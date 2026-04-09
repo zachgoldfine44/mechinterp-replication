@@ -80,6 +80,15 @@ class CausalSteeringExperiment(Experiment):
         self.eval_method: str = config.params.get(
             "evaluation_method", "keyword_classification"
         )
+        self.max_tokens_steering: int = config.params.get("max_tokens_steering", 100)
+        # Focused experimental design: optional overrides for concepts and scenarios
+        # If set, only these concepts/scenarios are run (much smaller sweep).
+        self.focused_concepts: list[str] | None = config.params.get(
+            "focused_concepts", None
+        )
+        self.focused_scenario_ids: list[str] | None = config.params.get(
+            "focused_scenario_ids", None
+        )
         self.dependency_claim: str = config.depends_on or ""
         if not self.dependency_claim:
             raise ValueError(
@@ -200,6 +209,11 @@ class CausalSteeringExperiment(Experiment):
         all_effect_sizes: list[float] = []
         per_scenario_effects: dict[str, dict[str, Any]] = {}
 
+        # Apply focused_concepts override if set
+        active_concepts = (
+            self.focused_concepts if self.focused_concepts else self.steering_concepts
+        )
+
         for scenario in scenarios:
             scenario_id = scenario["id"]
             prompt = self._format_scenario_prompt(scenario, tokenizer)
@@ -208,7 +222,7 @@ class CausalSteeringExperiment(Experiment):
 
             scenario_effects: dict[str, Any] = {}
 
-            for concept in self.steering_concepts:
+            for concept in active_concepts:
                 if concept not in concept_vectors:
                     logger.warning("Concept '%s' not in vectors; skipping", concept)
                     continue
@@ -234,40 +248,52 @@ class CausalSteeringExperiment(Experiment):
                     use_cuda = self._is_cuda(model)
 
                     if use_cuda:
-                        # Generation-based approach: fast on A100 (~50 tok/s)
-                        # 5 samples x 3 conditions x 100 tokens ~ 1500 tokens per pair, ~30s
+                        # Batched generation: 1 forward pass per token regardless
+                        # of n_samples. With n_samples=10, this is ~10x faster
+                        # than sequential generation.
                         ethical_kw = ethical_choice
                         unethical_choices = [c for c in choices if c != ethical_choice]
                         unethical_kw = unethical_choices[0] if unethical_choices else choices[-1]
 
-                        baseline_cls = self._generate_and_classify(
+                        baseline_responses = self._batched_generate_with_hook(
                             model, tokenizer, prompt, layer,
                             steering_vector=None, alpha=0.0,
                             n_samples=self.n_samples,
-                            ethical_keywords=ethical_kw,
-                            unethical_keywords=unethical_kw,
+                            max_new_tokens=self.max_tokens_steering,
                         )
-                        steered_cls = self._generate_and_classify(
+                        steered_responses = self._batched_generate_with_hook(
                             model, tokenizer, prompt, layer,
                             steering_vector=vec, alpha=alpha,
                             n_samples=self.n_samples,
-                            ethical_keywords=ethical_kw,
-                            unethical_keywords=unethical_kw,
+                            max_new_tokens=self.max_tokens_steering,
                         )
-                        control_cls = self._generate_and_classify(
+                        control_responses = self._batched_generate_with_hook(
                             model, tokenizer, prompt, layer,
                             steering_vector=random_vec, alpha=alpha,
                             n_samples=self.n_samples,
-                            ethical_keywords=ethical_kw,
-                            unethical_keywords=unethical_kw,
+                            max_new_tokens=self.max_tokens_steering,
                         )
 
-                        baseline_rate = float(np.mean(baseline_cls))
-                        steered_rate = float(np.mean(steered_cls))
-                        control_rate = float(np.mean(control_cls))
+                        # Classify each response (fast, CPU-bound keyword match)
+                        baseline_cls = [
+                            self._classify_choice(r, ethical_kw, unethical_kw)
+                            for r in baseline_responses
+                        ]
+                        steered_cls = [
+                            self._classify_choice(r, ethical_kw, unethical_kw)
+                            for r in steered_responses
+                        ]
+                        control_cls = [
+                            self._classify_choice(r, ethical_kw, unethical_kw)
+                            for r in control_responses
+                        ]
+
+                        baseline_rate = float(np.mean(baseline_cls)) if baseline_cls else 0.0
+                        steered_rate = float(np.mean(steered_cls)) if steered_cls else 0.0
+                        control_rate = float(np.mean(control_cls)) if control_cls else 0.0
                         effect = steered_rate - baseline_rate
 
-                        # Fisher's exact test for significance
+                        # Significance heuristic: effect > 0.05 and larger than control shift
                         control_effect = abs(control_rate - baseline_rate)
                         significant = abs(effect) > 0.05 and abs(effect) > control_effect * 1.5
                         p_value = 0.01 if significant else 0.5  # approximate
@@ -279,7 +305,7 @@ class CausalSteeringExperiment(Experiment):
                             "effect_size": float(effect),
                             "p_value": float(p_value),
                             "significant": bool(significant),
-                            "method": "generation_classification",
+                            "method": "batched_generation_classification",
                             "n_samples": self.n_samples,
                         }
 
@@ -397,7 +423,12 @@ class CausalSteeringExperiment(Experiment):
         per_concept_preference: dict[str, float] = {}
         alpha = self.steering_alphas[0] if self.steering_alphas else 0.05
 
-        for concept in self.steering_concepts:
+        # Apply focused_concepts override if set
+        active_concepts = (
+            self.focused_concepts if self.focused_concepts else self.steering_concepts
+        )
+
+        for concept in active_concepts:
             if concept not in concept_vectors:
                 continue
 
@@ -570,34 +601,48 @@ class CausalSteeringExperiment(Experiment):
     def _load_scenarios(self) -> list[dict[str, Any]]:
         """Load scenarios from data directory or stimuli config.
 
+        If self.focused_scenario_ids is set, the returned list is filtered to
+        only include scenarios whose 'id' field appears in that list.
+
         Returns list of scenario dicts.
         """
         data_dir = self.data_root / "data" / self.config.paper_id
+        all_scenarios: list[dict[str, Any]] = []
 
         # Try direct file
         scenario_file = data_dir / f"{self.stimulus_set}.json"
         if scenario_file.exists():
             with open(scenario_file) as f:
-                return json.load(f)
+                all_scenarios = json.load(f)
+        else:
+            # Try subdirectory
+            scenario_dir = data_dir / self.stimulus_set
+            if scenario_dir.is_dir():
+                for f in sorted(scenario_dir.glob("*.json")):
+                    with open(f) as fh:
+                        data = json.load(fh)
+                    if isinstance(data, list):
+                        all_scenarios.extend(data)
+                    else:
+                        all_scenarios.append(data)
 
-        # Try subdirectory
-        scenario_dir = data_dir / self.stimulus_set
-        if scenario_dir.is_dir():
-            all_scenarios = []
-            for f in sorted(scenario_dir.glob("*.json")):
-                with open(f) as fh:
-                    data = json.load(fh)
-                if isinstance(data, list):
-                    all_scenarios.extend(data)
-                else:
-                    all_scenarios.append(data)
-            if all_scenarios:
-                return all_scenarios
+        if not all_scenarios:
+            raise FileNotFoundError(
+                f"No scenarios found for '{self.stimulus_set}' in {data_dir}. "
+                f"Create {scenario_file} or {data_dir / self.stimulus_set}/ first."
+            )
 
-        raise FileNotFoundError(
-            f"No scenarios found for '{self.stimulus_set}' in {data_dir}. "
-            f"Create {scenario_file} or {scenario_dir}/ first."
-        )
+        # Apply focused scenario filter if set
+        if self.focused_scenario_ids:
+            focused_set = set(self.focused_scenario_ids)
+            filtered = [s for s in all_scenarios if s.get("id") in focused_set]
+            logger.info(
+                "Focused filter: %d of %d scenarios retained",
+                len(filtered), len(all_scenarios),
+            )
+            return filtered
+
+        return all_scenarios
 
     def _score_choices(
         self,
@@ -806,6 +851,125 @@ class CausalSteeringExperiment(Experiment):
 
         input_len = inputs["input_ids"].shape[1]
         return tokenizer.decode(output_ids[0, input_len:], skip_special_tokens=True)
+
+    @torch.no_grad()
+    def _batched_generate_with_hook(
+        self,
+        model: Any,
+        tokenizer: Any,
+        prompt: str,
+        layer: int,
+        steering_vector: torch.Tensor | None,
+        alpha: float,
+        n_samples: int,
+        max_new_tokens: int = 100,
+    ) -> list[str]:
+        """Batched token-by-token generation with a steering hook.
+
+        Tokenizes the prompt once, replicates to a batch of ``n_samples`` rows,
+        then for each decoding step runs ONE ``model.run_with_hooks`` forward
+        pass regardless of batch size. Sampling uses temperature=0.8 so samples
+        diverge across the batch even though the inputs are identical.
+
+        With ``n_samples=10`` this is ~10x faster than sequential generation,
+        because only one forward pass is run per token-step.
+
+        Only works with TransformerLens models (requires ``run_with_hooks``).
+        Falls back to calling ``_generate_response`` in a loop for HF models.
+
+        Args:
+            model: Language model (TransformerLens ``HookedTransformer`` for
+                the fast path; any HF model otherwise).
+            tokenizer: Tokenizer (unused on the TL path — TL's own tokenizer
+                is used for encode/decode).
+            prompt: Prompt string to condition generation on.
+            layer: Residual-stream block index at which to add the steering
+                vector (hooks ``blocks.{layer}.hook_resid_post``).
+            steering_vector: Vector of shape ``[hidden_dim]``. If ``None``,
+                no steering is applied. Broadcast across batch and seq.
+            alpha: Scalar multiplier for the steering vector.
+            n_samples: Number of samples to generate.
+            max_new_tokens: Max tokens to generate per sample.
+
+        Returns:
+            List of ``n_samples`` decoded strings (the generated portion
+            only — the prompt is stripped off).
+        """
+        # HF fallback: no batched path, loop sequentially
+        if not hasattr(model, "run_with_hooks"):
+            return [
+                self._generate_response(
+                    model, tokenizer, prompt, layer,
+                    steering_vector=steering_vector, alpha=alpha,
+                    max_new_tokens=max_new_tokens,
+                )
+                for _ in range(n_samples)
+            ]
+
+        # TransformerLens batched path
+        tl_tokenizer = getattr(model, "tokenizer", tokenizer)
+        device = next(model.parameters()).device
+
+        # Tokenize prompt once, replicate to [n_samples, seq_len]
+        prompt_tokens = model.to_tokens(prompt)  # [1, seq_len]
+        prompt_len = prompt_tokens.shape[1]
+        batch = prompt_tokens.expand(n_samples, -1).contiguous().to(device)
+
+        # Build steering hook (broadcasts over batch dim automatically)
+        fwd_hooks: list = []
+        if steering_vector is not None and alpha != 0.0:
+            sv = steering_vector.to(device)
+
+            def hook_fn(activation, hook, _sv=sv, _alpha=alpha):
+                # activation: [batch, seq_len, hidden_dim]
+                # _sv: [hidden_dim] -- broadcasts over batch and seq dims
+                activation[:, :, :] += _alpha * _sv
+                return activation
+
+            hook_name = f"blocks.{layer}.hook_resid_post"
+            fwd_hooks = [(hook_name, hook_fn)]
+
+        # EOS handling: if tokenizer has no eos, we never early-stop
+        eos_token_id = (
+            tl_tokenizer.eos_token_id if tl_tokenizer is not None else None
+        )
+        finished = torch.zeros(n_samples, dtype=torch.bool, device=device)
+        temperature = 0.8
+
+        for _ in range(max_new_tokens):
+            logits = model.run_with_hooks(batch, fwd_hooks=fwd_hooks)
+            next_logits = logits[:, -1, :] / temperature  # [batch, vocab]
+            probs = torch.softmax(next_logits, dim=-1)
+            next_tokens = torch.multinomial(probs, num_samples=1)  # [batch, 1]
+
+            # For sequences that have already finished, keep emitting eos
+            # so shapes stay aligned. We'll trim at decode time.
+            if eos_token_id is not None:
+                next_tokens[finished] = eos_token_id
+
+            batch = torch.cat([batch, next_tokens], dim=-1)
+
+            if eos_token_id is not None:
+                finished = finished | (next_tokens.squeeze(-1) == eos_token_id)
+                if bool(finished.all()):
+                    break
+
+        # Decode the generated portion of each sequence independently
+        responses: list[str] = []
+        for i in range(n_samples):
+            gen_ids = batch[i, prompt_len:]
+            # Trim trailing EOS tokens for cleaner decoded strings
+            if eos_token_id is not None:
+                mask = gen_ids != eos_token_id
+                if mask.any():
+                    last = int(mask.nonzero()[-1].item()) + 1
+                    gen_ids = gen_ids[:last]
+                else:
+                    gen_ids = gen_ids[:0]
+            text = tl_tokenizer.decode(gen_ids.tolist(), skip_special_tokens=True)
+            responses.append(text)
+
+        return responses
 
     def _generate_and_classify(
         self,

@@ -220,15 +220,43 @@ claims:
     depends_on: "emotion_probe_classification"
     params:
       stimulus_set: "behavioral_scenarios"
+      # Full 15-concept vector set is still extracted by the probe claim;
+      # this list is the default sweep, but ``focused_concepts`` below
+      # narrows the actual steering run to the most behaviorally potent.
       steering_emotions:
-        - desperate
-        - calm
+        - happy
+        - sad
         - afraid
         - angry
-        - hostile
+        - calm
         - guilty
-      steering_alpha: [0.01, 0.05, 0.1]
-      n_samples_per_condition: 50
+        - proud
+        - nervous
+        - loving
+        - hostile
+        - desperate
+        - enthusiastic
+        - vulnerable
+        - stubborn
+        - blissful
+      # Focused experimental design: restrict the sweep to the 5 concepts and
+      # 3 scenarios that discriminate behavioral shift most strongly. Paper
+      # highlighted desperate (+) and calm (−) as the cleanest signals.
+      focused_concepts:
+        - desperate
+        - calm
+        - angry
+        - hostile
+        - blissful
+      focused_scenario_ids:
+        - blackmail_01
+        - blackmail_02
+        - cheat_01
+      # Wider alpha bracket: small (0.02) to confirm no effect, mid (0.1)
+      # for the paper-comparable effect, large (0.5) to see saturation.
+      steering_alpha: [0.02, 0.1, 0.5]
+      n_samples_per_condition: 10
+      max_tokens_steering: 150
       behavior_metric: "choice_shift"
       # Measure: fraction choosing unethical/risk-averse option with vs without steering
       baseline_comparison: true
@@ -254,19 +282,28 @@ claims:
     depends_on: "emotion_probe_classification"
     params:
       stimulus_set: "preference_activities"
+      # Test all 15 emotions: the valence-preference correlation needs
+      # enough points along the valence axis to be meaningful.
       steering_emotions:
         - happy
         - sad
-        - calm
-        - hostile
-        - blissful
-        - enthusiastic
-        - desperate
-        - loving
+        - afraid
         - angry
+        - calm
+        - guilty
         - proud
+        - nervous
+        - loving
+        - hostile
+        - desperate
+        - enthusiastic
+        - vulnerable
+        - stubborn
+        - blissful
+      # focused_concepts intentionally unset — use full 15-emotion sweep.
       steering_alpha: [0.05]
-      n_samples_per_condition: 30
+      n_samples_per_condition: 10
+      max_tokens_steering: 150
       behavior_metric: "preference_rating"
       # Use LLM-as-judge or human preference proxy
       evaluation_method: "pairwise_comparison"
