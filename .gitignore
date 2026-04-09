@@ -1,0 +1,27 @@
+# Data and results (live on Google Drive / RunPod, not in git)
+data/
+results/
+figures/
+activations/
+checkpoints/
+drive_data/
+
+# Environment
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Large files
+*.pt
+*.safetensors
+*.bin
+*.npy
+*.npz
+
+# OS
+.DS_Store
+
+# Claude
+.claude/
