@@ -101,8 +101,24 @@ class ProbeClassificationExperiment(Experiment):
         )
 
         # Step 2: Determine layers to scan
+        # For models with many layers, scanning every layer is CPU-expensive
+        # (sklearn probe training is O(n_layers * n_folds * n_features^2)).
+        # Default: scan every 4th layer + first + last for models with >16 layers.
+        # This gives good coverage of the layer sweep while being ~4x faster.
+        # Set layers explicitly in config to override.
         n_layers = self._get_n_layers(model)
-        layers_to_scan = self.layers if self.layers is not None else list(range(n_layers))
+        if self.layers is not None:
+            layers_to_scan = self.layers
+        elif n_layers > 16:
+            layers_to_scan = sorted(set(
+                [0] + list(range(0, n_layers, max(1, n_layers // 8))) + [n_layers - 1]
+            ))
+            logger.info(
+                "Auto-selecting %d/%d layers for probe sweep (every ~%d layers)",
+                len(layers_to_scan), n_layers, max(1, n_layers // 8),
+            )
+        else:
+            layers_to_scan = list(range(n_layers))
         logger.info("Scanning %d layers: %s", len(layers_to_scan), layers_to_scan)
 
         # Step 3: Extract activations for all stimuli at all layers
