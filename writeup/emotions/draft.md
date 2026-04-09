@@ -132,7 +132,7 @@ For each concept × prompt, we generate a baseline and steered response (α=0.05
 
 ### 2.7 Compute
 
-Phase A (small tier) ran on a MacBook Air M3 with MPS. Phase B (medium tier) ran on a single NVIDIA A100 80GB rented from RunPod. The definitive Phase B run took approximately **6 hours 54 minutes** of GPU time across all three medium models (Llama 8B: 2h 2m, Qwen 7B: 1h 52m, Gemma 9B: 3h 0m), with batched generation running at 85-93% GPU utilization.
+Phase A (small tier) ran on a MacBook Air M5 with MPS. Phase B (medium tier) ran on a single NVIDIA A100 80GB rented from RunPod. The definitive Phase B run took approximately **6 hours 54 minutes** of GPU time across all three medium models (Llama 8B: 2h 2m, Qwen 7B: 1h 52m, Gemma 9B: 3h 0m), with batched generation running at 85-93% GPU utilization.
 
 ---
 
