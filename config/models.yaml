@@ -1,0 +1,143 @@
+# Model matrix for cross-model replication.
+# Organized by family and size tier.
+
+models:
+  # ── Llama 3 family ──
+  llama_1b:
+    hf_id: "meta-llama/Llama-3.2-1B-Instruct"
+    family: "llama"
+    size_tier: "small"
+    params_b: 1.0
+    layers: 16
+    hidden_dim: 2048
+    num_heads: 32
+    two_thirds_layer: 10
+    loader: "transformerlens"  # TL supports Llama
+    dtype: "float16"
+    notes: ""
+
+  llama_8b:
+    hf_id: "meta-llama/Llama-3.1-8B-Instruct"
+    family: "llama"
+    size_tier: "medium"
+    params_b: 8.0
+    layers: 32
+    hidden_dim: 4096
+    num_heads: 32
+    two_thirds_layer: 21
+    loader: "transformerlens"
+    dtype: "float16"
+    notes: "Primary validation model — run this first"
+
+  llama_70b:
+    hf_id: "meta-llama/Llama-3.1-70B-Instruct"
+    family: "llama"
+    size_tier: "large"
+    params_b: 70.0
+    layers: 80
+    hidden_dim: 8192
+    num_heads: 64
+    two_thirds_layer: 53
+    loader: "huggingface"  # Too large for TL, use raw HF + quantization
+    dtype: "4bit"
+    notes: "Requires bitsandbytes 4-bit quantization"
+
+  # ── Qwen 2.5 family ──
+  qwen_1_5b:
+    hf_id: "Qwen/Qwen2.5-1.5B-Instruct"
+    family: "qwen"
+    size_tier: "small"
+    params_b: 1.5
+    layers: 28
+    hidden_dim: 1536
+    num_heads: 12
+    two_thirds_layer: 18
+    loader: "transformerlens"
+    dtype: "float16"
+    notes: ""
+
+  qwen_7b:
+    hf_id: "Qwen/Qwen2.5-7B-Instruct"
+    family: "qwen"
+    size_tier: "medium"
+    params_b: 7.0
+    layers: 28
+    hidden_dim: 3584
+    num_heads: 28
+    two_thirds_layer: 18
+    loader: "transformerlens"
+    dtype: "float16"
+    notes: ""
+
+  qwen_72b:
+    hf_id: "Qwen/Qwen2.5-72B-Instruct"
+    family: "qwen"
+    size_tier: "large"
+    params_b: 72.0
+    layers: 80
+    hidden_dim: 8192
+    num_heads: 64
+    two_thirds_layer: 53
+    loader: "huggingface"
+    dtype: "4bit"
+    notes: "Requires bitsandbytes 4-bit quantization"
+
+  # ── Gemma 2 family ──
+  gemma_2b:
+    hf_id: "google/gemma-2-2b-it"
+    family: "gemma"
+    size_tier: "small"
+    params_b: 2.0
+    layers: 26
+    hidden_dim: 2304
+    num_heads: 8
+    two_thirds_layer: 17
+    loader: "transformerlens"
+    dtype: "float16"
+    notes: "Gemma uses different LayerNorm placement — verify activation extraction"
+
+  gemma_9b:
+    hf_id: "google/gemma-2-9b-it"
+    family: "gemma"
+    size_tier: "medium"
+    params_b: 9.0
+    layers: 42
+    hidden_dim: 3584
+    num_heads: 16
+    two_thirds_layer: 28
+    loader: "transformerlens"
+    dtype: "float16"
+    notes: "Gemma uses different LayerNorm placement — verify activation extraction"
+
+  gemma_27b:
+    hf_id: "google/gemma-2-27b-it"
+    family: "gemma"
+    size_tier: "large"
+    params_b: 27.0
+    layers: 46
+    hidden_dim: 4608
+    num_heads: 32
+    two_thirds_layer: 30
+    loader: "huggingface"
+    dtype: "float16"
+    notes: "May fit in 16-bit on A100 80GB; fall back to 8-bit if needed"
+
+# Tier ordering for execution
+execution_order:
+  - tier: "small"
+    models: [llama_1b, qwen_1_5b, gemma_2b]
+    priority: 1
+    environment: "local_macbook"
+    notes: "Run first locally. Validates pipeline infrastructure. Null results expected — establishes scaling floor."
+
+  - tier: "medium"
+    models: [llama_8b, qwen_7b, gemma_9b]
+    priority: 2
+    environment: "colab_gpu"
+    notes: "Primary replication target. Debug methodology here until results are interpretable."
+
+  - tier: "large"
+    models: [llama_70b, qwen_72b, gemma_27b]
+    priority: 3
+    environment: "colab_gpu"
+    notes: "Scaling ceiling. Run if compute allows."

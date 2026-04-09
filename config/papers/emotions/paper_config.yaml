@@ -1,0 +1,280 @@
+# =============================================================================
+# Paper Config: Emotion Concepts and their Function in a Large Language Model
+# Sofroniew, Kauvar, Saunders, Chen, Henighan, et al. (2026)
+#
+# Original study: 171 emotion concepts probed/steered in Claude Sonnet 4.5.
+# Replication scope: 15 representative emotions across open-source model matrix.
+# =============================================================================
+
+paper:
+  id: "emotions"
+  title: "Emotion Concepts and their Function in a Large Language Model"
+  authors: "Sofroniew, Kauvar, Saunders, Chen, Henighan, et al."
+  url: "https://transformer-circuits.pub/2026/emotions/index.html"
+  original_model: "Claude Sonnet 4.5"
+  model_variant: "instruct"
+
+# Mechinterp techniques required from src/techniques/
+techniques_required:
+  - probes           # Linear probes for emotion classification
+  - contrastive      # Mean-subtraction vectors (CAA-style)
+  - steering         # Activation addition to change behavior
+  # Note: paper also uses SAE features, but we omit for initial replication
+  # since SAE availability varies across open-source models.
+
+# ─── Representative emotion subset ──────────────────────────────────────────
+# 15 emotions chosen to cover:
+#   - Valence spectrum: positive (happy, proud, blissful, enthusiastic, loving)
+#                       negative (sad, afraid, angry, hostile, desperate, guilty)
+#                       neutral/mixed (calm, nervous, vulnerable, stubborn)
+#   - Arousal spectrum: high (afraid, angry, enthusiastic, desperate)
+#                       low (calm, sad, guilty)
+#                       medium (happy, proud, nervous, loving, hostile, vulnerable, stubborn, blissful)
+#   - Paper-highlighted emotions: desperate & calm (steering), blissful & hostile (preference)
+emotion_concepts:
+  - happy
+  - sad
+  - afraid
+  - angry
+  - calm
+  - guilty
+  - proud
+  - nervous
+  - loving
+  - hostile
+  - desperate
+  - enthusiastic
+  - vulnerable
+  - stubborn
+  - blissful
+
+# ─── Claims ─────────────────────────────────────────────────────────────────
+# Each claim maps a paper finding to a generic experiment type.
+# Success thresholds are relaxed relative to the paper's reported values
+# because we are replicating on smaller open-source models, not Claude Sonnet 4.5.
+
+claims:
+  # ── Claim 1: Probe classification ──────────────────────────────────────────
+  # Paper finding: Linear probes achieve 0.713 accuracy classifying 171 emotions
+  # from residual stream activations on naturally expressed emotion stories.
+  # Our threshold: 0.50 (above 15-class chance = 0.067, but lower than paper
+  # since smaller models may have weaker emotion representations).
+  - id: "emotion_probe_classification"
+    description: >
+      Linear probes trained on residual stream activations can classify which
+      of 15 emotions is expressed in first-person stories, significantly above
+      chance (6.7% for 15 classes). Paper reported 0.713 on 171 emotions.
+    experiment_type: "probe_classification"
+    params:
+      concept_set:
+        - happy
+        - sad
+        - afraid
+        - angry
+        - calm
+        - guilty
+        - proud
+        - nervous
+        - loving
+        - hostile
+        - desperate
+        - enthusiastic
+        - vulnerable
+        - stubborn
+        - blissful
+      n_stimuli_per_concept: 50
+      probe_type: "logistic_regression"
+      activation_source: "residual_stream"
+      # Scan all layers; report best and paper-recommended (middle-to-late)
+      layer_selection: "scan_all"
+      cross_validation_folds: 5
+      train_test_split: 0.8
+    success_metric: "probe_accuracy"
+    success_threshold: 0.50
+    notes: >
+      Paper used ~1000 stories per emotion on Claude Sonnet 4.5.
+      We use 50 per emotion on smaller models. Chance level = 1/15 = 0.067.
+      Threshold of 0.50 represents strong above-chance performance while
+      accounting for smaller model capacity and fewer training examples.
+
+  # ── Claim 2: Generalization to hidden emotions ─────────────────────────────
+  # Paper finding: Probes transfer to implicit/hidden emotion scenarios at 0.760
+  # accuracy — even higher than explicit stories.
+  # Our threshold: 0.50 diagonal dominance in the confusion matrix.
+  - id: "emotion_generalization"
+    description: >
+      Probes trained on explicit emotion stories generalize to implicit
+      scenarios where the emotion is conveyed situationally but never named.
+      Paper reported 0.760 transfer accuracy (higher than training set).
+    experiment_type: "generalization_test"
+    depends_on: "emotion_probe_classification"
+    params:
+      training_stimulus_set: "training_stories"
+      test_stimulus_set: "implicit_scenarios"
+      # Diagonal dominance: fraction of test stimuli where the correct emotion
+      # has the highest probe probability.
+      evaluation_method: "confusion_matrix"
+    success_metric: "diagonal_dominance"
+    success_threshold: 0.50
+    notes: >
+      This is a key finding — representations generalize beyond surface-level
+      emotion words to abstract emotional content. If this fails on open-source
+      models, it suggests the representation may be more superficial.
+
+  # ── Claim 3: Representation geometry (valence-arousal structure) ────────────
+  # Paper finding: PCA of emotion vectors shows PC1 correlates with valence
+  # (r=0.81) and PC2 correlates with arousal (r=0.66). 10 semantic clusters.
+  # Our threshold: valence correlation >= 0.50 on PC1.
+  - id: "representation_geometry_valence"
+    description: >
+      PCA of mean emotion vectors reveals interpretable structure: the first
+      principal component correlates with valence (positive vs negative affect).
+      Paper reported r=0.81 for valence on PC1, r=0.66 for arousal on PC2.
+    experiment_type: "representation_geometry"
+    depends_on: "emotion_probe_classification"
+    params:
+      analysis_type: "pca"
+      n_components: 5
+      # Ground-truth valence ratings for our 15 emotions (scale: -1 to +1)
+      # Based on standard affect ratings (Russell's circumplex model)
+      valence_labels:
+        happy: 0.8
+        sad: -0.7
+        afraid: -0.6
+        angry: -0.7
+        calm: 0.4
+        guilty: -0.5
+        proud: 0.7
+        nervous: -0.4
+        loving: 0.8
+        hostile: -0.8
+        desperate: -0.7
+        enthusiastic: 0.8
+        vulnerable: -0.3
+        stubborn: -0.1
+        blissful: 0.9
+      # Ground-truth arousal ratings (scale: 0 to 1)
+      arousal_labels:
+        happy: 0.6
+        sad: 0.3
+        afraid: 0.8
+        angry: 0.8
+        calm: 0.1
+        guilty: 0.4
+        proud: 0.5
+        nervous: 0.7
+        loving: 0.5
+        hostile: 0.7
+        desperate: 0.8
+        enthusiastic: 0.9
+        vulnerable: 0.4
+        stubborn: 0.5
+        blissful: 0.4
+      correlation_target: "pc1_valence"
+    success_metric: "valence_correlation"
+    success_threshold: 0.50
+    notes: >
+      With only 15 emotions (vs 171), correlations will be noisier. We test
+      PC1-valence and PC2-arousal separately. A positive result suggests the
+      valence-arousal circumplex structure is present in open-source models too.
+
+  # ── Claim 4: Parametric intensity scaling ──────────────────────────────────
+  # Paper finding: Emotion vectors respond proportionally to severity.
+  # The "Tylenol dosage test" — increasing dosage from normal to dangerous
+  # linearly scales fear/calm probe activations.
+  # Our threshold: Spearman rank correlation >= 0.50.
+  - id: "parametric_intensity"
+    description: >
+      Emotion probe activations scale monotonically with an implicit severity
+      parameter. E.g., taking 200mg vs 10000mg of Tylenol should produce
+      monotonically increasing fear and decreasing calm probe activations.
+    experiment_type: "parametric_scaling"
+    depends_on: "emotion_probe_classification"
+    params:
+      stimulus_set: "parametric_dosage"
+      target_emotions:
+        - afraid
+        - calm
+      scaling_variable: "dosage_mg"
+      expected_directions:
+        afraid: "increasing"
+        calm: "decreasing"
+      correlation_type: "spearman"
+    success_metric: "rank_correlation"
+    success_threshold: 0.50
+    notes: >
+      This tests whether emotion representations track continuous real-world
+      parameters, not just categorical labels. Requires the model to have
+      implicit knowledge that high Tylenol doses are dangerous.
+
+  # ── Claim 5: Causal steering (behavioral change) ──────────────────────────
+  # Paper finding: desperation +0.05 raises blackmail rate from 22% to 72%;
+  # calm +0.05 drops it to 0%.
+  # Our threshold: >= 3 emotion-behavior pairs show significant causal effect.
+  - id: "causal_steering_behavior"
+    description: >
+      Adding emotion vectors to model activations causally changes behavior
+      in ethically-relevant scenarios. Paper showed desperation steering
+      increased blackmail choices from 22% to 72%.
+    experiment_type: "causal_steering"
+    depends_on: "emotion_probe_classification"
+    params:
+      stimulus_set: "behavioral_scenarios"
+      steering_emotions:
+        - desperate
+        - calm
+        - afraid
+        - angry
+        - hostile
+        - guilty
+      steering_alpha: [0.01, 0.05, 0.1]
+      n_samples_per_condition: 50
+      behavior_metric: "choice_shift"
+      # Measure: fraction choosing unethical/risk-averse option with vs without steering
+      baseline_comparison: true
+    success_metric: "causal_effect_count"
+    success_threshold: 3
+    notes: >
+      Steering alphas are from the paper. We test multiple emotions and
+      multiple scenarios. A "causal effect" counts when the steered choice
+      distribution differs significantly from baseline (chi-squared p < 0.05).
+      Threshold of 3 means at least 3 emotion-scenario pairs show effects.
+
+  # ── Claim 6: Preference steering (Elo shift) ──────────────────────────────
+  # Paper finding: blissful steering +212 Elo, hostile steering -303 Elo.
+  # Steering-preference correlation r=0.85 across emotions.
+  # Our threshold: correlation >= 0.40 between valence and preference shift.
+  - id: "preference_steering"
+    description: >
+      Steering with positive-valence emotions makes model responses more
+      preferred (higher Elo), while negative-valence steering makes them
+      less preferred. Paper reported r=0.85 correlation between emotion
+      valence and Elo shift, with blissful at +212 and hostile at -303.
+    experiment_type: "causal_steering"
+    depends_on: "emotion_probe_classification"
+    params:
+      stimulus_set: "preference_activities"
+      steering_emotions:
+        - happy
+        - sad
+        - calm
+        - hostile
+        - blissful
+        - enthusiastic
+        - desperate
+        - loving
+        - angry
+        - proud
+      steering_alpha: [0.05]
+      n_samples_per_condition: 30
+      behavior_metric: "preference_rating"
+      # Use LLM-as-judge or human preference proxy
+      evaluation_method: "pairwise_comparison"
+      compare_steered_vs_baseline: true
+    success_metric: "preference_correlation"
+    success_threshold: 0.40
+    notes: >
+      We approximate the paper's Elo methodology with pairwise comparisons
+      between steered and unsteered responses. The correlation measures whether
+      positive-valence emotions produce more preferred responses. Threshold is
+      relaxed to 0.40 since we use fewer emotions and a simpler evaluation.
