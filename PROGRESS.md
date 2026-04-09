@@ -37,13 +37,19 @@ Phase B (medium tier, RunPod A100): Llama 8B + Qwen 7B done via old pod path;
 - [ ] Debug steering methodology at medium scale
 - [ ] Run cross-model + scaling analysis
 
-#### Phase C: Large-tier scaling (Colab, if compute allows)
-- [ ] Run on Llama-3.1-70B-Instruct
-- [ ] Run on Qwen-2.5-72B-Instruct
-- [ ] Run on Gemma-2-27B-it
+#### Phase C: Large-tier scaling — **DEFERRED**
+*Decision 2026-04-09: Stop after medium-tier (7-9B) runs. Write up small+medium
+results and share for external critique first. Revisit large-tier (27B-70B) in
+a future session if the writeup feedback suggests it would add value.*
+- [ ] ~~Run on Llama-3.1-70B-Instruct~~ (deferred)
+- [ ] ~~Run on Qwen-2.5-72B-Instruct~~ (deferred)
+- [ ] ~~Run on Gemma-2-27B-it~~ (deferred)
 
-#### Writeup
-- [ ] Write up results in writeup/emotions/draft.md
+#### Writeup (next up)
+- [x] Draft `writeup/emotions/draft.md` with Phase A results + placeholders for Phase B
+- [ ] Fill Phase B numbers once definitive run completes
+- [ ] Generate publication-ready figures (heatmap, scaling curves, PCA scatter)
+- [ ] Share draft for external critique
 
 ## Results: Small-Tier Cross-Model Comparison
 
