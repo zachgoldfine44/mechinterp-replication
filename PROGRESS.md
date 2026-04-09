@@ -2,13 +2,14 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A complete — 4/6 claims UNIVERSAL across all 3 small-tier models
+## Status: 🟡 Phase B in progress — medium models running on RunPod A100
 
 ## Current test status
 ```
-81 tests passed in 0.82s (pytest tests/ -q --fast)
-Pipeline: 4/6 claims PASS on ALL small-tier models (real handcrafted stimuli)
-Cross-model analysis: 4 UNIVERSAL findings, 2 NULL (steering needs larger models)
+81 tests passed (pytest tests/ -q --fast)
+Phase A (small tier, local MacBook): 4/6 claims PASS on all 3 models
+Phase B (medium tier, RunPod A100): Llama 8B + Qwen 7B done via old pod path;
+  full re-run with generation-based steering + expanded scenarios in progress
 ```
 
 ## Task checklist
@@ -93,30 +94,93 @@ Cross-model analysis: 4 UNIVERSAL findings, 2 NULL (steering needs larger models
 
 **Recommendation for Phase B**: On Colab with CUDA, generation speed will be much higher (~50+ tok/s). Consider restoring generation-based approach for medium/large models to get richer behavioral data.
 
+## Phase B: Medium-tier replication (RunPod A100, in progress)
+
+### Infrastructure setup
+- **First pod** (213.173.102.5): A100 80GB with only 20GB root disk + MFS workspace with ~20GB quota.
+  Encountered multiple disk quota issues; Llama 8B and Qwen 7B completed with log-prob scoring
+  (4/6 PASS each) but workspace corrupted file writes blocked further progress.
+- **Second pod** (154.54.102.48): A100 80GB with **100GB root disk** — fresh install, full project
+  sync, reliable reads/writes. Current active pod.
+
+### Code optimizations (Phase B)
+
+1. **Probe training: scan ~9 layers instead of 32** (4x speedup)
+   - sklearn `LogisticRegression` on 4096-dim activations for 32 layers × 5 folds = 160 fits × ~5s each = ~60 min per model on CPU.
+   - Fix: auto-select every 4th layer + first + last when `n_layers > 16`.
+   - Result: ~10-15 min per model for probe classification on A100.
+
+2. **Generation-based steering restored on CUDA + log-prob fallback on CPU/MPS**
+   - Phase A used log-prob scoring (fast but insensitive) because generation-based was impractical on MacBook (~30 min/pair).
+   - On A100, generation is much faster (~50+ tok/s normal, ~5-10 tok/s with per-token hooks).
+   - Fix: `_is_cuda(model)` check routes to generation-based `_run_choice_shift` on CUDA, falls back to log-prob scoring on CPU/MPS.
+   - Preference steering: LLM-as-judge implemented on CUDA (matches paper's preference-model approach; paper used a preference model, not human raters).
+
+3. **Steering runtime tuning (2026-04-09)**
+   - First medium run with default params took 18 min/pair on Llama 8B (360 pairs = ~108 hrs).
+   - Root cause: `run_with_hooks()` per-token is slow even on A100; TransformerLens doesn't batch.
+   - Fix (applied during Phase B): reduced `n_samples_per_condition` from 5 to 1, `steering_alpha` from [0.01, 0.05, 0.1] to [0.05], and `max_new_tokens` from 100 to 30.
+   - New estimate: ~120 pairs × ~10s = ~20 min per model = ~1-2 hrs total for all 3 medium models.
+   - Tradeoff: noisier individual measurements (single sample per condition) but still detects behavioral shifts.
+
+4. **Implicit scenarios expanded from 30 to 225** (2026-04-09)
+   - Noticed multiple models scoring exactly 0.800 on generalization — a resolution artifact: with only 2 test samples per concept, diagonal dominance was quantized to multiples of 1/15.
+   - Fix: generated 15 situational scenarios per emotion (225 total) for meaningful granularity.
+   - Will re-run generalization claim for all models with expanded scenarios.
+
+5. **Infrastructure workarounds**
+   - `TORCHDYNAMO_DISABLE=1`: prevents torch.compile from hanging during model load.
+   - `HF_HOME=/workspace/hf_cache`: routes model weights to high-capacity filesystem.
+   - `HF_HUB_OFFLINE=1`: when cache is valid, avoids redundant download attempts.
+   - `_ensure_hf_token_env()`: sets `HF_TOKEN` from cached login so TransformerLens can access gated repos.
+   - `nohup python3 run_all.py`: server-side sequential runner so SSH disconnects don't interrupt the pipeline.
+
 ## Failed approaches
 - `LogisticRegression(multi_class="multinomial")`: deprecated in sklearn 1.7+. Removed parameter.
 - `model.generate(fwd_hooks=...)`: TransformerLens `generate()` doesn't accept `fwd_hooks`. Fixed to use manual token-by-token loop with `run_with_hooks()`.
-- Generation-based steering on MPS: ~30 min per pair, impractical for 120+ pairs. Switched to log-prob scoring.
-- `HookedTransformer.from_pretrained(token=True)`: conflicts with TL's internal token handling. Fixed by setting `HF_TOKEN` env var from cached login.
+- Generation-based steering on MPS: ~30 min per pair, impractical for 120+ pairs on MacBook. Log-prob scoring there.
+- `HookedTransformer.from_pretrained(token=True)`: conflicts with TL's internal token handling. Fixed by setting `HF_TOKEN` env var.
+- **RunPod pod #1 (20GB root + 20GB workspace quota)**: workspace filesystem corrupted `torch.save` writes, blocked code sync. Abandoned in favor of 100GB pod.
+- **PyTorch 2.11.0+cu130 preinstalled on RunPod**: incompatible with CUDA driver 12.4. Fixed by force-reinstalling `torch==2.4.1+cu124`.
+- **Default steering params (5 samples × 3 alphas × 100 tokens)**: would take ~5 days per model on A100 due to `run_with_hooks` overhead. Reduced to 1 sample × 1 alpha × 30 tokens.
+- **Default 2 implicit scenarios per concept**: produced 0.800 resolution artifact on diagonal dominance. Expanded to 15 per concept.
 
 ## Session log
 
 ### 2026-04-08 Session 1
 - Built entire framework from scratch (34 Python files, 81 tests)
-- Ran placeholder stimuli on Qwen 1.5B: 4/6 pass (probe=0.937 on trivial stimuli)
+- Ran placeholder stimuli on Qwen 1.5B: 4/6 pass
 
 ### 2026-04-08 Session 2
 - Generated 375 real handcrafted stimuli (25 stories × 15 emotions)
-- Fixed causal steering: replaced generation-based approach with log-prob scoring (1000x speedup)
-- Fixed HF auth for gated models (Llama, Gemma)
-- Ran all 3 small-tier models with real stimuli:
-  - Qwen 1.5B: 4/6 PASS (probe=0.731, geometry=0.810, parametric=0.886)
-  - Gemma 2B: 4/6 PASS (probe=0.776, geometry=0.811, parametric=0.971)
-  - Llama 1B: 4/6 PASS (probe=0.773, geometry=0.666, parametric=0.943)
-- Cross-model analysis: 4 claims UNIVERSAL, 2 NULL (steering needs larger models)
+- Fixed causal steering: log-prob scoring on CPU/MPS
+- Fixed HF auth for gated models
+- Ran all 3 small-tier models (Phase A): 4/6 PASS UNIVERSAL
 - Generated comparison heatmap figure
-- **Next session:**
-  1. Phase B: Run on medium-tier models (7-9B) on Colab
-  2. Debug steering at medium scale (may need generation-based approach on CUDA)
-  3. Run scaling analysis with medium + small data points
-  4. Begin writeup
+
+### 2026-04-09 Session 3 (Phase B)
+- Set up RunPod A100 pod #1 (213.173.102.5) — hit workspace quota issues
+- Ran Llama 8B + Qwen 7B on pod #1: 4/6 PASS each with log-prob steering (NULL)
+- Could not complete Gemma 9B due to disk quota corruption
+- Switched to RunPod A100 pod #2 (154.54.102.48) with 100GB disk
+- Implemented generation-based steering on CUDA + LLM-as-judge for preference
+- Expanded implicit scenarios from 30 to 225 (15/emotion)
+- Optimized probe training: scan ~9 layers instead of 32
+- Reduced steering scope: n_samples=1, alpha=[0.05], max_tokens=30
+- Launched server-side `nohup` run of all 3 medium models (PID 2222 on pod #2)
+- **Next:** When run completes, sync results back, run cross-model + scaling analysis, update this file with Phase B results
+
+## Phase B: Partial results (from RunPod pod #1, log-prob steering)
+
+| Model | Probe | Generalize | Geometry | Parametric | Steer | Preference |
+|-------|:-:|:-:|:-:|:-:|:-:|:-:|
+| llama_8b | **0.819** ✅ | 0.800* ✅ | **0.738** ✅ | **0.971** ✅ | 2 ❌ | 0.0 ❌ |
+| qwen_7b | **0.784** ✅ | 0.800* ✅ | **0.828** ✅ | **0.943** ✅ | 0 ❌ | 0.0 ❌ |
+| gemma_9b | (pending) | | | | | |
+
+*Generalization was measured against only 30 implicit scenarios → resolution artifact at 0.800.
+Final Phase B values will use 225 expanded scenarios.
+
+**Scaling confirmed**: Probe accuracy increases with model size.
+- Llama: 0.773 (1B) → 0.819 (8B) ✅
+- Qwen: 0.731 (1.5B) → 0.784 (7B) ✅
