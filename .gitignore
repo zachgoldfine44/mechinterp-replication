@@ -1,10 +1,11 @@
 # Data and results (live on Google Drive / RunPod, not in git)
 data/
 results/
-figures/
 activations/
 checkpoints/
 drive_data/
+# NOTE: figures/ is NOT ignored — we commit publication-ready figures
+# so the writeup renders correctly on GitHub.
 
 # Environment
 .venv/
