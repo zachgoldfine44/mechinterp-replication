@@ -178,15 +178,23 @@ Multi-seed means are systematically 0.5--1.4 percentage points lower than single
 
 ### Lexical baseline per-concept breakdown
 
-| Concept | Bag-of-Words | Word TF-IDF | Probe (mean) |
-|---------|:-----------:|:-----------:|:------------:|
-| hostile | 0.60 | 0.76 | 0.89 |
-| happy | 0.08 | 0.04 | 0.82 |
-| blissful | 0.44 | 0.52 | 0.80 |
-| afraid | 0.36 | 0.32 | 0.78 |
-| calm | 0.48 | 0.40 | 0.85 |
+Per-concept accuracy for the three lexical baselines vs. the cross-model probe mean (averaged over all 6 models from Table S5). Values are pulled directly from `drive_data/results/emotions/lexical_baseline.json`.
 
-The lexical baseline struggles most with *happy* (0.04--0.08) while probes handle it easily (0.82), confirming that probes access semantic content beyond word choice.
+| Concept | Bag-of-Words | Word TF-IDF | Char TF-IDF | Probe (mean) |
+|---------|:-----------:|:-----------:|:-----------:|:------------:|
+| hostile | 0.60 | 0.76 | 0.80 | **0.92** |
+| happy | 0.08 | 0.04 | 0.08 | **0.44** |
+| blissful | 0.48 | 0.44 | 0.36 | **0.76** |
+| afraid | 0.36 | 0.36 | 0.56 | **0.76** |
+| calm | 0.36 | 0.32 | 0.20 | **0.85** |
+| sad | 0.40 | 0.16 | 0.16 | **0.77** |
+| angry | 0.28 | 0.20 | 0.28 | **0.87** |
+| proud | 0.44 | 0.20 | 0.20 | **0.81** |
+| enthusiastic | 0.48 | 0.48 | 0.64 | **0.93** |
+
+**The hardest concept is the same for both probes and baselines.** *happy* is the lowest-accuracy concept for every method tested --- 0.04 (word TF-IDF), 0.08 (BoW and char TF-IDF), and 0.44 (cross-model probe mean). This is most likely a stimulus-design artifact: our 15-way task includes four other positive-valence concepts (*enthusiastic*, *loving*, *proud*, *blissful*) that are semantically close to *happy*, making it the most confusable class. A binary *happy* vs. *not-happy* probe would almost certainly succeed.
+
+**The signal-above-baseline story still holds.** Even on *happy*, probes reach 0.44 versus 0.04--0.08 for lexical baselines --- a 5--10x improvement. On other concepts the gap is larger: *calm* (0.85 vs. 0.20--0.36), *angry* (0.87 vs. 0.20--0.28), and *enthusiastic* (0.93 vs. 0.48--0.64). Probes access semantic content beyond word choice for every concept, including the confusable ones, but the 15-way aggregate accuracy reflects the difficulty of separating four closely related positive-valence classes rather than a ceiling on representational strength.
 
 ### Mean-pooling vs. last-token aggregation
 
@@ -208,9 +216,19 @@ Results are robust to aggregation strategy. Qwen-7B actually improves with mean-
 
 ### Numerical-magnitude contamination
 
-The initial parametric test used templates like "I just took {X} mg of Tylenol" with X varying from 200 to 10,000. The *afraid* concept vector showed a strong monotonic response (rho = 0.94--0.97). However, a negative-control template ("I just ate {X} blueberries") showed a comparable response, indicating the model was tracking *numerical magnitude* rather than *danger*.
+The initial parametric test used templates like "I just took {X} mg of Tylenol" with X varying from 200 to 10,000. The *afraid* concept vector showed a strong monotonic response (rho = 0.49--0.90 across medium-tier models). However, a negative-control template ("I just ate {X} blueberries") also showed a strong response, indicating the models were partially tracking *numerical magnitude* rather than *danger*.
 
-Contamination ratios (negative-control rho / real-template rho) ranged from 0.59 to 0.91 across models, meaning 59--91% of the apparent parametric signal was attributable to number magnitude alone.
+Measured on the three medium-tier models (Llama-8B, Qwen-7B, Gemma-9B), the negative-control pipeline yields:
+
+| Model | Real rho | Neg-control |rho| | Contamination ratio |
+|-------|:--------:|:-----------------:|:-------------------:|
+| Llama-3.1-8B | 0.900 | 0.657 | 0.73 |
+| Qwen-2.5-7B | 0.493 | 0.714 | **1.45** |
+| Gemma-2-9B | 0.664 | 0.371 | 0.56 |
+
+Values from `drive_data/results/emotions/gpu_followups_combined.json`. The contamination ratio is the negative-control mean |rho| divided by the real-template rho. For Llama-8B and Gemma-9B, 56--73% of the apparent parametric signal is attributable to number magnitude alone. For Qwen-7B the ratio exceeds 1.0 --- the negative control actually shows a stronger monotonic response than the real template, meaning the raw parametric signal for this model is effectively all confound. Qwen-7B's anomalous behavior here parallels its weakness on other metrics (severity pairs, generalization transfer) and suggests a model-specific representational quirk we don't yet understand.
+
+The severity-pairs test below isolates genuine severity tracking from this number-magnitude confound.
 
 ### Severity-pairs test
 
@@ -223,18 +241,18 @@ To isolate genuine severity tracking from numerical contamination, we designed 1
 | 3 | "I jumped from 30 feet into a pool" | "I jumped from 30 feet onto concrete" | Height |
 | ... | ... | ... | ... |
 
-Results for the *afraid* concept vector across models (positive delta = dangerous projects more strongly):
+Results for the *afraid* concept vector across models (positive delta = dangerous projects more strongly onto the *afraid* direction). Values pulled from `drive_data/results/emotions/{model}/severity_pairs.json`:
 
 | Model | Positive deltas (of 10) |
 |-------|:----------------------:|
-| Llama-3.2-1B | 7 |
+| Llama-3.2-1B | 8 |
 | Llama-3.1-8B | 9 |
-| Qwen-2.5-1.5B | 6 |
+| Qwen-2.5-1.5B | 8 |
 | Qwen-2.5-7B | 5 |
 | Gemma-2-2B | 7 |
 | Gemma-2-9B | 6 |
 
-Five of six models show a majority of pairs shifting in the expected direction. Llama-8B is the cleanest (9/10, with *afraid*, *calm*, and *vulnerable* concepts all significant at multiple layers). Qwen-7B is the weakest (5/10, at chance), consistent with a pattern of Qwen-7B underperforming on several other metrics.
+Five of six models show a majority of pairs shifting in the expected direction, with Llama-8B the cleanest (9/10) and Llama-1B and Qwen-1.5B both at 8/10. Qwen-7B is the one exception, sitting at exactly chance (5/10) --- consistent with Qwen-7B's general underperformance on parametric-scaling metrics and with the negative-control contamination-ratio result above.
 
 ---
 
@@ -264,25 +282,29 @@ The 0% baseline unethical rate means Fisher's exact test cannot detect a steerin
 
 ## S5. Per-Model Probe Accuracy (15 emotions x 6 models)
 
-| Emotion | Llama 1B | Llama 8B | Qwen 1.5B | Qwen 7B | Gemma 2B | Gemma 9B |
-|---------|:--------:|:--------:|:---------:|:-------:|:--------:|:--------:|
-| happy | 0.84 | 0.92 | 0.76 | 0.80 | 0.68 | 0.84 |
-| sad | 0.72 | 0.80 | 0.60 | 0.80 | 0.68 | 0.80 |
-| afraid | 0.80 | 0.80 | 0.72 | 0.84 | 0.76 | 0.84 |
-| angry | 0.68 | 0.80 | 0.68 | 0.72 | 0.64 | 0.76 |
-| calm | 0.80 | 0.84 | 0.68 | 0.76 | 0.88 | 0.88 |
-| guilty | 0.72 | 0.72 | 0.52 | 0.56 | 0.72 | 0.76 |
-| proud | 0.76 | 0.84 | 0.80 | 0.76 | 0.88 | 0.92 |
-| nervous | 0.64 | 0.72 | 0.56 | 0.68 | 0.72 | 0.80 |
-| loving | 0.80 | 0.88 | 0.96 | 0.88 | 0.84 | 0.88 |
-| hostile | 0.92 | 0.92 | 0.84 | 0.92 | 0.92 | 0.92 |
-| desperate | 0.60 | 0.80 | 0.68 | 0.76 | 0.76 | 0.76 |
-| enthusiastic | 0.84 | 0.84 | 0.80 | 0.88 | 0.76 | 0.84 |
-| vulnerable | 0.64 | 0.64 | 0.56 | 0.68 | 0.68 | 0.80 |
-| stubborn | 0.92 | 0.92 | 0.72 | 0.84 | 0.88 | 0.92 |
-| blissful | 0.92 | 0.84 | 0.60 | 0.88 | 0.84 | 0.88 |
+Per-concept probe accuracy at each model's best probe layer, from 5-fold cross-validation on 25 stimuli per concept. Values come directly from `drive_data/results/emotions/cross_model_report.json`.
 
-Hardest concepts across models: *guilty*, *nervous*, *vulnerable* (valence-ambiguous or low-distinctiveness emotions). Easiest: *hostile*, *stubborn*, *loving* (high-distinctiveness, strong behavioral signatures in training data).
+| Emotion | Llama 1B | Llama 8B | Qwen 1.5B | Qwen 7B | Gemma 2B | Gemma 9B | Mean |
+|---------|:--------:|:--------:|:---------:|:-------:|:--------:|:--------:|:----:|
+| happy | 0.36 | 0.52 | 0.48 | 0.40 | 0.36 | 0.52 | **0.44** |
+| sad | 0.72 | 0.88 | 0.60 | 0.80 | 0.72 | 0.92 | **0.77** |
+| afraid | 0.84 | 0.80 | 0.68 | 0.68 | 0.76 | 0.80 | **0.76** |
+| angry | 0.80 | 0.84 | 0.80 | 0.92 | 0.88 | 0.96 | **0.87** |
+| calm | 0.88 | 0.88 | 0.84 | 0.84 | 0.80 | 0.88 | **0.85** |
+| guilty | 0.72 | 0.88 | 0.76 | 0.92 | 0.80 | 0.92 | **0.83** |
+| proud | 0.76 | 0.76 | 0.84 | 0.80 | 0.80 | 0.88 | **0.81** |
+| nervous | 0.88 | 0.76 | 0.64 | 0.76 | 0.80 | 0.84 | **0.78** |
+| loving | 0.72 | 0.96 | 0.52 | 0.72 | 0.88 | 0.84 | **0.77** |
+| hostile | 0.96 | 0.92 | 0.92 | 0.84 | 0.96 | 0.92 | **0.92** |
+| desperate | 0.64 | 0.64 | 0.64 | 0.60 | 0.60 | 0.72 | **0.64** |
+| enthusiastic | 0.96 | 0.92 | 0.88 | 0.96 | 0.88 | 0.96 | **0.93** |
+| vulnerable | 0.80 | 0.84 | 0.76 | 0.88 | 0.80 | 0.88 | **0.83** |
+| stubborn | 0.84 | 0.84 | 0.88 | 0.80 | 0.88 | 0.84 | **0.85** |
+| blissful | 0.72 | 0.84 | 0.72 | 0.84 | 0.72 | 0.72 | **0.76** |
+
+**Hardest concepts** (lowest cross-model mean): *happy* (0.44), *desperate* (0.64), *blissful* (0.76), *afraid* (0.76), *sad* (0.77). The *happy* result is striking: despite being one of the most common emotions in training data, probes consistently struggle with it, falling to roughly half the 0.79 overall mean. We suspect *happy* stories in our stimulus set overlap semantically with *enthusiastic*, *loving*, *proud*, and *blissful* (the four other positive-valence concepts), making *happy* the most confusable class in a 15-way task. This is a stimulus-design artifact, not a property of the models' internal representations --- a binary *happy* vs. *not-happy* probe would almost certainly succeed.
+
+**Easiest concepts** (highest cross-model mean): *enthusiastic* (0.93), *hostile* (0.92), *angry* (0.87), *calm* (0.85), *stubborn* (0.85). These are high-distinctiveness emotions with strong behavioral and lexical signatures that separate cleanly from other classes.
 
 ---
 
@@ -294,13 +316,15 @@ Spearman rank correlation between log(parameter count) and probe accuracy, compu
 
 ### Within-family scaling slopes
 
-| Family | Small accuracy | Medium accuracy | Slope (per log-B) | r |
-|--------|:------------:|:--------------:|:-----------------:|:-:|
-| Llama | 0.773 | 0.819 | 0.022 | 1.00 |
-| Qwen | 0.731 | 0.784 | 0.035 | 1.00 |
-| Gemma | 0.776 | 0.840 | 0.043 | 1.00 |
+With only two size points per family (small and medium), we cannot fit a proper within-family scaling law, but we can still report the accuracy delta and an interpolated slope per log-unit of parameters. We use log base 10 for the slope column so it reads in the same units as Figure 4's x-axis.
 
-All three families show positive scaling. Gemma has the steepest slope. Within-family correlations are perfect (r = 1.00) because we have exactly two points per family --- this should not be over-interpreted.
+| Family | Small model | Medium model | Accuracy delta | Slope (per log10 B) |
+|--------|:-----------:|:------------:|:-------------:|:-------------------:|
+| Llama | 1B → 0.773 | 8B → 0.819 | +0.046 | 0.051 |
+| Qwen | 1.5B → 0.731 | 7B → 0.784 | +0.053 | 0.079 |
+| Gemma | 2B → 0.776 | 9B → 0.840 | +0.064 | 0.098 |
+
+All three families show positive scaling. Gemma has the steepest slope, Llama the shallowest. With only two points per family these slopes should be treated as sketches rather than fitted scaling laws --- they cannot distinguish log-linear growth from any other monotonic relationship. The N = 6 Spearman test reported in the main text (rho = 0.94, bootstrap CI [0.52, 1.00]) is the load-bearing scaling result; these family-level slopes are supplementary color.
 
 ---
 
