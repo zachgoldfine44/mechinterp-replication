@@ -54,6 +54,11 @@ class ClaimConfig:
         depends_on: Optional claim_id that must run first (e.g., probes
             before steering).
         notes: Free-text notes for interpreting results or known caveats.
+        paper_section: Optional pointer to the section of the paper this
+            claim comes from (e.g., "Section 3.2", "Figure 4", "Appendix B").
+            Used by the critique agents to verify replicated methodology
+            against the paper. STRONGLY ENCOURAGED — every claim should
+            cite where in the paper it came from.
     """
 
     paper_id: str
@@ -65,6 +70,7 @@ class ClaimConfig:
     success_threshold: float
     depends_on: str | None = None
     notes: str = ""
+    paper_section: str = ""
 
 
 @dataclass

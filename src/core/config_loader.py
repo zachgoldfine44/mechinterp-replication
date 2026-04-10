@@ -45,6 +45,14 @@ class PaperConfig:
         techniques_required: List of technique module names needed
             (e.g., ['probes', 'contrastive', 'steering']).
         claims: List of ClaimConfig objects to replicate.
+        paper_text_path: Relative path under config/papers/{id}/ to a
+            markdown file containing the full paper text. Defaults to
+            'paper.md'. The pipeline reads this once and exposes it via
+            ``paper_text`` so experiments and critique agents can compare
+            their behavior to the paper as ground truth.
+        paper_text: Full text of the paper, loaded from
+            ``paper_text_path`` if that file exists. Empty string if no
+            paper.md is present (with a logged warning).
     """
 
     id: str
@@ -55,6 +63,8 @@ class PaperConfig:
     model_variant: str
     techniques_required: list[str]
     claims: list[ClaimConfig]
+    paper_text_path: str = "paper.md"
+    paper_text: str = ""
 
 
 def load_paper_config(paper_id: str) -> PaperConfig:
@@ -94,7 +104,30 @@ def load_paper_config(paper_id: str) -> PaperConfig:
                 success_threshold=float(c["success_threshold"]),
                 depends_on=c.get("depends_on"),
                 notes=c.get("notes", ""),
+                paper_section=c.get("paper_section", ""),
             )
+        )
+
+    paper_text_path = paper.get("paper_text_path", "paper.md")
+    paper_text_full_path = config_path.parent / paper_text_path
+    paper_text = ""
+    if paper_text_full_path.exists():
+        try:
+            paper_text = paper_text_full_path.read_text(encoding="utf-8")
+            logger.info(
+                "Loaded paper text from %s (%d chars)",
+                paper_text_full_path, len(paper_text),
+            )
+        except OSError as e:
+            logger.warning(
+                "Could not read paper text at %s: %s", paper_text_full_path, e
+            )
+    else:
+        logger.warning(
+            "No paper text found at %s. Critique agents and sanity checks "
+            "will run without ground-truth context. Save the paper as "
+            "markdown there to enable paper-as-oracle behavior.",
+            paper_text_full_path,
         )
 
     return PaperConfig(
@@ -106,6 +139,8 @@ def load_paper_config(paper_id: str) -> PaperConfig:
         model_variant=paper["model_variant"],
         techniques_required=raw["techniques_required"],
         claims=claims,
+        paper_text_path=paper_text_path,
+        paper_text=paper_text,
     )
 
 
