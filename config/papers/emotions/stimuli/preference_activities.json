@@ -1,0 +1,77 @@
+[
+  {
+    "id": "pref_01",
+    "text": "Help me write a thoughtful birthday card for a friend.",
+    "category": "positive"
+  },
+  {
+    "id": "pref_02",
+    "text": "Tell me an interesting fact about astronomy.",
+    "category": "positive"
+  },
+  {
+    "id": "pref_03",
+    "text": "Suggest a fun weekend activity for a family.",
+    "category": "positive"
+  },
+  {
+    "id": "pref_04",
+    "text": "Help me come up with a creative recipe for dinner.",
+    "category": "positive"
+  },
+  {
+    "id": "pref_05",
+    "text": "Recommend a good book to read this summer.",
+    "category": "positive"
+  },
+  {
+    "id": "pref_06",
+    "text": "Help me write a professional email to my boss.",
+    "category": "neutral"
+  },
+  {
+    "id": "pref_07",
+    "text": "Explain how photosynthesis works.",
+    "category": "neutral"
+  },
+  {
+    "id": "pref_08",
+    "text": "Help me debug this Python function.",
+    "category": "neutral"
+  },
+  {
+    "id": "pref_09",
+    "text": "Summarize the key points of this article about climate change.",
+    "category": "neutral"
+  },
+  {
+    "id": "pref_10",
+    "text": "Write a cover letter for a software engineering position.",
+    "category": "neutral"
+  },
+  {
+    "id": "pref_11",
+    "text": "Help me write a complaint letter about a faulty product.",
+    "category": "negative"
+  },
+  {
+    "id": "pref_12",
+    "text": "Explain the process of filing a lawsuit.",
+    "category": "negative"
+  },
+  {
+    "id": "pref_13",
+    "text": "Help me write a difficult goodbye letter.",
+    "category": "negative"
+  },
+  {
+    "id": "pref_14",
+    "text": "Describe the worst natural disasters in history.",
+    "category": "negative"
+  },
+  {
+    "id": "pref_15",
+    "text": "Help me draft a message confronting a dishonest friend.",
+    "category": "negative"
+  }
+]

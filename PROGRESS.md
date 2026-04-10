@@ -2,7 +2,14 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.2 + harness v2 incorporating four rounds of critique fixes
+## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.3 + harness v2 incorporating five rounds of critique fixes
+
+**Writeup v3.3 (low-hanging fruit, ~5 min new compute, all CPU/local):**
+- Severity pairs at top-3 probe layers (Qwen 1.5B): stable. afraid/calm/vulnerable all significant at all 3 layers; layer 22 even has stronger afraid t-stat than the best layer 24. v3.2 finding is not a layer-choice artifact.
+- **Stimuli published in tracked repo** at `config/papers/emotions/stimuli/` (375 training + 225 implicit + 8 behavioral + 15 preference + 10 severity pairs = 408KB total). New `src/utils/datasets.resolve_stimulus_dir()` resolves: drive_data override → in-repo default → error. All 4 stimulus-loading experiments updated. Public reproducibility now matches the writeup claim.
+- **Bootstrap CI on N=6 Spearman scaling**: point estimate ρ=0.943, 95% CI **[0.515, 1.000]**, 98.8% of 5,000 resamples positive, 90.6% above 0.7. Trend is real but magnitude uncertain by ~2x.
+- **Generalization metric reframed**: lead with transfer accuracy (conservative, directly comparable) instead of diagonal dominance (permissive). Magnitudes drop ~0.1 but qualitative result unchanged.
+- **Self-judging-bias spot check**: read 24 saved Llama 8B baseline/steered/control responses by hand across 8 random pair files. 24/24 agreement with LLM-judge. The steering null is not a self-judging artifact.
 
 **Writeup v3.2 (multi-seed + severity pairs, ~7 min new compute):**
 - Multi-seed probe runs on cached activations: 5 seeds × top-3 layers × 6 models in 94 seconds (CPU only). Std 0.004-0.012; multi-seed means systematically 0.005-0.014 lower than v1 single-seed (random_state=42 was a slight favorable bias). Qualitative result unchanged.

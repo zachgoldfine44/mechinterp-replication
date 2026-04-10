@@ -231,7 +231,9 @@ class ProbeClassificationExperiment(Experiment):
         Returns:
             (texts, labels) where texts[i] has concept labels[i].
         """
-        training_dir = self.data_root / "data" / self.config.paper_id / "training"
+        from src.utils.datasets import resolve_stimulus_dir
+        stimulus_dir = resolve_stimulus_dir(self.config.paper_id, self.data_root)
+        training_dir = stimulus_dir / "training"
 
         texts: list[str] = []
         labels: list[str] = []

@@ -26,7 +26,50 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from src.utils.env import get_project_root
+
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Stimulus path resolution
+# ---------------------------------------------------------------------------
+
+def resolve_stimulus_dir(paper_id: str, data_root: Path) -> Path:
+    """Return the directory where a paper's stimuli live.
+
+    Resolution order (first that exists wins):
+
+      1. ``{data_root}/data/{paper_id}/``  — the user's local override.
+         Allows users to point at a private/regenerated stimulus set
+         without modifying the repo.
+      2. ``{project_root}/config/papers/{paper_id}/stimuli/`` — the
+         in-repo published stimuli, tracked in git, that ship with the
+         harness for reproducibility (added in v3.3 in response to
+         critique #1-I about public reproducibility being weaker than
+         claimed).
+      3. Fall back to (1) even if it doesn't exist, so callers get a
+         clear FileNotFoundError pointing at the expected path.
+
+    Args:
+        paper_id: e.g. "emotions"
+        data_root: From ``get_data_root()``.
+
+    Returns:
+        A Path. May not exist; callers should still check.
+    """
+    user_dir = data_root / "data" / paper_id
+    if user_dir.exists() and any(user_dir.iterdir()):
+        return user_dir
+
+    project_root = get_project_root()
+    in_repo_dir = project_root / "config" / "papers" / paper_id / "stimuli"
+    if in_repo_dir.exists() and any(in_repo_dir.iterdir()):
+        return in_repo_dir
+
+    # Neither exists — return the user_dir path so the error message
+    # points at the writable location.
+    return user_dir
 
 
 # ---------------------------------------------------------------------------

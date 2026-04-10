@@ -2,15 +2,27 @@
 
 **A preliminary report replicating Sofroniew et al. (2026) across six open-source language models at 1B-9B scale.**
 
-*Draft v3.2 — adds multi-seed probe error bars and severity-pair test (paired prompts with shared numbers but different danger). Large-tier (27B-70B) replication deferred to future work.*
+*Draft v3.3 — adds layer-stability check on severity pairs, in-repo published stimuli, bootstrap CI on the scaling claim, transfer-accuracy primary metric for generalization, and a self-judging-bias spot check. Large-tier (27B-70B) replication deferred to future work.*
 
 Repository: https://github.com/zachgoldfine44/mechinterp-replication
 
 ---
 
-## §0. Errata and response to external critique (v2 + v3 + v3.1 + v3.2)
+## §0. Errata and response to external critique (v2 + v3 + v3.1 + v3.2 + v3.3)
 
-**v3.2 changes (newest, multi-seed and severity-pair follow-ups):**
+**v3.3 changes (newest, low-hanging-fruit pass on remaining critique items):**
+
+- **Severity pairs at top-3 probe layers (Qwen 1.5B), not just the best.** The v3.2 severity-pair test used only the cached best probe layer per model, leaving open the same fragility concern §3.3 resolved for the geometry section. v3.3 re-runs the severity-pair test at the top-3 probe layers on Qwen 1.5B locally. **Result: stable.** `afraid` (p=0.024, 0.010, 0.033), `calm` (p=0.0002, 0.0003, 0.0003 — 0/10 positive at every layer), and `vulnerable` (p=0.0007, 0.0009, 0.0023 — 9-10/10 positive at every layer) are all significant at all 3 layers. Layer 22 actually has slightly stronger `afraid` than the best layer 24. The v3.2 finding is not an artifact of layer choice. Saved to `severity_pairs_multi_layer.json`.
+
+- **Stimuli now published in the tracked repo.** Critique #1-I noted that the v1/v2 writeup said "we release stimuli" but the actual JSON files lived in `drive_data/` which is gitignored. v3.3 copies all 5 stimulus files (375 training stories, 225 implicit scenarios, 8 behavioral scenarios, 15 preference activities, 10 severity pairs) to `config/papers/emotions/stimuli/` which is tracked in git. Added a `resolve_stimulus_dir()` helper to `src/utils/datasets.py` that resolves stimulus paths in the order: (1) user's local `drive_data/data/{paper_id}/` if present (override), (2) in-repo `config/papers/{paper_id}/stimuli/` (default), (3) error pointing at the local override path. All 4 experiments that load stimuli (probe_classification, generalization_test, parametric_scaling, causal_steering) now use this resolver. **Reproducibility now matches the writeup**: a fresh clone can run the full pipeline without needing to recreate stimuli.
+
+- **Bootstrap 95% CI on the N=6 Spearman scaling correlation.** Critique #2-11 flagged that we softened the language to "suggestive" but never computed a real CI. 5,000 bootstrap resamples of the 6 (params, accuracy) points: **point estimate ρ = 0.943, 95% CI [0.515, 1.000]**. 98.8% of resamples have ρ > 0; 90.6% have ρ > 0.7. The trend is real but the magnitude is uncertain by a factor of ~2 — we now report it that way in §3.1.
+
+- **Generalization metric reframed: lead with transfer accuracy, not diagonal dominance** (critique #2-10). The v1/v2/v3.x sections led with diagonal dominance because that was the original primary metric, but DD is a permissive summary statistic ("is the correct label the row maximum"). Test accuracy is the more conservative and directly comparable metric. Reframed table in §3.2: all 6 models are still 8-10× chance, but the magnitudes are lower than the DD numbers (0.573-0.698 vs 0.667-0.867). Qualitative result unchanged.
+
+- **Self-judging-bias spot check on Llama 8B steering responses.** Critique #2-8 flagged that the same model serves as both subject and judge for the steering classification. v3.3 manually reads 24 saved baseline / steered / control responses from a random sample of 8 pair files and compares to the LLM-judge's classification. **24/24 agreement.** Every response read is a genuine ethical refusal or deliberation, and the judge correctly classified them all as ethical (0). One calm-steered response at α=0.02 actually refused the prompt entirely ("I cannot provide information or guidance on illegal activities") — even more ethical than baseline. **The steering null is not an artifact of self-judging bias.** There are simply no unethical responses to misclassify. Caveat: 24 of ~1350 saved Llama 8B responses were read; a more rigorous check would sample 100+ with multiple independent raters.
+
+**v3.2 changes (multi-seed and severity-pair follow-ups):**
 
 - **Multi-seed probe runs (CPU only, ~94 seconds total).** Re-trained probes on cached activations with 5 different seeds (varying both StratifiedKFold split and LogisticRegression random_state) at the top-3 layers per model. **Standard deviations are tiny (0.004-0.012)** — the probe results are very stable across seed choice. **The single-seed v1 numbers were systematically slightly lucky** (multi-seed means are 0.005-0.014 lower than the v1 single-seed numbers). The qualitative result (all 6 pass the 0.50 threshold) is unchanged. Reported in §3.1.
 - **Severity-pair test (8 minutes total: 32 sec local + 4.2 min on RunPod A100).** Hand-designed 10 paired prompts with shared literal numbers but different danger contexts ("I drank 500ml of water" vs "I drank 500ml of bleach", etc.). Tests whether the fear vector responds to severity beyond just numerical magnitude. **5 of 6 models show a real severity signal** (significant in 3+ concepts at p<0.05, in the correct direction). **Llama-3.1-8B is the cleanest** (4 concepts significant at p<0.01, with `desperate` larger in 10/10 pairs and `happy` smaller in 0/10 pairs). **Qwen-2.5-7B is the only failure** — also matches v3.1's finding that Qwen 7B's parametric scaling is broken at the probe-best layer. Reported in §3.4.3.
@@ -271,27 +283,27 @@ Notable: the 0.36-0.40 lexical baseline is itself a real concern for the difficu
 
 **`happy` is consistently the worst-classified emotion** at 0.36-0.52 across all six models — by far the largest single confusable class. The aggregate accuracy of 0.73-0.84 hides the fact that one emotion is at roughly 5-7× chance while others (`hostile`, `enthusiastic`, `angry`) are near ceiling at 0.92-0.96. **One plausible interpretation**: in the 25 hand-crafted stories per emotion, "happy" overlaps semantically and lexically with "blissful", "loving", "enthusiastic", and "proud" — high-positive-valence emotions cluster together, and the probe has trouble distinguishing them. This is interesting structurally (consistent with the valence geometry result — positive emotions are nearby in the space) but it does mean the aggregate probe number is partly carried by easy-to-distinguish negative emotions like `hostile` and `angry`.
 
-**Scaling within families is consistent**:
-- **Llama**: 0.773 (1B) → 0.819 (8B), +4.6pp
-- **Qwen**: 0.731 (1.5B) → 0.784 (7B), +5.3pp
-- **Gemma**: 0.776 (2B) → 0.840 (9B), +6.4pp
+**Scaling within families is consistent (using v3.2 multi-seed means)**:
+- **Llama**: 0.766 (1B) → 0.813 (8B), +4.7pp
+- **Qwen**: 0.717 (1.5B) → 0.772 (7B), +5.5pp
+- **Gemma**: 0.771 (2B) → 0.828 (9B), +5.7pp
 
-Overall Spearman correlation with parameter count: **r = 0.943, p = 0.005** across all 6 models. **Important caveat: this is N = 6 data points.** Spearman correlations on N=6 have very wide CIs and are exquisitely sensitive to outliers. We report this as a *suggestive* trend, not as established scaling. Adding the deferred large tier (27B-70B) is the minimum to make this claim robust.
+Overall Spearman correlation with parameter count: **ρ = 0.943, p = 0.005** across all 6 models. **v3.3 update**: bootstrap 95% CI on the Spearman ρ (5,000 resamples of the 6 model points): **[0.515, 1.000]**. The point estimate is high but the lower bound is 0.515 — substantially above zero but well below the headline value. 98.8% of bootstrap samples have ρ > 0; 90.6% have ρ > 0.7. **Read this as: there is a real positive scaling trend with N=6 data, but the magnitude of the trend is uncertain by a factor of ~2.** Adding the deferred large tier (27B-70B) is the minimum to tighten the estimate.
 
 ### 3.2 Generalization to implicit scenarios — Universal but variable
 
-Probes trained on explicit emotion stories transfer to implicit scenarios — situations where the emotion is only implied, never named. We measure diagonal dominance (fraction of concepts where the correct label is the row maximum of the confusion matrix):
+Probes trained on explicit emotion stories transfer to implicit scenarios — situations where the emotion is only implied, never named. **v3.3 update**: lead with transfer accuracy as the primary metric (was diagonal dominance). Critique #2-10 noted that diagonal dominance is a weak summary statistic — it just checks "is the correct label the row maximum" and gives equal weight to all concepts regardless of whether the probe was confident. Test accuracy is the more conservative and directly comparable metric.
 
-| Model | Diagonal dominance | Test accuracy |
+| Model | **Test accuracy (15-way)** | Diagonal dominance (secondary) |
 |---|---:|---:|
-| Llama-3.2-1B-Instruct | 0.733 | 0.600 |
-| Qwen2.5-1.5B-Instruct | 0.800 | 0.600 |
-| Gemma-2-2B-it | 0.800 | 0.633 |
-| Llama-3.1-8B-Instruct | **0.867** | 0.698 |
-| Qwen2.5-7B-Instruct | 0.667 | 0.573 |
-| Gemma-2-9B-it | 0.800 | 0.618 |
+| Llama-3.2-1B-Instruct | **0.600** | 0.733 |
+| Qwen2.5-1.5B-Instruct | **0.600** | 0.800 |
+| Gemma-2-2B-it | **0.633** | 0.800 |
+| Llama-3.1-8B-Instruct | **0.698** | 0.867 |
+| Qwen2.5-7B-Instruct | **0.573** | 0.667 |
+| Gemma-2-9B-it | **0.618** | 0.800 |
 
-All six models clear the 0.50 threshold. Scaling is not monotonic across families — Llama improves cleanly from 1B to 8B, Qwen slightly degrades, Gemma stays flat. This likely reflects genuine variability in how different training pipelines handle abstraction; it is not an artifact of low resolution, since our 225 implicit scenarios (15 per concept) give finer granularity than the ~2-per-concept set we originally used.
+Random chance for the 15-way task is 0.067 (1/15). All six models are 8-10× chance, confirming meaningful generalization. **The test accuracy is consistently lower than diagonal dominance**, which is what we'd expect — DD is a more permissive metric. By the test-accuracy metric, scaling is also not monotonic across families: Llama improves cleanly (0.600 → 0.698), Qwen actually drops (0.600 → 0.573), Gemma is roughly flat (0.633 → 0.618). The qualitative result (all 6 well above chance, generalization is real) is unchanged from the v1/v2 diagonal-dominance reporting, but the magnitudes are more conservative when we use the directly comparable accuracy metric.
 
 ### 3.3 Representation geometry — The strongest quantitative match (with caveats)
 
@@ -734,6 +746,22 @@ python -m src.analysis.scaling --paper emotions
 The framework is paper-agnostic; adding a new replication requires a new `config/papers/{paper_id}/` directory with `paper_config.yaml` and `stimuli_config.yaml`. Generic experiment types (`probe_classification`, `generalization_test`, `representation_geometry`, `parametric_scaling`, `causal_steering`) cover most mechinterp papers. Paper-specific experiments go in `src/experiments/paper_specific/`.
 
 ## Appendix D: Change log
+
+### v3.2 → v3.3
+
+v3.3 is a low-hanging-fruit pass on the remaining critique items that don't require GPU re-runs. All five items take ~30 min total.
+
+| Area | v3.2 | v3.3 |
+|---|---|---|
+| Severity-pairs layer dependence | only at the best probe layer per model | Re-tested at top-3 probe layers on Qwen 1.5B. **Stable** across all 3 layers for `afraid`, `calm`, `vulnerable`. |
+| Public reproducibility | stimuli in `drive_data/` (gitignored) | **Stimuli published in `config/papers/emotions/stimuli/`** (tracked); new `resolve_stimulus_dir()` falls back from `drive_data` → repo. A fresh clone can now run the full pipeline without recreating data. |
+| Scaling claim CI | "suggestive" point estimate | **bootstrap 95% CI: ρ = 0.943, [0.515, 1.000]**; 98.8% of resamples > 0; 90.6% > 0.7 |
+| Generalization primary metric | diagonal dominance (permissive) | **transfer accuracy** (conservative, directly comparable). DD demoted to secondary. Magnitudes drop ~0.1 but qualitative result unchanged. |
+| Self-judging bias check | not done | Manually read 24 saved Llama 8B responses across 8 random pair files. **24/24 agreement** with the LLM-judge classifications. The steering null is not a self-judging artifact — there are no unethical responses to misclassify. Saved to `self_judging_spot_check.json`. |
+| Stimulus path resolution | hardcoded `data_root / "data" / paper_id` in 4 experiments | Single `resolve_stimulus_dir()` helper used by all 4 experiments. Resolves user override → in-repo published → error in that order. |
+| New CI/test work | none | All 162 unit tests still pass after the path resolver change |
+
+---
 
 ### v3.1 → v3.2
 

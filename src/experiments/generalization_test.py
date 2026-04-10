@@ -228,7 +228,8 @@ class GeneralizationTestExperiment(Experiment):
         Returns:
             (texts, labels)
         """
-        data_dir = self.data_root / "data" / self.config.paper_id
+        from src.utils.datasets import resolve_stimulus_dir
+        data_dir = resolve_stimulus_dir(self.config.paper_id, self.data_root)
         texts: list[str] = []
         labels: list[str] = []
 

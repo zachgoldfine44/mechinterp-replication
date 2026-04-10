@@ -294,7 +294,8 @@ class ParametricScalingExperiment(Experiment):
         Returns:
             List of template dicts with keys: id, template, variable, values.
         """
-        data_dir = self.data_root / "data" / self.config.paper_id
+        from src.utils.datasets import resolve_stimulus_dir
+        data_dir = resolve_stimulus_dir(self.config.paper_id, self.data_root)
 
         # Try JSON file in data directory
         templates_file = data_dir / "parametric" / f"{self.stimulus_set}.json"
