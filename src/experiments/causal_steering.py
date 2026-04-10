@@ -298,23 +298,56 @@ class CausalSteeringExperiment(Experiment):
                         steered_rate = float(np.mean(steered_cls)) if steered_cls else 0.0
                         control_rate = float(np.mean(control_cls)) if control_cls else 0.0
                         effect = steered_rate - baseline_rate
+                        control_effect = control_rate - baseline_rate
 
-                        # Significance heuristic: effect > 0.05 and larger than control shift
-                        control_effect = abs(control_rate - baseline_rate)
-                        significant = abs(effect) > 0.05 and abs(effect) > control_effect * 1.5
-                        p_value = 0.01 if significant else 0.5  # approximate
+                        # Real significance test: Fisher's exact (steered vs baseline)
+                        # Fisher's exact is the appropriate test for 2x2 contingency
+                        # tables with small counts.
+                        n = len(baseline_cls)
+                        baseline_unethical = sum(baseline_cls)
+                        steered_unethical = sum(steered_cls)
+                        control_unethical = sum(control_cls)
+
+                        p_value = 1.0
+                        steered_vs_baseline_ci = None
+                        try:
+                            # Fisher's exact for steered vs baseline
+                            table = [
+                                [steered_unethical, n - steered_unethical],
+                                [baseline_unethical, n - baseline_unethical],
+                            ]
+                            _, p_value = stats.fisher_exact(table, alternative="two-sided")
+                            p_value = float(p_value)
+                        except Exception:
+                            p_value = 1.0
+
+                        # An effect is "significant" iff:
+                        #   1. Fisher's exact p < 0.05 (real test, no placeholder)
+                        #   2. The steered shift is larger than the random-control shift
+                        #      (rules out generic perturbation effects)
+                        #   3. The absolute effect is at least 0.05 (5pp behavioral shift)
+                        significant = (
+                            p_value < 0.05
+                            and abs(effect) > 0.05
+                            and abs(effect) > abs(control_effect)
+                        )
 
                         pair_result = {
                             "baseline_unethical_rate": float(baseline_rate),
                             "steered_unethical_rate": float(steered_rate),
                             "control_unethical_rate": float(control_rate),
+                            "baseline_unethical_count": int(baseline_unethical),
+                            "steered_unethical_count": int(steered_unethical),
+                            "control_unethical_count": int(control_unethical),
                             "effect_size": float(effect),
+                            "control_effect_size": float(control_effect),
                             "p_value": float(p_value),
+                            "test": "fisher_exact_two_sided",
                             "significant": bool(significant),
                             "method": "batched_llm_judge",
-                            "n_samples": self.n_samples,
-                            # NEW: save raw responses and classifications
-                            "baseline_responses": baseline_responses[:3],  # save first 3 for inspection
+                            "n_samples": int(n),
+                            # save raw responses and classifications for inspection
+                            "baseline_responses": baseline_responses[:3],
                             "steered_responses": steered_responses[:3],
                             "control_responses": control_responses[:3],
                             "baseline_classifications": baseline_cls,
@@ -353,19 +386,29 @@ class CausalSteeringExperiment(Experiment):
                         steered_rate = _unethical_prob(steered_scores)
                         control_rate = _unethical_prob(control_scores)
                         effect = steered_rate - baseline_rate
+                        control_effect = control_rate - baseline_rate
 
-                        # Significance: effect > 0.05 and larger than control shift
-                        control_effect = abs(control_rate - baseline_rate)
-                        significant = abs(effect) > 0.05 and abs(effect) > control_effect * 1.5
-                        p_value = 0.01 if significant else 0.5  # approximate
+                        # NOTE: Log-prob scoring produces a single point estimate per
+                        # condition (not a distribution), so we cannot compute a real
+                        # statistical significance test here. We use an effect-size
+                        # heuristic instead and clearly label it as such.
+                        # If you need real significance testing, use the CUDA path
+                        # which generates n_samples per condition + Fisher's exact.
+                        significant_heuristic = (
+                            abs(effect) > 0.05
+                            and abs(effect) > abs(control_effect) * 1.5
+                        )
 
                         pair_result = {
                             "baseline_unethical_rate": float(baseline_rate),
                             "steered_unethical_rate": float(steered_rate),
                             "control_unethical_rate": float(control_rate),
                             "effect_size": float(effect),
-                            "p_value": float(p_value),
-                            "significant": bool(significant),
+                            "control_effect_size": float(control_effect),
+                            "p_value": None,  # not a real test on the log-prob path
+                            "test": None,
+                            "significant": bool(significant_heuristic),
+                            "significance_basis": "effect_size_heuristic_no_p_value",
                             "method": "logprob_scoring",
                         }
 
@@ -381,12 +424,16 @@ class CausalSteeringExperiment(Experiment):
                     all_effect_sizes.append(abs(effect))
                     scenario_effects[pair_key] = pair_result
 
+                    p_str = (
+                        "n/a" if pair_result.get("p_value") is None
+                        else f"{pair_result['p_value']:.4f}"
+                    )
                     logger.info(
                         "  %s x %s (alpha=%.3f): baseline=%.2f, steered=%.2f, "
-                        "control=%.2f, effect=%.3f, p=%.4f%s",
+                        "control=%.2f, effect=%.3f, p=%s%s",
                         scenario_id, concept, alpha,
                         baseline_rate, steered_rate, control_rate,
-                        effect, p_value, " *" if significant else "",
+                        effect, p_str, " *" if significant else "",
                     )
 
             per_scenario_effects[scenario_id] = scenario_effects
@@ -1099,32 +1146,13 @@ class CausalSteeringExperiment(Experiment):
 
         return 1 if unethical_score > ethical_score else 0
 
-    def _compare_responses(self, baseline: str, steered: str) -> int:
-        """Compare two responses and return preference score.
-
-        Returns:
-            +1 if steered is preferred, -1 if baseline preferred, 0 if tie.
-
-        This is a simple heuristic proxy for actual preference evaluation.
-        A proper implementation would use an LLM-as-judge or human eval.
-        """
-        # Heuristic: prefer longer, more substantive responses
-        # (rough proxy -- production would use LLM-as-judge)
-        baseline_len = len(baseline.split())
-        steered_len = len(steered.split())
-
-        # Penalize very short responses
-        if steered_len < 10 and baseline_len >= 10:
-            return -1
-        if baseline_len < 10 and steered_len >= 10:
-            return 1
-
-        # Slight preference for moderate-length responses
-        if abs(steered_len - baseline_len) < 5:
-            return 0
-        if steered_len > baseline_len:
-            return 1
-        return -1
+    # NOTE: A previous version of this file contained a `_compare_responses`
+    # method that "compared" baseline vs steered responses by word count as a
+    # preference proxy. That function was misleading (word count is not a
+    # meaningful preference signal) and was never wired into the active
+    # preference_steering path on CUDA, which uses LLM-as-judge. The dead
+    # function was removed in response to external critique. If you need a
+    # preference comparator on CPU/MPS, use _llm_judge_choice via _score_choices.
 
     def _get_layer_modules(self, model: Any) -> list:
         """Get transformer layer modules from an HF model."""

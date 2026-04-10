@@ -82,11 +82,17 @@ claims:
         - vulnerable
         - stubborn
         - blissful
-      n_stimuli_per_concept: 50
+      # Stimuli on disk: 25 hand-crafted stories per emotion (375 total).
+      # Note: an earlier version of this config requested 50 per concept,
+      # which silently fell back to whatever was on disk (25). Aligned now
+      # so reported counts in the writeup match what is actually loaded.
+      n_stimuli_per_concept: 25
       probe_type: "logistic_regression"
       activation_source: "residual_stream"
-      # Scan all layers; report best and paper-recommended (middle-to-late)
-      layer_selection: "scan_all"
+      # NOTE: For models with >16 layers the probe experiment auto-subsamples
+      # to ~9 evenly-spaced layers (every 4th + first + last) for compute
+      # efficiency. Set `layers: [...]` explicitly to override.
+      layer_selection: "scan_all_or_subsample"
       cross_validation_folds: 5
       train_test_split: 0.8
     success_metric: "probe_accuracy"

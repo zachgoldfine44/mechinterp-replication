@@ -2,7 +2,19 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B COMPLETE — 4/6 claims UNIVERSAL across all 6 models, 2/6 null (documented as protocol limitation)
+## Status: 🟢 Phase A + Phase B COMPLETE; writeup v2 incorporating external critique fixes
+
+**v2 critique-response fixes (analysis-only, no GPU rerun needed):**
+- Real Fisher's exact test on CUDA steering path; placeholder p-values removed
+- PCA geometry now scores PC1 specifically (was max-over-PCs); + bootstrap 95% CIs
+- Lexical baseline added (text-only TF-IDF/BoW): 0.35-0.40 vs activation 0.73-0.84
+- Per-concept probe accuracy reported (`happy` is the worst class at 0.36-0.52)
+- Stimulus count discrepancy fixed (config aligned to actual 25/concept)
+- Dead `_compare_responses` word-count preference heuristic removed
+- DESIGN.md phantom modules marked as planned, not implemented
+- Writeup language downgraded from "universally replicates" to "passes our thresholds"
+- Steering null reframed as two equal-standing hypotheses (not just "our methodology")
+- Errata + change log added as §0 / Appendix D of writeup
 
 ## Current test status
 ```

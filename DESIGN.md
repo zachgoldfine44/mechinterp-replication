@@ -87,16 +87,27 @@ class ClaimConfig:
 `src/techniques/` contains reusable building blocks. These are NOT experiments
 — they're tools that experiments compose:
 
-| Module | What it provides | Used by which experiments |
-|--------|-----------------|--------------------------|
-| `probes.py` | Train/eval linear probes, logistic regression, MLP probes | probe_classification, generalization_test |
-| `contrastive.py` | Mean-difference vectors, CAA extraction | probe_classification, causal_steering |
-| `steering.py` | Activation addition at inference time | causal_steering |
-| `patching.py` | Activation patching, causal tracing | circuit_identification |
-| `attention.py` | Attention pattern analysis, head attribution | circuit_identification |
-| `sae.py` | SAE feature extraction (via SAELens or custom) | representation_geometry, circuit_identification |
-| `logit_lens.py` | Logit lens / tuned lens projections | circuit_identification, representation_geometry |
-| `circuit_discovery.py` | Path patching, ACDC, edge attribution | circuit_identification |
+**Status legend:** ✅ implemented · 🟡 stub / placeholder · ❌ planned, not yet written
+
+| Status | Module | What it provides | Used by which experiments |
+|:--:|--------|-----------------|--------------------------|
+| ✅ | `probes.py` | Train/eval linear probes, logistic regression, MLP probes | probe_classification, generalization_test |
+| ✅ | `contrastive.py` | Mean-difference vectors, CAA extraction | probe_classification, causal_steering |
+| ✅ | `steering.py` | Activation addition at inference time | causal_steering |
+| ❌ | `patching.py` | Activation patching, causal tracing | circuit_identification |
+| ❌ | `attention.py` | Attention pattern analysis, head attribution | circuit_identification |
+| ❌ | `sae.py` | SAE feature extraction (via SAELens or custom) | representation_geometry, circuit_identification |
+| ❌ | `logit_lens.py` | Logit lens / tuned lens projections | circuit_identification, representation_geometry |
+| ❌ | `circuit_discovery.py` | Path patching, ACDC, edge attribution | circuit_identification |
+
+The current harness fully supports **probing + contrastive + steering** workflows
+(the techniques used by the emotions paper). Patching, SAE, logit lens, and
+circuit-discovery support is **planned but not yet implemented** — papers that
+require those techniques are not yet replicable through this framework. The
+`circuit_identification` experiment type is similarly a planned slot, not a
+working experiment. We do not advertise the harness as a general mechinterp
+replication engine until those modules exist; until then it is more accurately
+described as a **representation probing / representation engineering harness**.
 
 ---
 

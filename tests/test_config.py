@@ -117,7 +117,9 @@ class TestLoadStimuliConfig:
         assert ts["type"] == "generated"
         assert "generation_prompt" in ts
         assert len(ts["concepts"]) == 15
-        assert ts["per_concept"] == 50
+        # Aligned to actual stimuli on disk (25 hand-crafted per emotion).
+        # Earlier value of 50 was aspirational and didn't match what was loaded.
+        assert ts["per_concept"] == 25
 
     def test_stimuli_config_missing_raises(self) -> None:
         """Non-existent paper should raise FileNotFoundError."""

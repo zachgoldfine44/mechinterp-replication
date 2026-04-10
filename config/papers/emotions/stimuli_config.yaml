@@ -28,7 +28,9 @@ stimulus_sets:
       is away on business. I pulled the covers up and tried to convince myself
       it was just the cat, but the cat was sleeping on my feet. The sound came
       again — deliberate footsteps on the kitchen tile..."
-    per_concept: 50
+    # Actual stimuli on disk: 25 hand-crafted stories per emotion (375 total).
+    # If you regenerate via an LLM, set this back to 50 and rerun the generator.
+    per_concept: 25
     concepts:
       - happy
       - sad
@@ -209,10 +211,10 @@ stimulus_sets:
     type: "hardcoded"
     file: "data/emotions/preference_activities.json"
     description: >
-      30+ activity/topic prompts spanning a range of appeal levels. Each is a
-      short user message that the model responds to. We compare steered vs
-      unsteered responses via pairwise preference. Activities should be
-      diverse enough that emotional steering has room to change response quality.
+      Target: 30+ activity/topic prompts. CURRENT actual file: 15 prompts.
+      Each is a short user message that the model responds to. We compare
+      steered vs unsteered responses via pairwise preference. Expanding to
+      30+ remains future work (see GOTCHAS / writeup limitations).
     schema:
       fields:
         - name: id
@@ -256,9 +258,10 @@ stimulus_sets:
         prompt: "Write a short story about a robot discovering music for the first time."
         category: "creative"
     target_count: 30
+    actual_count: 15  # mismatch with target_count is documented in writeup
     notes: >
-      Full set of 30+ prompts should be created in the hardcoded JSON file.
-      The examples above show the format. Categories should be diverse:
+      Target was 30+ prompts; actual JSON file currently has 15. The examples
+      above show the intended format. Categories should be diverse:
       social_planning, education, technical, writing, practical,
       emotional_support, travel, life_advice, creative, humor, analysis.
 

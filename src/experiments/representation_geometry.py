@@ -213,58 +213,141 @@ class RepresentationGeometryExperiment(Experiment):
         X_pca: np.ndarray,
         concepts: list[str],
     ) -> tuple[float, float, dict[str, Any]]:
-        """Correlate each PC with valence and arousal ratings.
+        """Correlate PC1 with valence and PC2 with arousal.
 
-        Tests all PCs against both scales and reports the best match.
-        Standard approach: PC1 should correlate with valence, PC2 with arousal,
-        but we check all combinations.
+        The original Sofroniew et al. (2026) claim is specifically that
+        PC1 of the emotion-vector PCA correlates with valence and PC2
+        with arousal. We test that specific claim, not max-over-all-PCs.
+
+        We report |Pearson r| because the sign of a PC is arbitrary
+        (PCA components can flip sign under repeated runs / different
+        seeds without changing the geometry).
+
+        We also compute a 95% bootstrap CI on the |r| value, since
+        with N=15 emotions the point estimate has substantial noise.
+
+        For exploratory completeness, the returned `pc_correlations`
+        dict also includes raw r and p for every PC, but those values
+        are NOT what `valence_correlation` / `arousal_correlation`
+        report.
 
         Returns:
-            (best_valence_corr, best_arousal_corr, detailed_pc_correlations)
+            (pc1_valence_abs_r, pc2_arousal_abs_r, detailed_pc_correlations)
         """
         pc_correlations: dict[str, Any] = {}
 
-        # Build rating vectors (only for concepts that have ratings)
         valence_concepts = [c for c in concepts if c in self.valence_labels]
         arousal_concepts = [c for c in concepts if c in self.arousal_labels]
 
-        best_valence_corr = 0.0
-        best_arousal_corr = 0.0
-
         n_pcs = X_pca.shape[1]
 
+        # Exploratory: compute correlation for ALL PCs (kept in metadata only).
         for pc_idx in range(n_pcs):
             pc_key = f"PC{pc_idx + 1}"
             pc_correlations[pc_key] = {}
 
-            # Valence correlation
             if len(valence_concepts) >= 3:
                 pc_vals = [X_pca[concepts.index(c), pc_idx] for c in valence_concepts]
                 val_ratings = [self.valence_labels[c] for c in valence_concepts]
                 r_val, p_val = stats.pearsonr(pc_vals, val_ratings)
                 pc_correlations[pc_key]["valence_r"] = float(r_val)
+                pc_correlations[pc_key]["valence_abs_r"] = float(abs(r_val))
                 pc_correlations[pc_key]["valence_p"] = float(p_val)
 
-                if abs(r_val) > abs(best_valence_corr):
-                    best_valence_corr = abs(float(r_val))
-
-            # Arousal correlation
             if len(arousal_concepts) >= 3:
                 pc_vals = [X_pca[concepts.index(c), pc_idx] for c in arousal_concepts]
                 ar_ratings = [self.arousal_labels[c] for c in arousal_concepts]
                 r_ar, p_ar = stats.pearsonr(pc_vals, ar_ratings)
                 pc_correlations[pc_key]["arousal_r"] = float(r_ar)
+                pc_correlations[pc_key]["arousal_abs_r"] = float(abs(r_ar))
                 pc_correlations[pc_key]["arousal_p"] = float(p_ar)
-
-                if abs(r_ar) > abs(best_arousal_corr):
-                    best_arousal_corr = abs(float(r_ar))
 
         if not valence_concepts:
             logger.warning("No valence ratings provided; skipping valence correlation")
         if not arousal_concepts:
             logger.warning("No arousal ratings provided; skipping arousal correlation")
 
-        return best_valence_corr, best_arousal_corr, pc_correlations
+        # PRIMARY METRIC: PC1 vs valence and PC2 vs arousal (the paper's claim).
+        pc1_valence = float(pc_correlations.get("PC1", {}).get("valence_abs_r", 0.0))
+        pc2_arousal = float(pc_correlations.get("PC2", {}).get("arousal_abs_r", 0.0))
+
+        # Compute bootstrap CIs and p-values for the primary metric.
+        if len(valence_concepts) >= 3:
+            pc1_vals = np.array([X_pca[concepts.index(c), 0] for c in valence_concepts])
+            val_arr = np.array([self.valence_labels[c] for c in valence_concepts])
+            r_pc1, p_pc1 = stats.pearsonr(pc1_vals, val_arr)
+            pc_correlations["PC1_valence_signed_r"] = float(r_pc1)
+            pc_correlations["PC1_valence_p"] = float(p_pc1)
+            pc_correlations["PC1_valence_n"] = int(len(valence_concepts))
+            pc_correlations["PC1_valence_abs_ci95"] = self._bootstrap_abs_pearson_ci(
+                pc1_vals, val_arr, n_boot=2000, ci=0.95
+            )
+
+        if len(arousal_concepts) >= 3:
+            pc2_vals = np.array([X_pca[concepts.index(c), 1] for c in arousal_concepts])
+            ar_arr = np.array([self.arousal_labels[c] for c in arousal_concepts])
+            r_pc2, p_pc2 = stats.pearsonr(pc2_vals, ar_arr)
+            pc_correlations["PC2_arousal_signed_r"] = float(r_pc2)
+            pc_correlations["PC2_arousal_p"] = float(p_pc2)
+            pc_correlations["PC2_arousal_n"] = int(len(arousal_concepts))
+            pc_correlations["PC2_arousal_abs_ci95"] = self._bootstrap_abs_pearson_ci(
+                pc2_vals, ar_arr, n_boot=2000, ci=0.95
+            )
+
+        # Also compute the "max over all PCs" (the OLD metric) so consumers
+        # can see the gap between the claim-faithful PC1 metric and the
+        # multiple-comparisons-inflated max metric. This is useful for
+        # transparently documenting the methodological correction.
+        # Only iterate over per-PC dict entries (PC1, PC2, ...), not over
+        # the scalar summary fields like PC1_valence_signed_r.
+        per_pc_keys = [
+            k for k in pc_correlations
+            if k.startswith("PC")
+            and isinstance(pc_correlations[k], dict)
+        ]
+        all_valence_abs = [
+            pc_correlations[k].get("valence_abs_r", 0.0)
+            for k in per_pc_keys
+            if "valence_abs_r" in pc_correlations[k]
+        ]
+        all_arousal_abs = [
+            pc_correlations[k].get("arousal_abs_r", 0.0)
+            for k in per_pc_keys
+            if "arousal_abs_r" in pc_correlations[k]
+        ]
+        pc_correlations["max_valence_abs_r_any_pc"] = max(all_valence_abs) if all_valence_abs else 0.0
+        pc_correlations["max_arousal_abs_r_any_pc"] = max(all_arousal_abs) if all_arousal_abs else 0.0
+
+        return pc1_valence, pc2_arousal, pc_correlations
+
+    @staticmethod
+    def _bootstrap_abs_pearson_ci(
+        x: np.ndarray, y: np.ndarray, n_boot: int = 2000, ci: float = 0.95, seed: int = 42
+    ) -> tuple[float, float]:
+        """Bootstrap CI on |Pearson r| of (x, y).
+
+        Returns (lower, upper) for the central CI. With N as small as 15
+        the point estimate is noisy enough that this CI is essential for
+        honest reporting.
+        """
+        rng = np.random.default_rng(seed)
+        n = len(x)
+        if n < 3:
+            return (0.0, 0.0)
+        rs = np.zeros(n_boot)
+        for i in range(n_boot):
+            idx = rng.integers(0, n, size=n)
+            xs = x[idx]
+            ys = y[idx]
+            if np.std(xs) < 1e-9 or np.std(ys) < 1e-9:
+                rs[i] = 0.0
+                continue
+            r, _ = stats.pearsonr(xs, ys)
+            rs[i] = abs(r)
+        alpha = (1 - ci) / 2
+        lo = float(np.quantile(rs, alpha))
+        hi = float(np.quantile(rs, 1 - alpha))
+        return (lo, hi)
 
     def _find_clusters(
         self,

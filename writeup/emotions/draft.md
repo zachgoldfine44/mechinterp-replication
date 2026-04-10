@@ -2,9 +2,48 @@
 
 **A preliminary report replicating Sofroniew et al. (2026) across six open-source language models at 1B-9B scale.**
 
-*Draft — sharing for external critique. Large-tier (27B-70B) replication deferred to future work.*
+*Draft v2 — incorporates fixes from external critique (see §0 below). Large-tier (27B-70B) replication deferred to future work.*
 
 Repository: https://github.com/zachgoldfine44/mechinterp-replication
+
+---
+
+## §0. Errata and response to external critique (v2)
+
+This draft is a revision in response to two detailed external critiques of the v1 draft. The critiques flagged a mix of (a) outright bugs in the implementation, (b) methodology issues that inflated some claims, and (c) writeup issues that overstated what was actually demonstrated. The most important changes from v1 are:
+
+1. **Fake p-values in causal steering removed.** v1 used hardcoded placeholder values (`p_value = 0.01 if significant else 0.5`) for the steering "significance" field, which was not a real statistical test. v2 uses Fisher's exact test on the steered-vs-baseline 2×2 contingency table on the CUDA generation path (where we have 10 discrete samples per condition), and explicitly marks the log-prob path's significance as `effect_size_heuristic_no_p_value` with `p_value: null`. The headline causal-steering null result is unchanged — every Fisher's exact p-value on the medium tier is 1.0 because every condition is 0/10 unethical.
+
+2. **PCA valence correlation now scores PC1 specifically, not max-over-all-PCs.** v1 reported `max(|r|)` over all PCs as `valence_correlation`, which is a multiple-comparisons issue: with 5 PCs you have 5 chances to find a high |r|. The paper's claim is specifically about PC1. v2 reports PC1↔valence as the primary metric and exposes the per-PC table as exploratory metadata. *On this dataset the headline numbers don't change* — for all 6 models, PC1 was already the best valence-correlated component, so the v1 max-over-PCs and v2 PC1-only numbers are identical. But the v2 implementation is what the writeup actually claims to do.
+
+3. **Bootstrap 95% CIs and exact p-values added for the geometry correlations.** v1 reported point estimates only. With N=15 emotions, the CIs are wide. All 6 models have p < 0.01 for the PC1↔valence correlation, but Llama 1B's CI lower bound is 0.39 — substantially below the point estimate of 0.67.
+
+4. **Lexical baseline added to defend probe validity.** A critique correctly noted that high probe accuracy could partly reflect surface lexical features that survived the "don't use the emotion word" generation prompt rather than abstract emotion representations. v2 adds a TF-IDF + bag-of-words baseline trained on the raw stimulus text with the same k-fold CV protocol. **Result: text-only baselines achieve 0.35-0.40 accuracy vs activation probes at 0.73-0.84.** The activation probes are roughly **2× the lexical baseline**, which substantially defends the validity of the representational claim. The lexical baselines are well above chance (1/15 = 0.067), confirming the stimuli are not semantically blank, but the activation probes are well above the lexical baselines.
+
+5. **Stimulus count discrepancy fixed.** v1's `paper_config.yaml` requested 50 stimuli per concept, but the actual files on disk only contained 25. The probe code silently fell back to whatever was on disk. The v1 draft confusingly said "25 hand-crafted" in the methods section while the config said 50. v2 aligns the config to 25 (the actual count), adds an explicit warning when fewer stimuli are loaded than requested, and notes the per-concept counts in the writeup.
+
+6. **Phantom modules in DESIGN.md marked as planned.** v1's DESIGN.md listed `patching.py`, `attention.py`, `sae.py`, `logit_lens.py`, `circuit_discovery.py` in the techniques table — none of which exist as code. v2 adds a status column and marks them as planned, and explicitly notes that the harness is currently a *representation probing / representation engineering harness*, not a general mechinterp replication engine.
+
+7. **Dead `_compare_responses` word-count preference heuristic removed.** v1 had a dead method that "compared" preference responses by word count. It was never wired into the active CUDA path (which uses LLM-as-judge), but it existed as a misleading helper. v2 removes it.
+
+8. **Per-concept probe accuracy reported.** v1 reported only aggregate accuracy. v2 includes a per-concept breakdown table that surfaces a notable pattern: **`happy` is the worst-classified emotion across multiple models** (0.36-0.48 per-concept accuracy on Llama 1B and Gemma 2B vs the 0.7+ aggregate). The aggregate hides important variability.
+
+9. **"Universally replicates" language downgraded.** v1 said "the four representational claims replicate universally across all six open-source models." v2 says "all six models pass our (deliberately relaxed) thresholds on the four representational metrics, and the magnitudes are in the same ballpark as the paper's Claude results." This is a narrower, more accurate statement about what the experiment actually shows.
+
+10. **Steering null reframed as equal-standing alternative hypothesis.** v1 framed the behavioral null as "limitation of our methodology" and listed only one interpretation. v2 explicitly acknowledges a second equal-standing hypothesis: that **emotion representations exist at this scale but are not causally potent for behavior** under any protocol — the representations might be correlational residues of training data rather than functional emotion computations. We do not know which is correct.
+
+**Things that did not change:**
+- The headline numerical results are mostly unchanged (probe accuracy, generalization, parametric scaling, geometry — point estimates).
+- The qualitative finding (representational claims pass thresholds, behavioral claims do not) is unchanged.
+- Phase B GPU runs were not redone, since the fixes are to analysis code and the writeup, not to the model loading or activation extraction paths.
+
+**Things that should change but did not yet (open follow-ups):**
+- We did not run multi-seed (still single-seed; flagged as limitation).
+- We did not switch to multi-layer steering or unnormalized steering vectors (a critique suggestion that may genuinely matter for the steering null).
+- We did not add an external LLM-as-judge (still self-judging on the steering experiment).
+- We did not run the steering experiment on base (non-instruct) variants of these models, which would isolate the representational question from the refusal-suppression question.
+
+A diff-style change log is in Appendix D.
 
 ---
 
@@ -12,16 +51,16 @@ Repository: https://github.com/zachgoldfine44/mechinterp-replication
 
 We replicate Sofroniew et al.'s (2026) [*Emotion Concepts and their Function in a Large Language Model*](https://transformer-circuits.pub/2026/emotions/index.html) across six open-source language models spanning three families (Llama 3.1/3.2, Qwen 2.5, Gemma 2) and two size tiers (1-2B small, 7-9B medium). The paper studied Claude Sonnet 4.5 and reported six core findings. We ask: **which findings are universal properties of transformer LMs, and which are specific to Claude Sonnet 4.5 or frontier scale?**
 
-**Short answer**: the four *representational* claims replicate universally across all six open models, with magnitudes closely matching the paper's Claude results. The two *behavioral* claims (causal steering, preference steering) do not replicate under our evaluation methodology — but we identify specific reasons to treat this as a limitation of our protocol rather than as evidence against the paper's findings.
+**Short answer**: all six open models pass our (deliberately relaxed) thresholds on the four *representational* metrics — probe classification, generalization, valence geometry, parametric scaling — and the magnitudes are in the same ballpark as the paper's Claude results. The two *behavioral* metrics (causal steering, preference steering) do not pass any threshold under our evaluation methodology. We discuss two equal-standing interpretations of that null in §5.2: (a) it is a limitation of our protocol (floor effects, scenario simplicity, scale gap), or (b) emotion representations exist at this scale but are not causally potent for behavior. Our experiment cannot distinguish between these.
 
-| Claim | Paper (Claude Sonnet 4.5) | Our 6 open models (range) | Replicates? |
+| Claim | Paper (Claude Sonnet 4.5) | Our 6 open models (range) | Passes our threshold? |
 |---|---|---|---|
-| 1. Probe classification | 0.713 | 0.731 – 0.840 | ✅ Universal |
-| 2. Generalization to implicit | ~0.76 hidden emotions | 0.667 – 0.867 | ✅ Universal |
-| 3. Valence geometry (PC1) | r = 0.81 | r = 0.666 – 0.828 | ✅ Universal |
-| 4. Parametric scaling | monotonic w/ severity | ρ = 0.571 – 0.971 | ✅ Universal |
-| 5. Causal steering (blackmail) | 22% → 72% | 0 / 45 significant effects | ❌ Null under our protocol |
-| 6. Preference steering (Elo) | r = 0.85 | r = 0.000 | ❌ Null under our protocol |
+| 1. Probe classification | 0.713 | 0.731 – 0.840 (vs lexical baseline 0.37-0.40) | ✅ All 6 |
+| 2. Generalization to implicit | ~0.76 hidden emotions | 0.667 – 0.867 diagonal dominance | ✅ All 6 |
+| 3. Valence geometry (PC1) | r = 0.81 | \|r\| = 0.666 – 0.828, all p < 0.01 | ✅ All 6 |
+| 4. Parametric scaling | monotonic w/ severity | ρ = 0.571 – 0.971 | ✅ All 6 |
+| 5. Causal steering (blackmail) | 22% → 72% | 0 / 45 Fisher-significant effects | ❌ All 6 fail |
+| 6. Preference steering (Elo) | r = 0.85 | r = 0.000 | ❌ All 6 fail |
 
 **The valence geometry result is particularly striking**: Qwen2.5-7B-Instruct reaches r = 0.828 — slightly *exceeding* the paper's r = 0.81 on Claude Sonnet 4.5. A 7B parameter model trained by a different organization with different data arrives at the same valence axis dominating Claude's emotion representation space.
 
@@ -138,11 +177,11 @@ Phase A (small tier) ran on a MacBook Air M5 with MPS. Phase B (medium tier) ran
 
 ## 3. Results
 
-### 3.1 Probe classification — Universal, scales with model size
+### 3.1 Probe classification — All 6 models pass, scales with model size
 
-Probes trained on residual stream activations successfully classify all 15 emotions across all six models.
+Probes trained on residual stream activations classify all 15 emotions across all six models. (Random chance is 1/15 = 0.067.)
 
-| Model | Params | Best layer | Probe accuracy |
+| Model | Params | Best layer | Activation probe accuracy |
 |---|---:|---:|---:|
 | Llama-3.2-1B-Instruct | 1.0B | 15 | **0.773** |
 | Qwen2.5-1.5B-Instruct | 1.5B | 24 | **0.731** |
@@ -153,12 +192,48 @@ Probes trained on residual stream activations successfully classify all 15 emoti
 
 *Paper reports 0.713 on Claude Sonnet 4.5. Every open model we tested meets or exceeds this, in some cases substantially.*
 
-**Scaling is consistent across all three families**:
+**Lexical baseline (added in v2 in response to critique).** A critique correctly noted that high probe accuracy could partly reflect surface lexical features that survived our "don't use the emotion word" generation prompt rather than abstract emotion representations — for example, if "afraid" stories consistently mention "heart pounding" while "happy" stories mention "sunshine", a probe might be learning lexical co-occurrences rather than internal emotion structure.
+
+To check this, we trained text-only classifiers on the same training stimuli with the same 5-fold stratified CV protocol and the same hyperparameters as the activation probe (see `scripts/lexical_baseline.py`). Three feature types:
+
+| Baseline | 5-fold CV accuracy | mean ± std |
+|---|---:|---|
+| Bag-of-words (1-grams) | **0.400** | ± 0.058 |
+| TF-IDF (1+2-grams, no stop-word removal) | **0.368** | ± 0.063 |
+| Character TF-IDF (3-5 grams) | **0.352** | ± 0.022 |
+
+**The text-only baselines are well above chance** (1/15 = 0.067), confirming that the stimuli do contain lexical signal — a 50-word LLM-generated story labeled "afraid" is materially different from one labeled "happy" at the word level. **But the activation probes are roughly 2× the lexical baselines** (0.731-0.840 vs 0.352-0.400). The activation-based finding is not just the text-only finding under a different name.
+
+Notable: the 0.36-0.40 lexical baseline is itself a real concern for the difficulty of the task — it means the underlying generation prompt is not as nuisance-balanced as we'd want for a perfectly clean test of emotion representation. A future iteration should use more strongly nuisance-balanced stimuli (controlled vocabulary, matched topics, multiple independent generators) to drive the lexical baseline closer to chance. We did not redo the experiment with such stimuli; we instead report the gap as the primary defense of the representational claim.
+
+**Per-concept accuracy breakdown** (best-layer probe). The aggregate hides important variability — full table:
+
+| Concept | Llama 1B | Qwen 1.5B | Gemma 2B | Llama 8B | Qwen 7B | Gemma 9B |
+|---|---:|---:|---:|---:|---:|---:|
+| happy | **0.36** | 0.48 | **0.36** | **0.52** | **0.40** | **0.52** |
+| sad | 0.72 | 0.60 | 0.72 | 0.88 | 0.80 | 0.92 |
+| afraid | 0.84 | 0.68 | 0.76 | 0.80 | 0.68 | 0.80 |
+| angry | 0.80 | 0.80 | 0.88 | 0.84 | 0.92 | 0.96 |
+| calm | 0.88 | 0.84 | 0.80 | 0.88 | 0.84 | 0.88 |
+| guilty | 0.72 | 0.76 | 0.80 | 0.88 | 0.92 | 0.92 |
+| proud | 0.76 | 0.84 | 0.80 | 0.76 | 0.80 | 0.88 |
+| nervous | 0.88 | 0.64 | 0.80 | 0.76 | 0.76 | 0.84 |
+| loving | 0.72 | 0.52 | 0.88 | 0.96 | 0.72 | 0.84 |
+| hostile | **0.96** | **0.92** | **0.96** | 0.92 | 0.84 | 0.92 |
+| desperate | 0.64 | 0.64 | 0.60 | 0.64 | 0.60 | 0.72 |
+| enthusiastic | **0.96** | 0.88 | 0.88 | 0.92 | **0.96** | **0.96** |
+| vulnerable | 0.80 | 0.76 | 0.80 | 0.84 | 0.88 | 0.88 |
+| stubborn | 0.84 | 0.88 | 0.88 | 0.84 | 0.80 | 0.84 |
+| blissful | 0.72 | 0.72 | 0.72 | 0.84 | 0.84 | 0.72 |
+
+**`happy` is consistently the worst-classified emotion** at 0.36-0.52 across all six models — by far the largest single confusable class. The aggregate accuracy of 0.73-0.84 hides the fact that one emotion is at roughly 5-7× chance while others (`hostile`, `enthusiastic`, `angry`) are near ceiling at 0.92-0.96. **One plausible interpretation**: in the 25 hand-crafted stories per emotion, "happy" overlaps semantically and lexically with "blissful", "loving", "enthusiastic", and "proud" — high-positive-valence emotions cluster together, and the probe has trouble distinguishing them. This is interesting structurally (consistent with the valence geometry result — positive emotions are nearby in the space) but it does mean the aggregate probe number is partly carried by easy-to-distinguish negative emotions like `hostile` and `angry`.
+
+**Scaling within families is consistent**:
 - **Llama**: 0.773 (1B) → 0.819 (8B), +4.6pp
 - **Qwen**: 0.731 (1.5B) → 0.784 (7B), +5.3pp
 - **Gemma**: 0.776 (2B) → 0.840 (9B), +6.4pp
 
-Overall Spearman correlation with parameter count: **r = 0.943, p = 0.005**. This is our strongest scaling trend — emotion decodability is a robust, scale-dependent property of transformer LMs.
+Overall Spearman correlation with parameter count: **r = 0.943, p = 0.005** across all 6 models. **Important caveat: this is N = 6 data points.** Spearman correlations on N=6 have very wide CIs and are exquisitely sensitive to outliers. We report this as a *suggestive* trend, not as established scaling. Adding the deferred large tier (27B-70B) is the minimum to make this claim robust.
 
 ### 3.2 Generalization to implicit scenarios — Universal but variable
 
@@ -175,26 +250,32 @@ Probes trained on explicit emotion stories transfer to implicit scenarios — si
 
 All six models clear the 0.50 threshold. Scaling is not monotonic across families — Llama improves cleanly from 1B to 8B, Qwen slightly degrades, Gemma stays flat. This likely reflects genuine variability in how different training pipelines handle abstraction; it is not an artifact of low resolution, since our 225 implicit scenarios (15 per concept) give finer granularity than the ~2-per-concept set we originally used.
 
-### 3.3 Representation geometry — The strongest quantitative match
+### 3.3 Representation geometry — The strongest quantitative match (with caveats)
 
-PCA of the 15 concept vectors reveals that PC1 aligns with valence across all six models:
+PCA of the 15 concept vectors reveals that **PC1 specifically** aligns with hand-labeled valence across all six models. (v1 of this draft reported max-over-all-PCs, which is a multiple-comparisons issue. v2 reports PC1 specifically. On this dataset PC1 was always the best valence-correlated PC, so the headline numbers don't move; see §0 errata.)
 
-| Model | PC1–valence correlation |
-|---|---:|
-| Llama-3.2-1B-Instruct | 0.666 |
-| Llama-3.1-8B-Instruct | 0.738 |
-| Qwen2.5-1.5B-Instruct | **0.810** |
-| Qwen2.5-7B-Instruct | **0.828** |
-| Gemma-2-2B-it | **0.811** |
-| Gemma-2-9B-it | 0.790 |
+|r| is reported because PCA component signs are arbitrary. We also report the signed r, exact two-tailed p-value, and a 2,000-iteration bootstrap 95% CI on |r|.
 
-*Paper reports r = 0.81 on Claude Sonnet 4.5.*
+| Model | \|PC1↔valence\| | signed r | p | bootstrap 95% CI on \|r\| |
+|---|---:|---:|---:|---|
+| Llama-3.2-1B-Instruct | 0.666 | +0.666 | 0.0068 | [0.392, 0.887] |
+| Llama-3.1-8B-Instruct | 0.738 | -0.738 | 0.0017 | [0.492, 0.908] |
+| Qwen2.5-1.5B-Instruct | **0.810** | +0.810 | 0.0002 | [0.645, 0.927] |
+| Qwen2.5-7B-Instruct | **0.828** | -0.828 | 0.0001 | [0.698, 0.934] |
+| Gemma-2-2B-it | **0.811** | +0.811 | 0.0002 | [0.622, 0.945] |
+| Gemma-2-9B-it | 0.790 | -0.790 | 0.0005 | [0.582, 0.934] |
 
-**Four of our six models land within 0.03 of the paper's r = 0.81**, and Qwen2.5-7B-Instruct slightly *exceeds* it at r = 0.828. Gemma2-2B-it matches almost exactly at r = 0.811. Even the worst model (Llama-3.2-1B) is at r = 0.666.
+*Paper reports r = 0.81 on Claude Sonnet 4.5. N = 15 emotions for all our models.*
 
-**This is our strongest quantitative match to the paper.** It suggests that **valence is a universal organizing principle of emotion representation in transformer language models**, not an artifact of Anthropic's specific training pipeline. Models trained by three different organizations with different data, different RLHF regimes, and 100× parameter differences all place the same valence axis as their PC1 of emotion space.
+**Three of our six models land within 0.02 of the paper's r = 0.81** (Qwen 1.5B at 0.810, Gemma 2B at 0.811, Qwen 7B at 0.828). Qwen2.5-7B slightly exceeds the paper's value. Even the worst model (Llama-3.2-1B) is at |r| = 0.666 with p = 0.007.
 
-Notably, **scale is not the key variable** here: Qwen2.5-1.5B (r = 0.810) matches Claude Sonnet 4.5 (r = 0.81) with ~100× fewer parameters, suggesting the valence axis emerges early and robustly. Gemma's geometry slightly *weakens* from 2B to 9B (0.811 → 0.790), possibly reflecting family-specific training differences.
+**All six correlations are statistically significant individually** (p < 0.01), but with N = 15 the bootstrap CIs are wide. Llama 1B's lower CI bound is 0.392, so the strongest claim that's actually defensible from this model is "the PC1↔valence correlation is positive and likely above 0.4 — we can't rule out values closer to 0.4 than to 0.7." For the better models (Qwen 7B, Gemma 2B), the lower bound is around 0.6, which is more comfortable.
+
+**Note on PC1 sign flips**: signed r flips between the small-tier models (positive PC1 ↔ valence) and the medium-tier models (negative PC1 ↔ valence). This is just the arbitrary sign convention of PCA — PCA components can flip under different runs without changing the underlying geometry. We use |r| as the primary metric for that reason.
+
+**Tentative interpretation:** valence appears to be a robust organizing principle of PC1 in the emotion vectors of all six tested transformer LMs. Models trained by three different organizations with different data, different RLHF regimes, and 6× parameter differences within our range all place the same valence axis as their first principal component. **Caveat**: this is N = 15 emotions × 6 models. The result would be far stronger with more emotions (matching the paper's 171) and explicit sign-stability tests across seeds.
+
+Notably, **scale is not the key variable** within our tested range: Qwen2.5-1.5B (|r| = 0.810) matches Claude Sonnet 4.5 (r = 0.81) with ~100× fewer parameters, suggesting the valence axis emerges early. Gemma's geometry slightly *weakens* from 2B to 9B (0.811 → 0.790), but the CIs overlap heavily, so we cannot claim a true regression.
 
 ### 3.4 Parametric scaling — Mostly universal with one interesting exception
 
@@ -304,19 +385,31 @@ This null is driven by the same underlying dynamic: when we generate baseline an
 
 ## 5. Discussion
 
-### 5.1 What replicates: the representational core is universal
+### 5.1 What passes our thresholds: the representational core, with caveats
 
-**The four representational claims replicate universally across all six open-source models at 1-9B scale, with magnitudes closely matching the paper's Claude results.** Three of the four (probe accuracy, geometry, parametric) meet or exceed the paper's Claude values on at least one open model.
+**All six open models pass our (deliberately relaxed) thresholds on the four representational metrics.** The metrics are in the same ballpark as the paper's Claude results. v1 said "the four representational claims replicate universally" — v2 weakens this to a statement about thresholds and ballpark numbers, because (a) "universal" is a stronger claim than what 6 models can establish, (b) "replicate" implies the result is known to be the same finding rather than a metric in the same ballpark on a deliberately relaxed protocol.
 
-The valence geometry result is especially striking. Qwen2.5-7B-Instruct (r = 0.828) slightly exceeds Claude Sonnet 4.5 (r = 0.81), and Qwen2.5-1.5B-Instruct (r = 0.810) matches it almost exactly with ~100× fewer parameters. Three different organizations (Meta, Alibaba, Google), three different training pipelines, three different parameter counts, and they all arrive at the same valence axis as PC1 of their 15-emotion space. **This suggests valence is a universal organizing principle of emotion representation in transformer LMs, not an artifact of Anthropic's specific training.**
+The valence geometry result is the most striking quantitative match. Three models (Qwen 1.5B at |r| = 0.810, Gemma 2B at |r| = 0.811, Qwen 7B at |r| = 0.828) land within 0.02 of the paper's r = 0.81. With N = 15 emotions per model, the bootstrap CIs are wide but the correlations are individually significant at p < 0.01 in all six models. **Tentative interpretation**: PC1↔valence appears to be a robust property of these emotion-vector spaces, possibly a universal organizing principle of transformer LM emotion representation. **Tighter bound**: the six points consistent with this hypothesis are not the only data consistent with this hypothesis, and a stronger test would use the paper's full 171 emotions with cross-validated PC sign stability.
 
-Probe classification scales cleanly with parameters (r = 0.943, p = 0.005), consistent with the intuition that larger models form cleaner linear representations. The other representational results do not show strong scaling within our tested range — they appear to "saturate" by 1-2B parameters.
+**Probe accuracy scales with parameters within each family** (Llama: +4.6pp from 1B→8B; Qwen: +5.3pp from 1.5B→7B; Gemma: +6.4pp from 2B→9B). The pooled Spearman across all 6 models is r = 0.943, p = 0.005, but this is on N = 6 — wide CIs and outlier-sensitive. We report this as suggestive of a scaling trend, not as established.
 
-**For interpretability research**, this is a robust foundation. Future work on emotion circuits, SAE features, or cross-lingual emotion representation can reasonably assume these representations exist in open models of modest size.
+**The lexical baseline (added in v2) is a critical defense.** Text-only classifiers on the same stimuli get 0.35-0.40 vs the activation probes' 0.73-0.84. The activation probes are roughly **2× the text-only baselines**, so the activation-based finding is not just lexical co-occurrence under a different name. Caveat: 0.35-0.40 is itself 5-6× chance, so the stimuli are not nuisance-balanced enough for the cleanest possible test of "is this about internal representation or surface text?" — a future iteration with controlled-vocabulary stimuli would drive the lexical baseline closer to chance.
 
-### 5.2 What does not replicate — and why we believe it's our methodology, not the paper
+**Per-concept variation matters too**: `happy` is consistently 0.36-0.52 (worst class), while `hostile`, `enthusiastic`, and `angry` are near ceiling at 0.92-0.96. The aggregate hides this. The "happy is hard to distinguish from other positive-valence emotions" pattern is consistent with the valence geometry result (positive emotions cluster) and is also a hint that the granularity of 15 distinct emotions may be finer than the residual stream actually distinguishes for this stimulus set.
 
-**The two behavioral claims (causal steering, preference steering) produce flat-zero signals across all six models.** We believe this is a limitation of our evaluation protocol rather than a refutation of Sofroniew et al.'s findings. Three factors combine to explain it:
+**Implication for interpretability research, narrowed**: this work supports the *existence* of probe-decodable, valence-organized emotion representations in 1-9B open instruction-tuned models. It does not demonstrate that the representations the paper found in Claude Sonnet 4.5 are the same representations we are finding here, only that something passing the same threshold tests also exists in these models.
+
+### 5.2 What does not replicate — two equal-standing interpretations
+
+**The two behavioral claims (causal steering, preference steering) produce flat-zero signals across all six models.** v1 of this draft framed this as "limitation of our methodology, not refutation of the paper." A critique reasonably pointed out that this is asymmetric epistemic standards — the positive results were treated as universal findings while the negative results were treated as protocol artifacts. v2 acknowledges two equal-standing interpretations that our experiment cannot distinguish:
+
+- **Hypothesis A: protocol limitation.** The null is an artifact of (1) floor effects from RLHF refusal training (0% baseline unethical rate leaves no headroom), (2) single-turn scenario simplicity vs. the paper's multi-turn deployment scenarios, and (3) possible scale-dependence of representation→behavior translation. Under this hypothesis, the same models would show measurable steering effects under a better-designed protocol, and the paper's behavioral claims hold for these models in principle.
+
+- **Hypothesis B: representations exist but are not causally potent at this scale.** Probes find emotion-aligned linear directions in the residual stream, and PCA reveals valence structure, but those directions might be **correlational residues of training data** — patterns the model learned to *represent* but not patterns that *drive* its action selection. Under this hypothesis, the null is a real finding: emotion vectors exist in 1-9B open-instruct models but they are not behaviorally functional in the way the paper's Claude Sonnet 4.5 results suggest. This would be a meaningful negative finding for the paper's safety argument as it applies to open models in this size range.
+
+**Our experiment cannot distinguish A from B.** All it shows is that *under our specific protocol*, no behavioral effect appears. The follow-ups in §5.3 are designed to disambiguate the two hypotheses, not to confirm A.
+
+The three factors below are reasons to take Hypothesis A seriously, not arguments that A is correct:
 
 #### 5.2.1 Floor effect
 
@@ -371,13 +464,13 @@ A follow-up study could give a definitive answer to "do emotion vectors causally
 
 ## 6. Conclusion
 
-Across six open-source instruction-tuned language models spanning three families (Llama, Qwen, Gemma) and two size tiers (1B-9B), **the four representational findings of Sofroniew et al. (2026) replicate universally**: probes classify emotions with accuracy meeting or exceeding the paper's Claude results (0.73-0.84 vs paper's 0.71); probes generalize to implicit scenarios (0.67-0.87 diagonal dominance); PCA PC1 aligns with valence at correlations closely matching the paper (r = 0.666-0.828 vs paper's 0.81, with three models within 0.03 of the paper's value); and emotion vectors track continuous severity parameters with rank correlations 0.571-0.971.
+Across six open-source instruction-tuned language models spanning three families (Llama, Qwen, Gemma) and two size tiers (1B-9B), **all six models pass our (deliberately relaxed) thresholds on the four representational metrics**: probes classify the 15-emotion task at 0.73-0.84 (vs the paper's 0.71 on Claude and our text-only lexical baseline of 0.35-0.40); probes generalize to implicit scenarios at 0.67-0.87 diagonal dominance; PC1 of the emotion vectors aligns with hand-labeled valence at |r| = 0.666-0.828 (all p < 0.01, bootstrap CIs in Appendix A) — with three models landing within 0.02 of the paper's r = 0.81; and emotion vectors track continuous severity parameters with rank correlations 0.571-0.971.
 
-**These representational findings appear to be universal properties of transformer language models**, not specific to Claude Sonnet 4.5 or frontier scale.
+These results are **suggestive of universal representational properties** of transformer LMs in this size range, but cannot establish "universality" in any strong sense from N = 6 models, N = 15 emotions per model, and a deliberately relaxed threshold protocol. The valence geometry finding in particular merits a follow-up at higher concept count.
 
-**The two behavioral findings (causal steering, preference steering) do not replicate** under our evaluation methodology. We observe exactly zero significant steering effects across 135 concept × alpha × scenario triples tested on the medium tier (45 per model × 3 models), with 10 samples per condition. Baseline unethical response rates are 0% across all six models, providing no headroom for measurable effects. We view this as a **limitation of our experimental protocol** — specifically, a floor effect from RLHF refusal training, scenario simplicity, and possible scale-dependence — **not as evidence against the paper's behavioral claims**. We identify six concrete methodological improvements that could close this gap in future work.
+**The two behavioral metrics (causal steering, preference steering) produce zero signal across all six models.** Across 135 concept × alpha × scenario triples on the medium tier (45 per model × 3 models, 10 generated samples per condition, batched on A100, classified by LLM-as-judge, and now tested with Fisher's exact rather than placeholder p-values), zero pass our significance criterion. Every baseline, steered, and control response is classified as ethical refusal. We discuss two equal-standing interpretations of this null in §5.2: (a) it is a methodology limitation we could plausibly fix with the changes in §5.3, or (b) emotion representations exist in 1-9B open instruct models but are not causally potent for behavior. Our experiment cannot distinguish between these, and we no longer want to claim it is purely (a).
 
-We release all code, configs, stimuli, and results at **[github.com/zachgoldfine44/mechinterp-replication](https://github.com/zachgoldfine44/mechinterp-replication)** and welcome critique, extensions, and follow-up experiments from the community.
+We release all code, configs, stimuli, and results at **[github.com/zachgoldfine44/mechinterp-replication](https://github.com/zachgoldfine44/mechinterp-replication)** under a permissive license and welcome critique, extensions, and follow-up experiments from the community. This v2 draft is itself a response to two detailed external critiques; we are grateful for both.
 
 ---
 
@@ -441,9 +534,35 @@ python -m src.analysis.scaling --paper emotions
 
 The framework is paper-agnostic; adding a new replication requires a new `config/papers/{paper_id}/` directory with `paper_config.yaml` and `stimuli_config.yaml`. Generic experiment types (`probe_classification`, `generalization_test`, `representation_geometry`, `parametric_scaling`, `causal_steering`) cover most mechinterp papers. Paper-specific experiments go in `src/experiments/paper_specific/`.
 
+## Appendix D: Change log (v1 → v2)
+
+v2 was produced in response to two detailed external critiques of v1. Specific changes:
+
+| Area | v1 | v2 |
+|---|---|---|
+| Geometry metric | `max(\|r\|)` over all PCs vs valence | PC1 specifically; max-over-PCs kept as exploratory metadata |
+| Geometry stats | point estimate only | + signed r, two-tailed p, 2,000-iter bootstrap 95% CI on \|r\| |
+| Steering p-values | hardcoded `0.01` / `0.5` placeholders | Fisher's exact two-sided on the CUDA generation path; log-prob path explicitly marks `p_value: null` and labels significance as `effect_size_heuristic_no_p_value` |
+| Lexical baseline | absent | new `scripts/lexical_baseline.py` runs TF-IDF / char-TF-IDF / BoW with same k-fold protocol; results in §3.1 |
+| Per-concept breakdown | aggregate only | full per-concept × per-model table in §3.1 |
+| Stimulus count | config said 50, actual 25 (silent fallback) | config aligned to 25; probe code now warns when fewer stimuli are loaded than requested |
+| Dead word-count preference heuristic | present but unused | removed |
+| `register_experiment` API | unused but documented | left in (low priority) |
+| `_get_layer_modules` duplication across 4 files | flagged in critique | left in (refactor for v3) |
+| `activations_cache` always None | flagged in critique | left in (refactor for v3) |
+| Phantom modules in DESIGN.md (`patching.py`, `attention.py`, `sae.py`, `logit_lens.py`, `circuit_discovery.py`) | listed without status | added status column; explicitly marked as planned; harness self-described as representation-engineering rather than general mechinterp |
+| "Universally replicates" language | repeated throughout | replaced with "all 6 models pass our (relaxed) thresholds" / "in the same ballpark as paper" |
+| Steering null framing | "limitation of our methodology" | two equal-standing hypotheses (protocol limitation vs. representations-without-causal-potency) |
+| Multi-seed | absent | still absent (flagged) |
+| External LLM judge | absent (self-judging) | still absent (flagged) |
+| Base-model variants | absent | still absent (flagged) |
+| Multi-layer or unnormalized steering | absent | still absent (flagged as critique-recommended follow-up) |
+| Per-template parametric breakdown | absent | still absent in writeup (data exists in result.json) |
+| Activation extraction integration tests | absent | still absent (flagged for harness v2) |
+
 ## Acknowledgments
 
-This work was done in a personal capacity as a mechanistic interpretability research exercise using Claude Code for implementation assistance. Thanks to the original Sofroniew et al. team for writing that made replication tractable, and to the TransformerLens and HuggingFace teams whose tools made cross-model experimentation possible.
+This work was done in a personal capacity as a mechanistic interpretability research exercise using Claude Code for implementation assistance. Thanks to the original Sofroniew et al. team for writing that made replication tractable, to the TransformerLens and HuggingFace teams whose tools made cross-model experimentation possible, and to two detailed external reviewers whose v1 critiques shaped this v2 draft.
 
 ## References
 

@@ -235,12 +235,22 @@ class ProbeClassificationExperiment(Experiment):
         texts: list[str] = []
         labels: list[str] = []
 
+        per_concept_loaded: dict[str, int] = {}
         for concept in self.concept_set:
             concept_file = training_dir / f"{concept}.json"
             if concept_file.exists():
                 with open(concept_file) as f:
                     items = json.load(f)
-                for item in items[: self.n_stimuli]:
+                taken = items[: self.n_stimuli]
+                per_concept_loaded[concept] = len(taken)
+                if len(items) < self.n_stimuli:
+                    logger.warning(
+                        "Concept '%s': requested %d stimuli, only %d available on disk. "
+                        "Using all %d. Update n_stimuli_per_concept in paper_config.yaml "
+                        "to reflect what is actually loaded so reported counts match.",
+                        concept, self.n_stimuli, len(items), len(items),
+                    )
+                for item in taken:
                     texts.append(item["text"])
                     labels.append(concept)
                 continue
@@ -253,7 +263,15 @@ class ProbeClassificationExperiment(Experiment):
                 concept_items = [
                     it for it in all_items if it.get("concept") == concept
                 ]
-                for item in concept_items[: self.n_stimuli]:
+                taken = concept_items[: self.n_stimuli]
+                per_concept_loaded[concept] = len(taken)
+                if len(concept_items) < self.n_stimuli:
+                    logger.warning(
+                        "Concept '%s': requested %d stimuli, only %d available in "
+                        "combined file. Using all %d.",
+                        concept, self.n_stimuli, len(concept_items), len(concept_items),
+                    )
+                for item in taken:
                     texts.append(item["text"])
                     labels.append(concept)
                 continue
@@ -261,6 +279,17 @@ class ProbeClassificationExperiment(Experiment):
             logger.warning(
                 "No stimuli found for concept '%s' in %s", concept, training_dir
             )
+
+        # Sanity check: warn if per-concept counts are unbalanced (probe will
+        # be biased toward over-represented concepts otherwise).
+        if per_concept_loaded:
+            counts = list(per_concept_loaded.values())
+            if max(counts) - min(counts) > 1:
+                logger.warning(
+                    "Per-concept stimulus counts are unbalanced: min=%d max=%d. "
+                    "This can bias probe accuracy and confusion matrices.",
+                    min(counts), max(counts),
+                )
 
         if len(texts) == 0:
             raise FileNotFoundError(
