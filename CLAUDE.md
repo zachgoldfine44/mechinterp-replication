@@ -1,4 +1,13 @@
-# Mechinterp Paper Replication Engine
+# Mechinterp Replication Engine — Operational Guide
+
+> **For humans**: If you're looking for an overview of what this project is
+> and how to use it, see [README.md](README.md). If you want to contribute
+> a replication or improve the harness, see [CONTRIBUTING.md](CONTRIBUTING.md).
+>
+> **This file** is the operational guide for Claude Code agents (and
+> power-users who want to understand the internal conventions). It documents
+> session workflow, commit cadence, storage layout, and coding standards
+> that the autonomous development pipeline relies on.
 
 ## What is this?
 
