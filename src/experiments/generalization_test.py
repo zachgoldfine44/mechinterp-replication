@@ -279,17 +279,30 @@ class GeneralizationTestExperiment(Experiment):
         Returns:
             Array of shape (n_stimuli, hidden_dim).
         """
-        # Reuse extraction from probe_classification via import
+        # Determine aggregation from training metadata (match training).
+        training_results_dir = (
+            self.data_root / "results" / self.config.paper_id
+            / self.model_key / self.training_claim_id
+        )
+        training_result_path = training_results_dir / "result.json"
+        aggregation = "last_token"
+        if training_result_path.exists():
+            with open(training_result_path) as f:
+                tr = json.load(f)
+            aggregation = tr.get("metadata", {}).get("aggregation", "last_token")
+
+        # Reuse probe_classification's extraction machinery (it owns caching
+        # and batching). We build a shallow instance without triggering
+        # __init__ because we don't have a concept_set here; we only need
+        # the extraction helpers.
         from src.experiments.probe_classification import ProbeClassificationExperiment
 
-        # Create a temporary instance just for extraction
-        temp_config = self.config
         temp = ProbeClassificationExperiment.__new__(ProbeClassificationExperiment)
-        temp.config = temp_config
+        temp.config = self.config
         temp.model_key = self.model_key
         temp.data_root = self.data_root
         temp.results_dir = self.results_dir
-        temp.aggregation = "last_token"  # match training
+        temp.aggregation = aggregation
         temp.concept_set = []
         temp.n_stimuli = 0
         temp.probe_type = "logistic_regression"
@@ -297,17 +310,6 @@ class GeneralizationTestExperiment(Experiment):
         temp.n_folds = 1
         temp.train_split = 0.8
         temp.seed = 42
-
-        # Check training metadata for aggregation type
-        training_results_dir = (
-            self.data_root / "results" / self.config.paper_id
-            / self.model_key / self.training_claim_id
-        )
-        training_result_path = training_results_dir / "result.json"
-        if training_result_path.exists():
-            with open(training_result_path) as f:
-                tr = json.load(f)
-            temp.aggregation = tr.get("metadata", {}).get("aggregation", "last_token")
 
         acts_by_layer = temp._extract_activations(
             model, tokenizer, texts, [layer], activations_cache

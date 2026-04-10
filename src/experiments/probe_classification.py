@@ -8,7 +8,9 @@ Expected params in ClaimConfig.params:
     n_stimuli_per_concept: int      -- stimuli per concept
     probe_type: str                 -- "logistic_regression" or "mlp"
     layers: list[int] | None        -- specific layers, or None to scan all
-    aggregation: str                -- "last_token" or "mean"
+    aggregation: str                -- "last_token", "first_token", "mean",
+                                        "max", or "last_k:N" (see
+                                        src.utils.aggregation)
     cross_validation_folds: int     -- CV folds (default 5)
     train_test_split: float         -- train fraction (default 0.8)
 
@@ -48,6 +50,7 @@ from sklearn.preprocessing import LabelEncoder
 from src.core.claim import ClaimConfig, ExperimentResult
 from src.core.experiment import Experiment
 from src.utils.activations import get_hf_layer_modules
+from src.utils.aggregation import aggregate_hidden_states
 
 logger = logging.getLogger(__name__)
 
@@ -332,29 +335,69 @@ class ProbeClassificationExperiment(Experiment):
     ) -> dict[int, np.ndarray]:
         """Extract residual stream activations for all stimuli at specified layers.
 
+        Layered caching:
+          1. activations_cache (in-memory, shared across experiments per model) —
+             fastest, keyed by (layer, aggregation, text_hash).
+          2. results_dir/activations/stimulus_*.pt (disk, per-experiment) —
+             resume-safe, survives process restart.
+          3. Live extraction from the model.
+
+        When activations_cache is None (e.g. in tests), falls back to the
+        old behavior: disk cache + live extraction only.
+
         Returns:
             Dict mapping layer index -> numpy array of shape (n_stimuli, hidden_dim).
         """
         cache_dir = self.results_dir / "activations"
         cache_dir.mkdir(parents=True, exist_ok=True)
 
-        # Check for cached activations
-        result: dict[int, list[np.ndarray]] = {layer: [] for layer in layers}
-        needs_extraction: list[int] = []  # indices into stimuli
+        n = len(stimuli)
+        # Per-stimulus, per-layer slot. None means "not yet filled".
+        slots: dict[int, list[np.ndarray | None]] = {
+            layer: [None] * n for layer in layers
+        }
+        needs_extraction: list[int] = []
 
-        for i in range(len(stimuli)):
+        for i, text in enumerate(stimuli):
+            # 1. Try the shared in-memory cache first.
+            if activations_cache is not None:
+                all_hit = True
+                for layer in layers:
+                    vec = activations_cache.get(layer, self.aggregation, text)
+                    if vec is None:
+                        all_hit = False
+                        break
+                    slots[layer][i] = vec
+                if all_hit:
+                    continue
+                # Partial hit: clear so the disk/live path fills everything
+                # consistently for this stimulus.
+                for layer in layers:
+                    slots[layer][i] = None
+
+            # 2. Per-stimulus disk cache.
             cache_path = cache_dir / f"stimulus_{i:04d}.pt"
             if cache_path.exists():
                 cached = torch.load(cache_path, map_location="cpu", weights_only=True)
+                missing_layer = False
                 for layer in layers:
-                    result[layer].append(cached[layer].numpy())
-            else:
-                needs_extraction.append(i)
+                    if layer not in cached:
+                        missing_layer = True
+                        break
+                    arr = cached[layer].numpy()
+                    slots[layer][i] = arr
+                    if activations_cache is not None:
+                        activations_cache.put(layer, self.aggregation, text, arr)
+                if not missing_layer:
+                    continue
+                # Fall through to live extraction if disk cache lacks some layers.
+
+            needs_extraction.append(i)
 
         if needs_extraction:
             logger.info(
                 "Extracting activations for %d/%d stimuli",
-                len(needs_extraction), len(stimuli),
+                len(needs_extraction), n,
             )
 
         # Extract in batches
@@ -368,18 +411,32 @@ class ProbeClassificationExperiment(Experiment):
             for local_idx, global_idx in enumerate(batch_indices):
                 # Save per-stimulus activations (resume-safe)
                 per_stimulus: dict[int, torch.Tensor] = {}
+                text = stimuli[global_idx]
                 for layer in layers:
                     act_vec = batch_acts[layer][local_idx]
-                    result[layer].append(act_vec.numpy())
+                    arr = act_vec.numpy()
+                    slots[layer][global_idx] = arr
                     per_stimulus[layer] = act_vec
+                    if activations_cache is not None:
+                        activations_cache.put(layer, self.aggregation, text, arr)
 
                 cache_path = cache_dir / f"stimulus_{global_idx:04d}.pt"
                 tmp = cache_path.with_suffix(".tmp")
                 torch.save(per_stimulus, tmp)
                 tmp.rename(cache_path)
 
-        # Stack into arrays
-        return {layer: np.stack(result[layer]) for layer in layers}
+        # Stack into arrays. Every slot should now be filled.
+        out: dict[int, np.ndarray] = {}
+        for layer in layers:
+            filled = slots[layer]
+            if any(v is None for v in filled):
+                missing = [i for i, v in enumerate(filled) if v is None]
+                raise RuntimeError(
+                    f"Activation extraction incomplete at layer {layer}: "
+                    f"{len(missing)} stimuli missing (indices {missing[:5]}...)"
+                )
+            out[layer] = np.stack(filled)  # type: ignore[arg-type]
+        return out
 
     def _extract_batch(
         self,
@@ -399,17 +456,17 @@ class ProbeClassificationExperiment(Experiment):
             for text in texts:
                 tokens = model.to_tokens(text)
                 _, cache = model.run_with_cache(tokens, names_filter=lambda name: "resid_post" in name)
+                # TransformerLens has no pad tokens here (single example),
+                # so the attention mask is all ones.
+                tl_mask = torch.ones(
+                    tokens.shape[0], tokens.shape[1], device=tokens.device
+                )
 
                 for layer in layers:
                     hook_name = f"blocks.{layer}.hook_resid_post"
                     acts = cache[hook_name]  # (1, seq_len, hidden_dim)
-
-                    if self.aggregation == "last_token":
-                        vec = acts[0, -1, :]
-                    else:  # mean
-                        vec = acts[0].mean(dim=0)
-
-                    result[layer].append(vec.float().cpu())
+                    pooled = aggregate_hidden_states(acts, tl_mask, self.aggregation)
+                    result[layer].append(pooled[0].float().cpu())
 
             return result
 
@@ -446,15 +503,14 @@ class ProbeClassificationExperiment(Experiment):
                 with torch.no_grad():
                     hf_model(**inputs)
 
+                attn_mask_cpu = inputs["attention_mask"].detach().cpu()
                 for layer in layers:
                     if activations_store[layer]:
                         acts = activations_store[layer][0]  # (1, seq_len, hidden_dim)
-                        if self.aggregation == "last_token":
-                            seq_len = inputs["attention_mask"].sum().item()
-                            vec = acts[0, int(seq_len) - 1, :]
-                        else:
-                            vec = acts[0].mean(dim=0)
-                        result[layer].append(vec)
+                        pooled = aggregate_hidden_states(
+                            acts, attn_mask_cpu, self.aggregation
+                        )
+                        result[layer].append(pooled[0])
                     else:
                         logger.warning("No activations captured for layer %d", layer)
         finally:

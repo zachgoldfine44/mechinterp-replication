@@ -46,6 +46,7 @@ from src.core.config_loader import (
 from src.core.experiment import Experiment
 from src.models.loader import load_model, unload_model
 from src.models.registry import ModelInfo, ModelRegistry
+from src.utils.activation_cache import ActivationCache
 from src.utils.env import get_data_root, get_device
 
 logger = logging.getLogger(__name__)
@@ -400,6 +401,11 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
 
                 prev_model_key = model_key
 
+            # One shared in-memory activation cache per (paper, model).
+            # All claims that run on the same (stimuli, layer, aggregation)
+            # share extracted vectors instead of re-running the forward pass.
+            activations_cache = ActivationCache(model_key=model_key, data_root=data_root)
+
             model_results: dict[str, ExperimentResult] = {}
             claim_results_cache: dict[str, ExperimentResult] = {}
 
@@ -463,7 +469,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
                 t0 = time.time()
                 try:
                     result = experiment.load_or_run(
-                        current_model, current_tokenizer, activations_cache=None,
+                        current_model, current_tokenizer, activations_cache=activations_cache,
                     )
                 except Exception as exc:
                     logger.error(
@@ -492,6 +498,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
                 model_results[claim.claim_id] = result
                 claim_results_cache[claim.claim_id] = result
 
+            logger.info("  activation cache stats for %s: %s", model_key, activations_cache.stats())
             all_results[model_key] = model_results
 
     finally:
