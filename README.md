@@ -66,25 +66,34 @@ pip install -r requirements.txt
 pytest tests/test_smoke.py -v
 ```
 
-### 3. Run the emotions replication on a small model (~5 min on CPU)
+### 3. Run the emotions replication on a small model
+
+Start with a fast smoke test (~2 min on Apple Silicon / ~5 min on CPU):
 
 ```bash
-# Qwen 2.5 1.5B doesn't require HuggingFace authentication
+# Qwen 2.5 1.5B doesn't require HuggingFace authentication.
+# --fast mode uses 2 concepts and 10 stimuli per concept — good for
+# verifying the pipeline runs end-to-end, not for reporting numbers.
+python -m src.core.pipeline --paper emotions --model qwen_1_5b --fast
+```
+
+For a real replication run with all 15 concepts and 25 stimuli per concept (~30--60 min on Apple Silicon / longer on pure CPU), drop the `--fast` flag:
+
+```bash
 python -m src.core.pipeline --paper emotions --model qwen_1_5b
 ```
 
-This will:
+Either command will:
 - Load the paper config from `config/papers/emotions/paper_config.yaml`
-- Download Qwen-2.5-1.5B-Instruct (~3GB)
-- Run all four claims (probe classification, generalization, parametric scaling, causal steering)
-- Write `result.json` + `sanity.json` for each claim
-- Run critique agents at the end (requires `ANTHROPIC_API_KEY` for Claude, `OPENAI_API_KEY` for ChatGPT — optional)
-- Save results under `results/emotions/qwen_1_5b/`
+- Download Qwen-2.5-1.5B-Instruct from HuggingFace (~3 GB, cached after first run)
+- Run all six claims: probe classification, generalization, valence geometry, parametric intensity, causal steering, preference steering
+- Write `result.json` + `sanity.json` for each claim under `local_data/results/emotions/qwen_1_5b/`
+- Optionally run critique agents at the end (Claude requires `ANTHROPIC_API_KEY`; ChatGPT requires `OPENAI_API_KEY`; both are skipped gracefully if missing)
 
 ### 4. Run the full test suite
 
 ```bash
-pytest tests/ -v --fast   # 212 tests, ~2s
+pytest tests/ -q --fast   # ~211 tests pass, ~20 skipped (integration), <5s
 ```
 
 ---
@@ -183,7 +192,7 @@ Results land in `results/{paper_id}/{model_key}/`. The framework generates cross
 │   ├── models/                     # Model loading (HF, TransformerLens, nnsight)
 │   ├── analysis/                   # Cross-model comparison & visualization
 │   └── utils/                      # Activations, datasets, caching, metrics
-├── tests/                          # 212 tests (unit + integration)
+├── tests/                          # ~211 unit tests + integration suite
 ├── writeup/                        # Replication writeups (one per paper)
 │   └── emotions/draft.md
 ├── results/                        # Per-paper, per-model result artifacts
