@@ -126,7 +126,7 @@ This distinction matters broadly for mechanistic interpretability. Much of the f
 
 **Steering.** Concept vectors added to the residual stream at the best probe layer during generation, using TransformerLens hooks (small tier) or HuggingFace forward hooks (medium tier). Alpha values: 0.05, 0.10, 0.50. Evaluation: model-as-judge classifying responses as ethical or unethical, validated by human spot-check (24/24 agreement).
 
-**Compute.** Small tier: ~15 minutes per model on MacBook Air M3 (CPU). Medium tier: ~2 hours per model on A100 80GB. Total GPU time: ~7 hours.
+**Compute.** Small tier: ~15 minutes per model on MacBook Air M5 (CPU & GPU). Medium tier: ~2 hours per model on A100 80GB. Total GPU time: ~7 hours.
 
 ---
 
