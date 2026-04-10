@@ -245,22 +245,22 @@ The extraction strategy depends on the experiment type:
 
 ### Caching strategy
 
-All activations cached per-item to Google Drive (via `get_data_root()`):
+All activations cached per-item to Google Drive or locally (via `get_data_root()`):
 ```
 {DATA_ROOT}/activations/{paper_id}/{model_key}/{stimulus_set}_{stimulus_id}.pt
 ```
 
 Uses the skip-if-exists + atomic write pattern (see CLAUDE.md checkpointing
-section). Code lives in the GitHub repo; data files live on Google Drive.
+section). Code lives in the GitHub repo; data files live on Google Drive or locally.
 See CLAUDE.md "Git, GitHub, and multi-environment workflow" for the full setup.
 
 ### Memory management
 
 | Environment | Models | Batch size | Precision |
 |------------|--------|------------|-----------|
-| MacBook Air M3 | 1-2B only | 2-4 | float16 on MPS (CPU fallback) |
-| Colab A100/H100 | 7-9B | 4-8 | float16 |
-| Colab A100/H100 | 70B+ | 1 | 4-bit (bitsandbytes) |
+| MacBook Air M5 | 1-2B only | 2-4 | float16 on MPS (CPU fallback) |
+| Colab or hosted A100/H100 | 7-9B | 4-8 | float16 |
+| Colab or hosted A100/H100 | 70B+ | 1 | 4-bit (bitsandbytes) |
 
 ---
 
