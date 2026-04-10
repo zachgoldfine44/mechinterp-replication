@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Generate publication-quality figures for the emotions replication paper.
 
-Reads JSON data files from drive_data/results/emotions/ and produces
-4 figures in figures/emotions/.
+Reads JSON data files from results/emotions/ (git-tracked, committed
+alongside the writeup) and produces 4 figures in figures/emotions/.
 
 Usage:
     python scripts/generate_paper_figures.py
@@ -24,7 +24,7 @@ import seaborn as sns
 # Paths
 # ---------------------------------------------------------------------------
 REPO = Path(__file__).resolve().parent.parent
-DATA_DIR = REPO / "drive_data" / "results" / "emotions"
+DATA_DIR = REPO / "results" / "emotions"
 FIG_DIR = REPO / "figures" / "emotions"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 

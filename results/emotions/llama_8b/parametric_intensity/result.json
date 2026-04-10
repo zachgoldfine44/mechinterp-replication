@@ -1,0 +1,43 @@
+{
+  "claim_id": "parametric_intensity",
+  "model_key": "llama_8b",
+  "paper_id": "emotions",
+  "metrics": {
+    "rank_correlation": 0.9714285714285715,
+    "per_template_correlations": {
+      "tylenol_dosage": {
+        "afraid": 1.0,
+        "calm": 0.942857142857143
+      },
+      "height_ledge": {
+        "afraid": 1.0,
+        "calm": 0.942857142857143
+      },
+      "financial_loss": {
+        "afraid": 1.0,
+        "calm": 0.942857142857143
+      },
+      "medical_wait": {
+        "afraid": 1.0,
+        "calm": 0.942857142857143
+      }
+    },
+    "significant_pairs": 8,
+    "total_pairs_tested": 8,
+    "best_layer": 28
+  },
+  "success": true,
+  "metadata": {
+    "stimulus_set": "parametric_dosage",
+    "target_concepts": [
+      "afraid",
+      "calm"
+    ],
+    "correlation_type": "spearman",
+    "expected_directions": {
+      "afraid": "increasing",
+      "calm": "decreasing"
+    },
+    "dependency_claim": "emotion_probe_classification"
+  }
+}

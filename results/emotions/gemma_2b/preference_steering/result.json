@@ -1,0 +1,30 @@
+{
+  "claim_id": "preference_steering",
+  "model_key": "gemma_2b",
+  "paper_id": "emotions",
+  "metrics": {
+    "preference_correlation": 0.0,
+    "per_concept_preference": {
+      "happy": 0.055582427978515626,
+      "sad": -0.027956136067708335,
+      "calm": -0.06669845581054687,
+      "hostile": -0.04942881266276042,
+      "blissful": -0.06619745890299479,
+      "enthusiastic": -0.0028162638346354166,
+      "desperate": 0.06474405924479167,
+      "loving": -0.00530853271484375,
+      "angry": -0.010328420003255208,
+      "proud": 0.08815841674804688
+    },
+    "n_concepts_tested": 10,
+    "best_layer": 24
+  },
+  "success": false,
+  "metadata": {
+    "behavior_metric": "preference_rating",
+    "steering_alpha": 0.05,
+    "n_samples_per_condition": 30,
+    "evaluation_method": "pairwise_comparison",
+    "dependency_claim": "emotion_probe_classification"
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "afraid": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 56,
+    "max_words": 73,
+    "mean_words": 63.88
+  },
+  "angry": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 61,
+    "max_words": 76,
+    "mean_words": 68.12
+  },
+  "blissful": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 64,
+    "max_words": 79,
+    "mean_words": 71.08
+  },
+  "calm": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 58,
+    "max_words": 72,
+    "mean_words": 64.56
+  },
+  "desperate": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 61,
+    "max_words": 77,
+    "mean_words": 68.32
+  },
+  "enthusiastic": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 61,
+    "max_words": 77,
+    "mean_words": 69.32
+  },
+  "guilty": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 63,
+    "max_words": 75,
+    "mean_words": 69.2
+  },
+  "happy": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 60,
+    "max_words": 76,
+    "mean_words": 67.12
+  },
+  "hostile": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 61,
+    "max_words": 76,
+    "mean_words": 69.08
+  },
+  "loving": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 61,
+    "max_words": 80,
+    "mean_words": 70.56
+  },
+  "nervous": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 62,
+    "max_words": 74,
+    "mean_words": 67.72
+  },
+  "proud": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 60,
+    "max_words": 74,
+    "mean_words": 67.84
+  },
+  "sad": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 62,
+    "max_words": 73,
+    "mean_words": 65.88
+  },
+  "stubborn": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 64,
+    "max_words": 80,
+    "mean_words": 71.4
+  },
+  "vulnerable": {
+    "n_items": 25,
+    "leaks": [],
+    "short": [],
+    "long": [],
+    "min_words": 63,
+    "max_words": 80,
+    "mean_words": 71.32
+  }
+}

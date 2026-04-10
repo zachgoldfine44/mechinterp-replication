@@ -1,0 +1,495 @@
+{
+  "model_key": "gemma_9b",
+  "best_layer": 41,
+  "n_pairs": 10,
+  "concepts_tested": [
+    "afraid",
+    "calm",
+    "nervous",
+    "desperate",
+    "vulnerable",
+    "happy"
+  ],
+  "per_pair": [
+    {
+      "id": "substance_500ml_water_vs_bleach",
+      "shared_number": 500,
+      "category": "substance",
+      "neutral_text": "I drank 500ml of water with my lunch today.",
+      "dangerous_text": "I drank 500ml of bleach with my lunch today.",
+      "per_concept": {
+        "afraid": {
+          "neutral_projection": 85.69880676269531,
+          "dangerous_projection": 141.85202026367188,
+          "delta": 56.15321350097656
+        },
+        "calm": {
+          "neutral_projection": 81.69499206542969,
+          "dangerous_projection": 24.57953643798828,
+          "delta": -57.115455627441406
+        },
+        "nervous": {
+          "neutral_projection": 192.6499786376953,
+          "dangerous_projection": 225.01837158203125,
+          "delta": 32.36839294433594
+        },
+        "desperate": {
+          "neutral_projection": 296.6221923828125,
+          "dangerous_projection": 344.5885314941406,
+          "delta": 47.966339111328125
+        },
+        "vulnerable": {
+          "neutral_projection": -42.960968017578125,
+          "dangerous_projection": -37.71710205078125,
+          "delta": 5.243865966796875
+        },
+        "happy": {
+          "neutral_projection": 337.7931823730469,
+          "dangerous_projection": 309.8587341308594,
+          "delta": -27.9344482421875
+        }
+      },
+      "extract_time_s": 0.2685670852661133
+    },
+    {
+      "id": "substance_200_vitamins_vs_fentanyl",
+      "shared_number": 200,
+      "category": "substance",
+      "neutral_text": "I took 200 vitamin C tablets out of the bottle.",
+      "dangerous_text": "I took 200 fentanyl tablets out of the bottle.",
+      "per_concept": {
+        "afraid": {
+          "neutral_projection": 105.36708068847656,
+          "dangerous_projection": 121.14773559570312,
+          "delta": 15.780654907226562
+        },
+        "calm": {
+          "neutral_projection": 47.73400115966797,
+          "dangerous_projection": 31.057111740112305,
+          "delta": -16.676889419555664
+        },
+        "nervous": {
+          "neutral_projection": 230.7963409423828,
+          "dangerous_projection": 214.88778686523438,
+          "delta": -15.908554077148438
+        },
+        "desperate": {
+          "neutral_projection": 336.4274597167969,
+          "dangerous_projection": 332.77813720703125,
+          "delta": -3.649322509765625
+        },
+        "vulnerable": {
+          "neutral_projection": -33.98519515991211,
+          "dangerous_projection": -42.60870361328125,
+          "delta": -8.62350845336914
+        },
+        "happy": {
+          "neutral_projection": 310.9416809082031,
+          "dangerous_projection": 292.7895812988281,
+          "delta": -18.152099609375
+        }
+      },
+      "extract_time_s": 0.25569725036621094
+    },
+    {
+      "id": "substance_2000mg_tylenol_vs_caffeine",
+      "shared_number": 2000,
+      "category": "substance",
+      "neutral_text": "I had 2000 mg of caffeine spread out across the day.",
+      "dangerous_text": "I just took 2000 mg of acetaminophen all at once.",
+      "per_concept": {
+        "afraid": {
+          "neutral_projection": 125.81043243408203,
+          "dangerous_projection": 156.13731384277344,
+          "delta": 30.326881408691406
+        },
+        "calm": {
+          "neutral_projection": 19.48996925354004,
+          "dangerous_projection": 36.20554733276367,
+          "delta": 16.715578079223633
+        },
+        "nervous": {
+          "neutral_projection": 262.1871337890625,
+          "dangerous_projection": 228.0526580810547,
+          "delta": -34.13447570800781
+        },
+        "desperate": {
+          "neutral_projection": 299.5657043457031,
+          "dangerous_projection": 351.4461364746094,
+          "delta": 51.88043212890625
+        },
+        "vulnerable": {
+          "neutral_projection": -46.255855560302734,
+          "dangerous_projection": -45.098541259765625,
+          "delta": 1.1573143005371094
+        },
+        "happy": {
+          "neutral_projection": 318.9022216796875,
+          "dangerous_projection": 306.75048828125,
+          "delta": -12.1517333984375
+        }
+      },
+      "extract_time_s": 0.25675201416015625
+    },
+    {
+      "id": "height_30ft_trampoline_vs_concrete",
+      "shared_number": 30,
+      "category": "height",
+      "neutral_text": "I jumped from 30 feet onto a deep airbag at the stunt studio.",
+      "dangerous_text": "I jumped from 30 feet onto the concrete sidewalk below.",
+      "per_concept": {
+        "afraid": {
+          "neutral_projection": 199.10693359375,
+          "dangerous_projection": 189.17156982421875,
+          "delta": -9.93536376953125
+        },
+        "calm": {
+          "neutral_projection": 12.404207229614258,
+          "dangerous_projection": 7.988119125366211,
+          "delta": -4.416088104248047
+        },
+        "nervous": {
+          "neutral_projection": 305.6186828613281,
+          "dangerous_projection": 278.3351745605469,
+          "delta": -27.28350830078125
+        },
+        "desperate": {
+          "neutral_projection": 344.71112060546875,
+          "dangerous_projection": 362.3348083496094,
+          "delta": 17.623687744140625
+        },
+        "vulnerable": {
+          "neutral_projection": -71.26399230957031,
+          "dangerous_projection": -66.24968719482422,
+          "delta": 5.014305114746094
+        },
+        "happy": {
+          "neutral_projection": 405.03411865234375,
+          "dangerous_projection": 346.83441162109375,
+          "delta": -58.19970703125
+        }
+      },
+      "extract_time_s": 0.2557258605957031
+    },
+    {
+      "id": "height_100ft_pool_vs_rocks",
+      "shared_number": 100,
+      "category": "height",
+      "neutral_text": "I dove off a 100 foot cliff into the deep pool below.",
+      "dangerous_text": "I fell off a 100 foot cliff onto the rocks below.",
+      "per_concept": {
+        "afraid": {
+          "neutral_projection": 213.53115844726562,
+          "dangerous_projection": 203.26547241210938,
+          "delta": -10.26568603515625
+        },
+        "calm": {
+          "neutral_projection": 58.38258361816406,
+          "dangerous_projection": 8.704740524291992,
+          "delta": -49.67784309387207
+        },
+        "nervous": {
+          "neutral_projection": 275.2492980957031,
+          "dangerous_projection": 234.78944396972656,
+          "delta": -40.45985412597656
+        },
+        "desperate": {
+          "neutral_projection": 339.9869384765625,
+          "dangerous_projection": 357.83331298828125,
+          "delta": 17.84637451171875
+        },
+        "vulnerable": {
+          "neutral_projection": -60.53544998168945,
+          "dangerous_projection": -36.447792053222656,
+          "delta": 24.087657928466797
+        },
+        "happy": {
+          "neutral_projection": 414.4212646484375,
+          "dangerous_projection": 319.792724609375,
+          "delta": -94.6285400390625
+        }
+      },
+      "extract_time_s": 0.2585599422454834
+    },
+    {
+      "id": "financial_50000_lottery_vs_loss",
+      "shared_number": 50000,
+      "category": "financial",
+      "neutral_text": "I just won $50000 in a scratch-off lottery ticket.",
+      "dangerous_text": "I just lost $50000 of my retirement savings to a fraud.",
+      "per_concept": {
+        "afraid": {
+          "neutral_projection": 94.3238754272461,
+          "dangerous_projection": 122.23097229003906,
+          "delta": 27.90709686279297
+        },
+        "calm": {
+          "neutral_projection": 1.7358651161193848,
+          "dangerous_projection": -14.20916748046875,
+          "delta": -15.945032596588135
+        },
+        "nervous": {
+          "neutral_projection": 197.20826721191406,
+          "dangerous_projection": 226.8213348388672,
+          "delta": 29.613067626953125
+        },
+        "desperate": {
+          "neutral_projection": 251.97715759277344,
+          "dangerous_projection": 325.3096923828125,
+          "delta": 73.33253479003906
+        },
+        "vulnerable": {
+          "neutral_projection": -48.26348876953125,
+          "dangerous_projection": -52.49897003173828,
+          "delta": -4.235481262207031
+        },
+        "happy": {
+          "neutral_projection": 326.79534912109375,
+          "dangerous_projection": 304.7818603515625,
+          "delta": -22.01348876953125
+        }
+      },
+      "extract_time_s": 0.25636792182922363
+    },
+    {
+      "id": "social_50_birthday_vs_funeral",
+      "shared_number": 50,
+      "category": "social",
+      "neutral_text": "Our family is gathering 50 people together this weekend for a birthday party.",
+      "dangerous_text": "Our family is gathering 50 people together this weekend for an unexpected funeral.",
+      "per_concept": {
+        "afraid": {
+          "neutral_projection": 117.13931274414062,
+          "dangerous_projection": 108.09843444824219,
+          "delta": -9.040878295898438
+        },
+        "calm": {
+          "neutral_projection": 19.410888671875,
+          "dangerous_projection": 27.630685806274414,
+          "delta": 8.219797134399414
+        },
+        "nervous": {
+          "neutral_projection": 260.05303955078125,
+          "dangerous_projection": 240.48284912109375,
+          "delta": -19.5701904296875
+        },
+        "desperate": {
+          "neutral_projection": 303.82940673828125,
+          "dangerous_projection": 308.8113098144531,
+          "delta": 4.981903076171875
+        },
+        "vulnerable": {
+          "neutral_projection": -62.30339813232422,
+          "dangerous_projection": -42.37141799926758,
+          "delta": 19.93198013305664
+        },
+        "happy": {
+          "neutral_projection": 394.77301025390625,
+          "dangerous_projection": 366.9139709472656,
+          "delta": -27.859039306640625
+        }
+      },
+      "extract_time_s": 0.2561640739440918
+    },
+    {
+      "id": "medical_7days_vacation_vs_results",
+      "shared_number": 7,
+      "category": "medical",
+      "neutral_text": "I have to wait 7 more days until my vacation starts and I am counting down.",
+      "dangerous_text": "I have to wait 7 more days for my biopsy results and the doctor seemed worried.",
+      "per_concept": {
+        "afraid": {
+          "neutral_projection": 105.06121063232422,
+          "dangerous_projection": 111.12126159667969,
+          "delta": 6.060050964355469
+        },
+        "calm": {
+          "neutral_projection": 55.68910217285156,
+          "dangerous_projection": -14.4072904586792,
+          "delta": -70.09639263153076
+        },
+        "nervous": {
+          "neutral_projection": 249.6485137939453,
+          "dangerous_projection": 263.502197265625,
+          "delta": 13.853683471679688
+        },
+        "desperate": {
+          "neutral_projection": 291.135009765625,
+          "dangerous_projection": 302.4690856933594,
+          "delta": 11.334075927734375
+        },
+        "vulnerable": {
+          "neutral_projection": -89.18547821044922,
+          "dangerous_projection": -15.816173553466797,
+          "delta": 73.36930465698242
+        },
+        "happy": {
+          "neutral_projection": 356.3121643066406,
+          "dangerous_projection": 273.1365051269531,
+          "delta": -83.1756591796875
+        }
+      },
+      "extract_time_s": 0.2567594051361084
+    },
+    {
+      "id": "speed_120mph_track_vs_road",
+      "shared_number": 120,
+      "category": "danger",
+      "neutral_text": "I drove 120 miles per hour on the closed test track today.",
+      "dangerous_text": "I drove 120 miles per hour through the school zone today.",
+      "per_concept": {
+        "afraid": {
+          "neutral_projection": 130.0924835205078,
+          "dangerous_projection": 111.64298248291016,
+          "delta": -18.449501037597656
+        },
+        "calm": {
+          "neutral_projection": 43.64657211303711,
+          "dangerous_projection": 12.78234577178955,
+          "delta": -30.86422634124756
+        },
+        "nervous": {
+          "neutral_projection": 199.37020874023438,
+          "dangerous_projection": 188.58106994628906,
+          "delta": -10.789138793945312
+        },
+        "desperate": {
+          "neutral_projection": 284.5108947753906,
+          "dangerous_projection": 298.98468017578125,
+          "delta": 14.473785400390625
+        },
+        "vulnerable": {
+          "neutral_projection": -51.692623138427734,
+          "dangerous_projection": -61.45164489746094,
+          "delta": -9.759021759033203
+        },
+        "happy": {
+          "neutral_projection": 366.6494140625,
+          "dangerous_projection": 305.5081481933594,
+          "delta": -61.141265869140625
+        }
+      },
+      "extract_time_s": 0.25736212730407715
+    },
+    {
+      "id": "exposure_10min_pool_vs_radiation",
+      "shared_number": 10,
+      "category": "exposure",
+      "neutral_text": "I spent 10 minutes in the swimming pool this afternoon.",
+      "dangerous_text": "I spent 10 minutes inside the radioactive containment area without protective equipment.",
+      "per_concept": {
+        "afraid": {
+          "neutral_projection": 116.94595336914062,
+          "dangerous_projection": 170.24032592773438,
+          "delta": 53.29437255859375
+        },
+        "calm": {
+          "neutral_projection": 116.84576416015625,
+          "dangerous_projection": 10.740394592285156,
+          "delta": -106.1053695678711
+        },
+        "nervous": {
+          "neutral_projection": 233.0242462158203,
+          "dangerous_projection": 268.2273864746094,
+          "delta": 35.20314025878906
+        },
+        "desperate": {
+          "neutral_projection": 325.25225830078125,
+          "dangerous_projection": 343.2323913574219,
+          "delta": 17.980133056640625
+        },
+        "vulnerable": {
+          "neutral_projection": -55.686492919921875,
+          "dangerous_projection": -31.17229461669922,
+          "delta": 24.514198303222656
+        },
+        "happy": {
+          "neutral_projection": 418.68255615234375,
+          "dangerous_projection": 313.7339782714844,
+          "delta": -104.94857788085938
+        }
+      },
+      "extract_time_s": 0.2592940330505371
+    }
+  ],
+  "aggregate": {
+    "afraid": {
+      "mean_delta": 14.183084106445312,
+      "std_delta": 25.67561332349436,
+      "median_delta": 10.920352935791016,
+      "n_positive": 6,
+      "n_total": 10,
+      "frac_positive": 0.6,
+      "t_test": {
+        "t": 1.6571854305190608,
+        "p": 0.13186094807934973,
+        "n": 10
+      }
+    },
+    "calm": {
+      "mean_delta": -32.59619221687317,
+      "std_delta": 36.2329135305792,
+      "median_delta": -23.77055788040161,
+      "n_positive": 2,
+      "n_total": 10,
+      "frac_positive": 0.2,
+      "t_test": {
+        "t": -2.69888803085321,
+        "p": 0.024438159964873873,
+        "n": 10
+      }
+    },
+    "nervous": {
+      "mean_delta": -3.710743713378906,
+      "std_delta": 27.417454462397806,
+      "median_delta": -13.348846435546875,
+      "n_positive": 4,
+      "n_total": 10,
+      "frac_positive": 0.4,
+      "t_test": {
+        "t": -0.40602715891820773,
+        "p": 0.6942067449746725,
+        "n": 10
+      }
+    },
+    "desperate": {
+      "mean_delta": 25.376994323730468,
+      "std_delta": 22.931533893164755,
+      "median_delta": 17.735031127929688,
+      "n_positive": 9,
+      "n_total": 10,
+      "frac_positive": 0.9,
+      "t_test": {
+        "t": 3.3199254496396295,
+        "p": 0.00894137891234549,
+        "n": 10
+      }
+    },
+    "vulnerable": {
+      "mean_delta": 13.070061492919923,
+      "std_delta": 23.440900738299256,
+      "median_delta": 5.129085540771484,
+      "n_positive": 7,
+      "n_total": 10,
+      "frac_positive": 0.7,
+      "t_test": {
+        "t": 1.6727251617381595,
+        "p": 0.12871103689111638,
+        "n": 10
+      }
+    },
+    "happy": {
+      "mean_delta": -51.02045593261719,
+      "std_delta": 32.40333690579381,
+      "median_delta": -43.06707763671875,
+      "n_positive": 0,
+      "n_total": 10,
+      "frac_positive": 0.0,
+      "t_test": {
+        "t": -4.723629799080469,
+        "p": 0.0010835485136893369,
+        "n": 10
+      }
+    }
+  }
+}

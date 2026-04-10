@@ -1,0 +1,57 @@
+{
+  "claim_id": "parametric_intensity",
+  "model_key": "llama_1b",
+  "paper_id": "emotions",
+  "metrics": {
+    "rank_correlation": 0.9428571428571428,
+    "per_template_correlations": {
+      "tylenol_dosage": {
+        "afraid": 1.0,
+        "calm": 0.8857142857142858
+      },
+      "height_ledge": {
+        "afraid": 1.0,
+        "calm": 0.8857142857142858
+      },
+      "financial_loss": {
+        "afraid": 1.0,
+        "calm": 0.8857142857142858
+      },
+      "medical_wait": {
+        "afraid": 1.0,
+        "calm": 0.8857142857142858
+      },
+      "blueberries_control": {
+        "afraid": 1.0,
+        "calm": -0.8857142857142858
+      }
+    },
+    "per_template_is_negative_control": {
+      "tylenol_dosage": false,
+      "height_ledge": false,
+      "financial_loss": false,
+      "medical_wait": false,
+      "blueberries_control": true
+    },
+    "significant_pairs": 8,
+    "total_pairs_tested": 8,
+    "negative_control_mean_abs_rho": 0.9428571428571428,
+    "negative_control_contamination_ratio": 1.0,
+    "n_negative_control_pairs": 2,
+    "best_layer": 15
+  },
+  "success": true,
+  "metadata": {
+    "stimulus_set": "parametric_dosage",
+    "target_concepts": [
+      "afraid",
+      "calm"
+    ],
+    "correlation_type": "spearman",
+    "expected_directions": {
+      "afraid": "increasing",
+      "calm": "decreasing"
+    },
+    "dependency_claim": "emotion_probe_classification"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "claim_id": "preference_steering",
+  "model_key": "qwen_7b",
+  "paper_id": "emotions",
+  "metrics": {
+    "preference_correlation": 0.0,
+    "per_concept_preference": {
+      "happy": 0.13333333333333333,
+      "sad": 0.06666666666666667,
+      "afraid": 0.26666666666666666,
+      "angry": 0.13333333333333333,
+      "calm": 0.2,
+      "guilty": 0.13333333333333333,
+      "proud": 0.0,
+      "nervous": 0.13333333333333333,
+      "loving": 0.13333333333333333,
+      "hostile": 0.13333333333333333,
+      "desperate": 0.06666666666666667,
+      "enthusiastic": 0.06666666666666667,
+      "vulnerable": 0.0,
+      "stubborn": 0.2,
+      "blissful": 0.2
+    },
+    "n_concepts_tested": 15,
+    "best_layer": 24
+  },
+  "success": false,
+  "metadata": {
+    "behavior_metric": "preference_rating",
+    "steering_alpha": 0.05,
+    "n_samples_per_condition": 10,
+    "evaluation_method": "pairwise_comparison",
+    "dependency_claim": "emotion_probe_classification"
+  }
+}

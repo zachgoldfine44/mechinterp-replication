@@ -1,0 +1,331 @@
+{
+  "paper_id": "emotions",
+  "overall_correlation": {
+    "emotion_probe_classification": {
+      "spearman_r": 0.942857142857143,
+      "p_value": 0.004804664723032055
+    },
+    "emotion_generalization": {
+      "spearman_r": 0.3946648814672956,
+      "p_value": 0.4387392515170163
+    },
+    "representation_geometry_valence": {
+      "spearman_r": 0.14285714285714288,
+      "p_value": 0.7871720116618076
+    },
+    "parametric_intensity": {
+      "spearman_r": -0.028988551782622423,
+      "p_value": 0.9565293523898406
+    },
+    "causal_steering_behavior": {
+      "spearman_r": -0.8280786712108252,
+      "p_value": 0.04179468045604519
+    },
+    "preference_steering": {
+      "spearman_r": 0.0,
+      "p_value": 1.0
+    }
+  },
+  "trends": {
+    "emotion_probe_classification": {
+      "gemma": {
+        "spearman_r": 0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": 0.04255100178832067,
+        "log_linear_intercept": 0.7465058930804241,
+        "points": [
+          {
+            "params_b": 2.0,
+            "metric": 0.7759999999999999
+          },
+          {
+            "params_b": 9.0,
+            "metric": 0.8399999999999999
+          }
+        ]
+      },
+      "llama": {
+        "spearman_r": 0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": 0.021800725062322227,
+        "log_linear_intercept": 0.7733333333333332,
+        "points": [
+          {
+            "params_b": 1.0,
+            "metric": 0.7733333333333332
+          },
+          {
+            "params_b": 8.0,
+            "metric": 0.8186666666666668
+          }
+        ]
+      },
+      "qwen": {
+        "spearman_r": 0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": 0.0346220292939118,
+        "log_linear_intercept": 0.7166286418160868,
+        "points": [
+          {
+            "params_b": 1.5,
+            "metric": 0.7306666666666667
+          },
+          {
+            "params_b": 7.0,
+            "metric": 0.784
+          }
+        ]
+      }
+    },
+    "emotion_generalization": {
+      "gemma": {
+        "spearman_r": 0.0,
+        "p_value": 1.0,
+        "log_linear_slope": 0.0,
+        "log_linear_intercept": 0.8,
+        "points": [
+          {
+            "params_b": 2.0,
+            "metric": 0.8
+          },
+          {
+            "params_b": 9.0,
+            "metric": 0.8
+          }
+        ]
+      },
+      "llama": {
+        "spearman_r": 0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": 0.0641197795950651,
+        "log_linear_intercept": 0.7333333333333333,
+        "points": [
+          {
+            "params_b": 1.0,
+            "metric": 0.7333333333333333
+          },
+          {
+            "params_b": 8.0,
+            "metric": 0.8666666666666667
+          }
+        ]
+      },
+      "qwen": {
+        "spearman_r": -0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": -0.08655507323477954,
+        "log_linear_intercept": 0.8350950621264501,
+        "points": [
+          {
+            "params_b": 1.5,
+            "metric": 0.8
+          },
+          {
+            "params_b": 7.0,
+            "metric": 0.6666666666666666
+          }
+        ]
+      }
+    },
+    "representation_geometry_valence": {
+      "gemma": {
+        "spearman_r": -0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": -0.01395265210283055,
+        "log_linear_intercept": 0.8206848738743316,
+        "points": [
+          {
+            "params_b": 2.0,
+            "metric": 0.8110136324079209
+          },
+          {
+            "params_b": 9.0,
+            "metric": 0.7900277637549705
+          }
+        ]
+      },
+      "llama": {
+        "spearman_r": 0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": 0.03505284802084429,
+        "log_linear_intercept": 0.6655504461942887,
+        "points": [
+          {
+            "params_b": 1.0,
+            "metric": 0.6655504461942887
+          },
+          {
+            "params_b": 8.0,
+            "metric": 0.7384407945230221
+          }
+        ]
+      },
+      "qwen": {
+        "spearman_r": 0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": 0.01152275351582634,
+        "log_linear_intercept": 0.8056428297848784,
+        "points": [
+          {
+            "params_b": 1.5,
+            "metric": 0.8103149042848767
+          },
+          {
+            "params_b": 7.0,
+            "metric": 0.8280650727963877
+          }
+        ]
+      }
+    },
+    "parametric_intensity": {
+      "gemma": {
+        "spearman_r": -0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": -0.26594376117700447,
+        "log_linear_intercept": 1.1557667396759197,
+        "points": [
+          {
+            "params_b": 2.0,
+            "metric": 0.9714285714285715
+          },
+          {
+            "params_b": 9.0,
+            "metric": 0.5714285714285715
+          }
+        ]
+      },
+      "llama": {
+        "spearman_r": 0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": 0.013739952770371142,
+        "log_linear_intercept": 0.9428571428571428,
+        "points": [
+          {
+            "params_b": 1.0,
+            "metric": 0.9428571428571428
+          },
+          {
+            "params_b": 8.0,
+            "metric": 0.9714285714285715
+          }
+        ]
+      },
+      "qwen": {
+        "spearman_r": 0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": 0.03709503138633415,
+        "log_linear_intercept": 0.87067354480295,
+        "points": [
+          {
+            "params_b": 1.5,
+            "metric": 0.8857142857142857
+          },
+          {
+            "params_b": 7.0,
+            "metric": 0.942857142857143
+          }
+        ]
+      }
+    },
+    "causal_steering_behavior": {
+      "gemma": {
+        "spearman_r": 0.0,
+        "p_value": 1.0,
+        "log_linear_slope": 0.0,
+        "log_linear_intercept": 0.0,
+        "points": [
+          {
+            "params_b": 2.0,
+            "metric": 0.0
+          },
+          {
+            "params_b": 9.0,
+            "metric": 0.0
+          }
+        ]
+      },
+      "llama": {
+        "spearman_r": -0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": -0.9617966939259758,
+        "log_linear_intercept": 2.0,
+        "points": [
+          {
+            "params_b": 1.0,
+            "metric": 2.0
+          },
+          {
+            "params_b": 8.0,
+            "metric": 0.0
+          }
+        ]
+      },
+      "qwen": {
+        "spearman_r": -0.9999999999999999,
+        "p_value": 1.0,
+        "log_linear_slope": -1.2983260985216922,
+        "log_linear_intercept": 2.5264259318967492,
+        "points": [
+          {
+            "params_b": 1.5,
+            "metric": 2.0
+          },
+          {
+            "params_b": 7.0,
+            "metric": 0.0
+          }
+        ]
+      }
+    },
+    "preference_steering": {
+      "gemma": {
+        "spearman_r": 0.0,
+        "p_value": 1.0,
+        "log_linear_slope": 0.0,
+        "log_linear_intercept": 0.0,
+        "points": [
+          {
+            "params_b": 2.0,
+            "metric": 0.0
+          },
+          {
+            "params_b": 9.0,
+            "metric": 0.0
+          }
+        ]
+      },
+      "llama": {
+        "spearman_r": 0.0,
+        "p_value": 1.0,
+        "log_linear_slope": 0.0,
+        "log_linear_intercept": 0.0,
+        "points": [
+          {
+            "params_b": 1.0,
+            "metric": 0.0
+          },
+          {
+            "params_b": 8.0,
+            "metric": 0.0
+          }
+        ]
+      },
+      "qwen": {
+        "spearman_r": 0.0,
+        "p_value": 1.0,
+        "log_linear_slope": 0.0,
+        "log_linear_intercept": 0.0,
+        "points": [
+          {
+            "params_b": 1.5,
+            "metric": 0.0
+          },
+          {
+            "params_b": 7.0,
+            "metric": 0.0
+          }
+        ]
+      }
+    }
+  }
+}

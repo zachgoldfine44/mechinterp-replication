@@ -1,0 +1,44 @@
+{
+  "paper_id": "emotions",
+  "paper_title": "Emotion Concepts and their Function in a Large Language Model",
+  "models": {
+    "gemma_2b": {
+      "emotion_probe_classification": {
+        "success": true,
+        "metric": "probe_accuracy",
+        "value": 0.7759999999999999,
+        "threshold": 0.5
+      },
+      "emotion_generalization": {
+        "success": true,
+        "metric": "diagonal_dominance",
+        "value": 0.8,
+        "threshold": 0.5
+      },
+      "representation_geometry_valence": {
+        "success": true,
+        "metric": "valence_correlation",
+        "value": 0.8110138735225234,
+        "threshold": 0.5
+      },
+      "parametric_intensity": {
+        "success": true,
+        "metric": "rank_correlation",
+        "value": 0.9714285714285715,
+        "threshold": 0.5
+      },
+      "causal_steering_behavior": {
+        "success": false,
+        "metric": "causal_effect_count",
+        "value": 0,
+        "threshold": 3.0
+      },
+      "preference_steering": {
+        "success": false,
+        "metric": "preference_correlation",
+        "value": 0.0,
+        "threshold": 0.4
+      }
+    }
+  }
+}

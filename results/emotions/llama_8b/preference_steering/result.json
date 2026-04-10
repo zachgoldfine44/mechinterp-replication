@@ -1,0 +1,35 @@
+{
+  "claim_id": "preference_steering",
+  "model_key": "llama_8b",
+  "paper_id": "emotions",
+  "metrics": {
+    "preference_correlation": 0.0,
+    "per_concept_preference": {
+      "happy": 0.13333333333333333,
+      "sad": 0.2,
+      "afraid": 0.2,
+      "angry": 0.3333333333333333,
+      "calm": 0.0,
+      "guilty": 0.06666666666666667,
+      "proud": 0.0,
+      "nervous": 0.13333333333333333,
+      "loving": 0.13333333333333333,
+      "hostile": 0.0,
+      "desperate": 0.2,
+      "enthusiastic": 0.06666666666666667,
+      "vulnerable": 0.06666666666666667,
+      "stubborn": 0.06666666666666667,
+      "blissful": 0.13333333333333333
+    },
+    "n_concepts_tested": 15,
+    "best_layer": 28
+  },
+  "success": false,
+  "metadata": {
+    "behavior_metric": "preference_rating",
+    "steering_alpha": 0.05,
+    "n_samples_per_condition": 10,
+    "evaluation_method": "pairwise_comparison",
+    "dependency_claim": "emotion_probe_classification"
+  }
+}

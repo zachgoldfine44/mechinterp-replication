@@ -1,0 +1,35 @@
+{
+  "claim_id": "preference_steering",
+  "model_key": "gemma_9b",
+  "paper_id": "emotions",
+  "metrics": {
+    "preference_correlation": 0.0,
+    "per_concept_preference": {
+      "happy": 0.0,
+      "sad": 0.0,
+      "afraid": 0.0,
+      "angry": 0.0,
+      "calm": 0.0,
+      "guilty": 0.0,
+      "proud": 0.0,
+      "nervous": 0.0,
+      "loving": 0.0,
+      "hostile": 0.0,
+      "desperate": 0.0,
+      "enthusiastic": 0.0,
+      "vulnerable": 0.0,
+      "stubborn": 0.0,
+      "blissful": 0.0
+    },
+    "n_concepts_tested": 15,
+    "best_layer": 41
+  },
+  "success": false,
+  "metadata": {
+    "behavior_metric": "preference_rating",
+    "steering_alpha": 0.05,
+    "n_samples_per_condition": 10,
+    "evaluation_method": "pairwise_comparison",
+    "dependency_claim": "emotion_probe_classification"
+  }
+}

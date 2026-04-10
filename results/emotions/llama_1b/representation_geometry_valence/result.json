@@ -1,0 +1,115 @@
+{
+  "claim_id": "representation_geometry_valence",
+  "model_key": "llama_1b",
+  "paper_id": "emotions",
+  "metrics": {
+    "valence_correlation": 0.6655485520994382,
+    "arousal_correlation": 0.12255801753669265,
+    "pc_correlations": {
+      "PC1": {
+        "valence_r": 0.6655485520994382,
+        "valence_abs_r": 0.6655485520994382,
+        "valence_p": 0.0067668310144909745,
+        "arousal_r": -0.6598333775391362,
+        "arousal_abs_r": 0.6598333775391362,
+        "arousal_p": 0.00743715538614222
+      },
+      "PC2": {
+        "valence_r": -0.48012896143631556,
+        "valence_abs_r": 0.48012896143631556,
+        "valence_p": 0.07008512959856633,
+        "arousal_r": 0.12255801753669265,
+        "arousal_abs_r": 0.12255801753669265,
+        "arousal_p": 0.6634660474779357
+      },
+      "PC3": {
+        "valence_r": 0.3166434026409103,
+        "valence_abs_r": 0.3166434026409103,
+        "valence_p": 0.2502017736773563,
+        "arousal_r": 0.499650327447448,
+        "arousal_abs_r": 0.499650327447448,
+        "arousal_p": 0.05790190077150919
+      },
+      "PC4": {
+        "valence_r": -0.30762724678407877,
+        "valence_abs_r": 0.30762724678407877,
+        "valence_p": 0.2646807544099072,
+        "arousal_r": -0.08695395726662641,
+        "arousal_abs_r": 0.08695395726662641,
+        "arousal_p": 0.7579767191550271
+      },
+      "PC5": {
+        "valence_r": 0.044068784117383075,
+        "valence_abs_r": 0.044068784117383075,
+        "valence_p": 0.8760763514233078,
+        "arousal_r": -0.11901144506241554,
+        "arousal_abs_r": 0.11901144506241554,
+        "arousal_p": 0.6726975116227364
+      },
+      "PC1_valence_signed_r": 0.6655485520994382,
+      "PC1_valence_p": 0.0067668310144909745,
+      "PC1_valence_n": 15,
+      "PC1_valence_abs_ci95": [
+        0.3919697880610077,
+        0.8870682867251086
+      ],
+      "PC2_arousal_signed_r": 0.12255801753669265,
+      "PC2_arousal_p": 0.6634660474779357,
+      "PC2_arousal_n": 15,
+      "PC2_arousal_abs_ci95": [
+        0.010981575834396476,
+        0.6468115047498382
+      ],
+      "max_valence_abs_r_any_pc": 0.6655485520994382,
+      "max_arousal_abs_r_any_pc": 0.6598333775391362
+    },
+    "explained_variance": [
+      0.29824501276016235,
+      0.21418461203575134,
+      0.10730703920125961,
+      0.09144192934036255,
+      0.057991575449705124
+    ],
+    "total_variance_explained": 0.769170168787241,
+    "n_clusters": 5,
+    "cluster_labels": {
+      "afraid": 1,
+      "angry": 1,
+      "blissful": 0,
+      "calm": 0,
+      "desperate": 1,
+      "enthusiastic": 3,
+      "guilty": 4,
+      "happy": 2,
+      "hostile": 3,
+      "loving": 4,
+      "nervous": 1,
+      "proud": 2,
+      "sad": 4,
+      "stubborn": 3,
+      "vulnerable": 4
+    },
+    "silhouette_score": 0.4112989008426666,
+    "best_layer": 15,
+    "n_concepts": 15,
+    "top_cosine_similarities": {
+      "blissful_calm": 0.8040999174118042,
+      "happy_proud": 0.5574315190315247,
+      "afraid_nervous": 0.5524243116378784,
+      "afraid_desperate": 0.5515478849411011,
+      "enthusiastic_stubborn": 0.46857932209968567,
+      "hostile_stubborn": 0.44715601205825806,
+      "desperate_nervous": 0.4206373393535614,
+      "guilty_vulnerable": 0.38380318880081177,
+      "happy_loving": 0.37408697605133057,
+      "angry_guilty": 0.3245381712913513
+    }
+  },
+  "success": true,
+  "metadata": {
+    "n_components": 5,
+    "dependency_claim": "emotion_probe_classification",
+    "valence_labels_provided": true,
+    "arousal_labels_provided": true
+  }
+}

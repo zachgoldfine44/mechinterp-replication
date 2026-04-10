@@ -178,7 +178,7 @@ Multi-seed means are systematically 0.5--1.4 percentage points lower than single
 
 ### Lexical baseline per-concept breakdown
 
-Per-concept accuracy for the three lexical baselines vs. the cross-model probe mean (averaged over all 6 models from Table S5). Values are pulled directly from `drive_data/results/emotions/lexical_baseline.json`.
+Per-concept accuracy for the three lexical baselines vs. the cross-model probe mean (averaged over all 6 models from Table S5). Values are pulled directly from `results/emotions/lexical_baseline.json`.
 
 | Concept | Bag-of-Words | Word TF-IDF | Char TF-IDF | Probe (mean) |
 |---------|:-----------:|:-----------:|:-----------:|:------------:|
@@ -226,7 +226,7 @@ Measured on the three medium-tier models (Llama-8B, Qwen-7B, Gemma-9B), the nega
 | Qwen-2.5-7B | 0.493 | 0.714 | **1.45** |
 | Gemma-2-9B | 0.664 | 0.371 | 0.56 |
 
-Values from `drive_data/results/emotions/gpu_followups_combined.json`. The contamination ratio is the negative-control mean |rho| divided by the real-template rho. For Llama-8B and Gemma-9B, 56--73% of the apparent parametric signal is attributable to number magnitude alone. For Qwen-7B the ratio exceeds 1.0 --- the negative control actually shows a stronger monotonic response than the real template, meaning the raw parametric signal for this model is effectively all confound. Qwen-7B's anomalous behavior here parallels its weakness on other metrics (severity pairs, generalization transfer) and suggests a model-specific representational quirk we don't yet understand.
+Values from `results/emotions/gpu_followups_combined.json`. The contamination ratio is the negative-control mean |rho| divided by the real-template rho. For Llama-8B and Gemma-9B, 56--73% of the apparent parametric signal is attributable to number magnitude alone. For Qwen-7B the ratio exceeds 1.0 --- the negative control actually shows a stronger monotonic response than the real template, meaning the raw parametric signal for this model is effectively all confound. Qwen-7B's anomalous behavior here parallels its weakness on other metrics (severity pairs, generalization transfer) and suggests a model-specific representational quirk we don't yet understand.
 
 The severity-pairs test below isolates genuine severity tracking from this number-magnitude confound.
 
@@ -241,7 +241,7 @@ To isolate genuine severity tracking from numerical contamination, we designed 1
 | 3 | "I jumped from 30 feet into a pool" | "I jumped from 30 feet onto concrete" | Height |
 | ... | ... | ... | ... |
 
-Results for the *afraid* concept vector across models (positive delta = dangerous projects more strongly onto the *afraid* direction). Values pulled from `drive_data/results/emotions/{model}/severity_pairs.json`:
+Results for the *afraid* concept vector across models (positive delta = dangerous projects more strongly onto the *afraid* direction). Values pulled from `results/emotions/{model}/severity_pairs.json`:
 
 | Model | Positive deltas (of 10) |
 |-------|:----------------------:|
@@ -282,7 +282,7 @@ The 0% baseline unethical rate means Fisher's exact test cannot detect a steerin
 
 ## S5. Per-Model Probe Accuracy (15 emotions x 6 models)
 
-Per-concept probe accuracy at each model's best probe layer, from 5-fold cross-validation on 25 stimuli per concept. Values come directly from `drive_data/results/emotions/cross_model_report.json`.
+Per-concept probe accuracy at each model's best probe layer, from 5-fold cross-validation on 25 stimuli per concept. Values come directly from `results/emotions/cross_model_report.json`.
 
 | Emotion | Llama 1B | Llama 8B | Qwen 1.5B | Qwen 7B | Gemma 2B | Gemma 9B | Mean |
 |---------|:--------:|:--------:|:---------:|:-------:|:--------:|:--------:|:----:|
