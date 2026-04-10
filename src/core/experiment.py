@@ -86,6 +86,10 @@ class Experiment(ABC):
         This is the primary entry point used by the pipeline. It checks for
         an existing result.json on disk before doing any computation.
 
+        Every freshly-computed result gets a `run_manifest` attached to its
+        metadata field (git SHA, library versions, torch device, etc.), so
+        downstream consumers can detect stale caches and version drift.
+
         Args:
             model: The loaded model.
             tokenizer: The model's tokenizer.
@@ -107,5 +111,19 @@ class Experiment(ABC):
         )
         result = self.run(model, tokenizer, activations_cache)
         result.success = self.evaluate(result)
+
+        # Attach run manifest (git SHA, library versions, device, etc.)
+        # so downstream consumers can detect stale caches and version drift.
+        # Best-effort: never let manifest collection break a successful run.
+        try:
+            from src.utils.manifest import build_run_manifest, manifest_summary
+            manifest = build_run_manifest()
+            if not isinstance(result.metadata, dict):
+                result.metadata = {}
+            result.metadata["run_manifest"] = manifest
+            logger.info("  manifest: %s", manifest_summary(manifest))
+        except Exception as e:
+            logger.debug("Could not build run manifest: %s", e)
+
         result.save(result_path)
         return result

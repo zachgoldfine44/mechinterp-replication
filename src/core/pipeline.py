@@ -141,7 +141,9 @@ def _topo_sort_claims(claims: list[ClaimConfig]) -> list[ClaimConfig]:
                 f"which does not exist. Available claims: {list(by_id.keys())}"
             )
 
-    # Kahn's algorithm
+    # Kahn's algorithm. Use deque for O(1) popleft (was O(n) list.pop(0)
+    # before; matters for paper configs with many claims).
+    from collections import deque
     in_degree: dict[str, int] = {c.claim_id: 0 for c in claims}
     dependents: dict[str, list[str]] = defaultdict(list)
 
@@ -150,11 +152,11 @@ def _topo_sort_claims(claims: list[ClaimConfig]) -> list[ClaimConfig]:
             in_degree[c.claim_id] += 1
             dependents[c.depends_on].append(c.claim_id)
 
-    queue = [cid for cid, deg in in_degree.items() if deg == 0]
+    queue: deque[str] = deque(cid for cid, deg in in_degree.items() if deg == 0)
     sorted_ids: list[str] = []
 
     while queue:
-        cid = queue.pop(0)
+        cid = queue.popleft()
         sorted_ids.append(cid)
         for dep in dependents[cid]:
             in_degree[dep] -= 1
@@ -334,7 +336,17 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
 
     # Apply --fast to claim params: limit to 2 concepts, 10 stimuli each
     if args.fast:
-        logger.info("--fast mode: reducing stimuli to 2 concepts, 10 per concept")
+        logger.warning(
+            "=" * 70 + "\n"
+            "  --fast MODE: reducing to 2 concepts and 10 stimuli per concept.\n"
+            "  Results from --fast are NOT comparable to a full-mode run:\n"
+            "    - Probe classification becomes a binary task (~50%% chance)\n"
+            "      instead of 15-way (~6.7%% chance).\n"
+            "    - Geometry/parametric/steering metrics use far fewer points.\n"
+            "    - Use --fast ONLY for pipeline plumbing validation, not for\n"
+            "      reporting numbers.\n"
+            + "=" * 70
+        )
         fast_claims = []
         for c in sorted_claims:
             new_params = dict(c.params)
@@ -392,14 +404,43 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
             claim_results_cache: dict[str, ExperimentResult] = {}
 
             for claim in sorted_claims:
-                # Check dependency met
-                if claim.depends_on and claim.depends_on not in claim_results_cache:
+                # Check dependency met. The dependency must (a) have run AND
+                # (b) succeeded. v1 of the pipeline only checked (a), so a
+                # failed dependency would cascade as a separate
+                # FileNotFoundError instead of a clean "skipped" message.
+                if claim.depends_on:
                     dep_result = claim_results_cache.get(claim.depends_on)
                     if dep_result is None:
                         logger.warning(
-                            "Skipping %s: dependency '%s' did not produce a result",
+                            "  %s | SKIP | dependency '%s' was not run",
                             claim.claim_id, claim.depends_on,
                         )
+                        skipped_result = ExperimentResult(
+                            claim_id=claim.claim_id,
+                            model_key=model_key,
+                            paper_id=args.paper,
+                            metrics={},
+                            success=False,
+                            metadata={"skipped_reason": f"dependency '{claim.depends_on}' was not run"},
+                        )
+                        model_results[claim.claim_id] = skipped_result
+                        claim_results_cache[claim.claim_id] = skipped_result
+                        continue
+                    if dep_result.success is False:
+                        logger.warning(
+                            "  %s | SKIP | dependency '%s' failed",
+                            claim.claim_id, claim.depends_on,
+                        )
+                        skipped_result = ExperimentResult(
+                            claim_id=claim.claim_id,
+                            model_key=model_key,
+                            paper_id=args.paper,
+                            metrics={},
+                            success=False,
+                            metadata={"skipped_reason": f"dependency '{claim.depends_on}' failed"},
+                        )
+                        model_results[claim.claim_id] = skipped_result
+                        claim_results_cache[claim.claim_id] = skipped_result
                         continue
 
                 # Resolve experiment class

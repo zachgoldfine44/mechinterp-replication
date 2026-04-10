@@ -2,7 +2,19 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B COMPLETE; writeup v2 + harness v2 incorporating external critique fixes
+## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3 + harness v2 incorporating two rounds of external critique fixes
+
+**Writeup v3 (low-hanging-fruit pass on the v2 critiques):**
+- Parametric scaling: added negative-control template ("blueberries"). Contamination ratio = 1.000 across all 3 small models — fear vector activates monotonically with blueberry count just as strongly as with Tylenol dosage. Claim 4 reframed as contaminated, not "passes universally".
+- Geometry: layer-stability check across top-3 probe layers; spread is small (~0.1) so the result is NOT a brittle single-layer artifact. Saved to `geometry_layer_stability.json`.
+- Stimulus audit: new `scripts/audit_stimuli.py` runs against actual stimuli; **0 leaks across 375 stimuli**. Runtime `validate_stimuli_for_leaks` added to dataset loader.
+- Run manifest: git SHA, lib versions, torch device/dtype now attached to every fresh ExperimentResult.metadata['run_manifest'] via the base Experiment class.
+- Cascading dependency failure: pipeline now skips dependent claims cleanly when their dependency failed (was producing cascading FileNotFoundErrors).
+- Topological sort: deque.popleft (O(1)).
+- `--fast` mode: loud multi-line warning that results are not comparable to full mode.
+- Behavioral scenarios schema: verified correct (no bug).
+- Stimulus count discrepancy fixed (config aligned to actual 25/concept).
+
 
 **Harness v2 (technique modules + tests, in response to "implement the missing files" critique):**
 - 5 previously-vapor technique modules now exist with full implementations and unit tests:

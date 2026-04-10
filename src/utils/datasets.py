@@ -41,6 +41,7 @@ def load_stimuli(
     model: Any = None,
     tokenizer: Any = None,
     fast: bool = False,
+    validate: bool = True,
 ) -> list[dict[str, Any]]:
     """Load or generate stimuli based on the stimulus set config.
 
@@ -55,6 +56,10 @@ def load_stimuli(
         tokenizer: Optional tokenizer for type="generated".
         fast: If True, reduce to 2 concepts and 10 stimuli per concept
             for development speed.
+        validate: If True (default), run validate_stimuli_for_leaks() and
+            log warnings for any stimuli that contain their own concept word
+            verbatim. Set to False to skip the check (e.g., when stimuli
+            intentionally name the concept, as for some baselines).
 
     Returns:
         List of dicts, each with at least {"text": str, "concept": str, "id": str}.
@@ -65,21 +70,71 @@ def load_stimuli(
     stim_type = stimulus_set_config.get("type", "")
 
     if stim_type == "generated":
-        return generate_stimuli(
+        stimuli = generate_stimuli(
             stimulus_set_config, paper_id, data_root,
             model=model, tokenizer=tokenizer, fast=fast,
         )
     elif stim_type == "hardcoded":
-        return load_hardcoded_stimuli(stimulus_set_config, data_root, fast=fast)
+        stimuli = load_hardcoded_stimuli(stimulus_set_config, data_root, fast=fast)
     elif stim_type == "dataset":
-        return load_dataset_stimuli(stimulus_set_config, data_root, fast=fast)
+        stimuli = load_dataset_stimuli(stimulus_set_config, data_root, fast=fast)
     elif stim_type == "programmatic":
-        return load_programmatic_stimuli(stimulus_set_config, fast=fast)
+        stimuli = load_programmatic_stimuli(stimulus_set_config, fast=fast)
     else:
         raise ValueError(
             f"Unknown stimulus type: {stim_type!r}. "
             f"Expected one of: generated, hardcoded, dataset, programmatic"
         )
+
+    if validate and stimuli:
+        leaks = validate_stimuli_for_leaks(stimuli)
+        if leaks:
+            logger.warning(
+                "Stimulus validation: %d/%d stimuli contain their own concept "
+                "word verbatim. Probe accuracy on these stimuli may partly "
+                "reflect lexical features rather than internal representations. "
+                "Run `python scripts/audit_stimuli.py --paper %s` for full details.",
+                len(leaks), len(stimuli), paper_id,
+            )
+            for stim in leaks[:3]:
+                logger.warning("  leak: %s [%s] -> %r",
+                               stim.get("id", "?"), stim.get("concept", "?"),
+                               stim.get("text", "")[:100])
+
+    return stimuli
+
+
+def validate_stimuli_for_leaks(
+    stimuli: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Return the subset of stimuli that contain their own concept word.
+
+    A "leak" is a stimulus whose `text` contains the literal `concept`
+    string as a whole word (case-insensitive). This is the strict, low-
+    false-positive check; for stem-prefix matching with derivations
+    (e.g., "loving" -> "lov"), use `scripts/audit_stimuli.py`.
+
+    Why this matters: training stimuli for representation probes are
+    supposed to *evoke* a concept without *naming* it. If a "happy"
+    story contains the word "happy", a probe trained on activations
+    from that story may be picking up on the word, not the model's
+    internal emotion representation. The lexical baseline check is
+    the stronger validity defense; this runtime check catches the
+    most egregious cases at load time.
+    """
+    import re
+
+    leaks: list[dict[str, Any]] = []
+    for stim in stimuli:
+        concept = (stim.get("concept") or "").strip().lower()
+        text = (stim.get("text") or "").lower()
+        if not concept or not text:
+            continue
+        # Whole-word match only (no stem matching) — see the audit script
+        # for the more aggressive prefix-stem version.
+        if re.search(r"\b" + re.escape(concept) + r"\b", text):
+            leaks.append(stim)
+    return leaks
 
 
 # ---------------------------------------------------------------------------

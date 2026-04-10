@@ -2,13 +2,30 @@
 
 **A preliminary report replicating Sofroniew et al. (2026) across six open-source language models at 1B-9B scale.**
 
-*Draft v2 — incorporates fixes from external critique (see §0 below). Large-tier (27B-70B) replication deferred to future work.*
+*Draft v3 — incorporates fixes from two rounds of external critique (see §0 below). Large-tier (27B-70B) replication deferred to future work.*
 
 Repository: https://github.com/zachgoldfine44/mechinterp-replication
 
 ---
 
-## §0. Errata and response to external critique (v2)
+## §0. Errata and response to external critique (v2 + v3)
+
+**v3 changes (newest, in response to a re-read of the v2 critiques):**
+
+- **Parametric scaling claim 4 is now flagged as contaminated.** A negative-control template ("blueberries", same numerical scaling, no danger) was added in v3. On all 3 small-tier models, the negative control gives a contamination ratio of **1.000** — i.e., the fear vector activates monotonically with blueberry count just as strongly as it does with Tylenol dosage. The parametric scaling result on small models is mostly an artifact of how transformer LMs encode numerical magnitude in the prompt, not a meaningful "severity → emotion" effect. See §3.4 for details.
+- **Geometry layer-stability check added.** Across the top-3 probe layers per model, the PC1↔valence correlation varies by ~0.1 — the result is robust within the top-probe-layer regime, not a single-layer artifact. See §3.3.
+- **Stimulus audit script added.** A new `scripts/audit_stimuli.py` checks every training stimulus for word-stem leaks of its own concept (e.g., "happy" stories containing "happy", "happily", "happier", etc., with a whitelist for false-positive English words like "happen"). The audit reports **0 leaks across all 375 training stimuli**, with word counts in 56-80 (mean ≈ 68) per stimulus. A runtime version (`validate_stimuli_for_leaks` in `src/utils/datasets.py`) now warns at probe-load time.
+- **Real Fisher's exact statistical test in steering** (already in v2 — recapped here for completeness).
+- **PCA tested on PC1 specifically** (already in v2 — recapped).
+- **Run manifest** (git SHA, library versions, torch device, dtype) attached to every fresh `ExperimentResult.metadata`. Catches stale-cache regressions and version drift across runs.
+- **Stimulus count discrepancy** in config aligned to actual files (config used to say 50 per concept; actual files have 25; probe code now warns when fewer are loaded than requested).
+- **Cascading dependency-failure** fix in pipeline. When a claim's dependency fails, downstream claims now get a clean "SKIP | dependency 'X' failed" log line instead of a separate FileNotFoundError that looks like its own bug.
+- **Topological sort** in pipeline now uses `collections.deque` for O(1) `popleft` (was O(n) `list.pop(0)`). Trivial perf cleanup.
+- **`--fast` mode warning** now explicit: large red warning at startup that `--fast` results are NOT comparable to a full run (it changes a 15-way classification problem into a binary one).
+
+**Test counts after v3:** still 162 unit tests + 20 integration tests; the v3 fixes didn't add new tests because they were either pure analysis (negative control, geometry stability) or trivial pipeline cleanups.
+
+**v2 changes (previous round of critique-response):**
 
 This draft is a revision in response to two detailed external critiques of the v1 draft. The critiques flagged a mix of (a) outright bugs in the implementation, (b) methodology issues that inflated some claims, and (c) writeup issues that overstated what was actually demonstrated. The most important changes from v1 are:
 
@@ -51,14 +68,14 @@ A diff-style change log is in Appendix D.
 
 We replicate Sofroniew et al.'s (2026) [*Emotion Concepts and their Function in a Large Language Model*](https://transformer-circuits.pub/2026/emotions/index.html) across six open-source language models spanning three families (Llama 3.1/3.2, Qwen 2.5, Gemma 2) and two size tiers (1-2B small, 7-9B medium). The paper studied Claude Sonnet 4.5 and reported six core findings. We ask: **which findings are universal properties of transformer LMs, and which are specific to Claude Sonnet 4.5 or frontier scale?**
 
-**Short answer**: all six open models pass our (deliberately relaxed) thresholds on the four *representational* metrics — probe classification, generalization, valence geometry, parametric scaling — and the magnitudes are in the same ballpark as the paper's Claude results. The two *behavioral* metrics (causal steering, preference steering) do not pass any threshold under our evaluation methodology. We discuss two equal-standing interpretations of that null in §5.2: (a) it is a limitation of our protocol (floor effects, scenario simplicity, scale gap), or (b) emotion representations exist at this scale but are not causally potent for behavior. Our experiment cannot distinguish between these.
+**Short answer**: all six open models pass our (deliberately relaxed) thresholds on the four representational metrics, and the magnitudes are in the same ballpark as the paper's Claude results — **but** v3 of this draft reveals that one of the four (parametric scaling) is mostly an artifact of numerical-magnitude encoding, not severity-from-context (see §3.4 negative-control analysis: contamination ratio = 1.0 across all 3 small-tier models). The two *behavioral* metrics (causal steering, preference steering) do not pass any threshold under our evaluation methodology. We discuss two equal-standing interpretations of that null in §5.2: (a) it is a limitation of our protocol (floor effects, scenario simplicity, scale gap), or (b) emotion representations exist at this scale but are not causally potent for behavior. Our experiment cannot distinguish between these.
 
 | Claim | Paper (Claude Sonnet 4.5) | Our 6 open models (range) | Passes our threshold? |
 |---|---|---|---|
 | 1. Probe classification | 0.713 | 0.731 – 0.840 (vs lexical baseline 0.37-0.40) | ✅ All 6 |
 | 2. Generalization to implicit | ~0.76 hidden emotions | 0.667 – 0.867 diagonal dominance | ✅ All 6 |
 | 3. Valence geometry (PC1) | r = 0.81 | \|r\| = 0.666 – 0.828, all p < 0.01 | ✅ All 6 |
-| 4. Parametric scaling | monotonic w/ severity | ρ = 0.571 – 0.971 | ✅ All 6 |
+| 4. Parametric scaling | monotonic w/ severity | ρ = 0.571 – 0.971 | 🟡 contaminated (see §3.4 — neg-control gives same magnitude) |
 | 5. Causal steering (blackmail) | 22% → 72% | 0 / 45 Fisher-significant effects | ❌ All 6 fail |
 | 6. Preference steering (Elo) | r = 0.85 | r = 0.000 | ❌ All 6 fail |
 
@@ -277,9 +294,45 @@ PCA of the 15 concept vectors reveals that **PC1 specifically** aligns with hand
 
 Notably, **scale is not the key variable** within our tested range: Qwen2.5-1.5B (|r| = 0.810) matches Claude Sonnet 4.5 (r = 0.81) with ~100× fewer parameters, suggesting the valence axis emerges early. Gemma's geometry slightly *weakens* from 2B to 9B (0.811 → 0.790), but the CIs overlap heavily, so we cannot claim a true regression.
 
-### 3.4 Parametric scaling — Mostly universal with one interesting exception
+**Layer stability check (added in v3 in response to critique).** A critique pointed out that v1 and v2 reported the geometry result only at the single best probing layer, leaving open the question of whether the result is fragile to layer choice. We re-ran the PCA at every scanned layer for each model and report the spread across the **top-3 probe-accuracy layers** below:
 
-Emotion vectors respond proportionally to continuous severity parameters across all tested templates (Tylenol dosage, cliff height, financial loss, medical wait time).
+| Model | Best layer | \|PC1↔valence\| at best | top-3 layers \|r\| range | full-layer mean \|r\| |
+|---|---:|---:|---|---:|
+| Llama-3.2-1B-Instruct | 15 | 0.674 | 0.67 – 0.79 | 0.69 |
+| Qwen2.5-1.5B-Instruct | 24 | 0.818 | 0.67 – 0.84 | 0.63 |
+| Gemma-2-2B-it | 24 | 0.814 | 0.77 – 0.83 | 0.73 |
+| Llama-3.1-8B-Instruct | 28 | 0.746 | 0.69 – 0.77 | 0.68 |
+| Qwen2.5-7B-Instruct | 24 | 0.835 | 0.75 – 0.85 | 0.64 |
+| Gemma-2-9B-it | 41 | 0.796 | 0.80 – 0.83 | 0.80 |
+
+The geometry result is **stable across the top-3 probing layers** for every model — the spread is small (~0.1 within top-3) and the mean across all scanned layers is consistently above the 0.5 threshold. The only places the correlation drops to near-zero are the very earliest layers (0-2), which the probe sweep also rejects as poor. **The geometry result is NOT a brittle single-layer artifact.** Full per-layer table in `drive_data/results/emotions/geometry_layer_stability.json`.
+
+### 3.4 Parametric scaling — Headline replicates, but negative control suggests heavy numerical-magnitude contamination
+
+**v3 update from external critique**: A critique noted that the parametric experiment doesn't isolate severity from numerical-magnitude artifacts — the model may be responding to "5000" being a bigger number than "200", not to the embedded danger meaning. We added a negative-control template ("I ate {X} blueberries today" with X ∈ {5, 50, 500, 5000, 50000, 500000}) which has the same numerical scaling pattern but no danger implication. Expected behavior: the fear vector should NOT scale with blueberries.
+
+**The negative control fails to be silent in all three small-tier models we re-ran:**
+
+| Model | Real templates rank correlation | Negative control mean \|ρ\| | Contamination ratio |
+|---|---:|---:|---:|
+| Llama-3.2-1B-Instruct | 0.943 | 0.943 | **1.000** |
+| Qwen2.5-1.5B-Instruct | 0.886 | 0.886 | **1.000** |
+| Gemma-2-2B-it | 0.971 | 0.971 | **1.000** |
+
+**Contamination ratio of 1.0 means the negative control gives exactly the same magnitude correlation as the real templates.** Concretely: the "afraid" probe activates monotonically with blueberry count, and the "calm" probe deactivates monotonically with blueberry count, at exactly the same strength as it does for Tylenol dosage. **This strongly suggests the parametric scaling result on small models is mostly an artifact of how transformer LMs encode numerical magnitude in the prompt, not a meaningful representation of "severity → emotion".** A "happy" or "calm" probe would presumably also scale with any monotonically increasing numerical scalar at the same position, regardless of context.
+
+We have not yet rerun the negative control on the medium tier (Llama 8B / Qwen 7B / Gemma 9B) — that requires extracting activations for the new template prompts on the GPU pod. We expect a similar pattern but cannot yet report it.
+
+**This is a significant downgrade of claim 4** from v1/v2. Where we previously reported "emotion vectors track continuous severity parameters with rank correlations 0.886-0.971", we should now report: "emotion-vector projections monotonically track numerical magnitude in the prompt, but a numerical-only negative control (blueberry count) shows the same monotonic effect, so the scaling is not specific to severity at this scale and protocol".
+
+**A replication that cleanly tests severity** would require:
+- Contrastive stimulus pairs that vary danger while holding the literal number constant ("I took 1000mg of tylenol" vs "I drank 1000ml of water"), or
+- Multiple negative controls across number ranges (small/large, integer/decimal, with/without units)
+- Probing at *intermediate* layers where pure numerical-magnitude features may be less dominant
+
+We leave this to follow-up work and flag claim 4 as **contaminated** in v3 of this draft. The full per-template breakdown (with contamination ratios) is in the model JSON results files.
+
+The original (v2) results we reported below are still valid as the *headline* numbers but should be read with the contamination caveat above:
 
 | Model | Mean rank correlation |
 |---|---:|
@@ -464,9 +517,9 @@ A follow-up study could give a definitive answer to "do emotion vectors causally
 
 ## 6. Conclusion
 
-Across six open-source instruction-tuned language models spanning three families (Llama, Qwen, Gemma) and two size tiers (1B-9B), **all six models pass our (deliberately relaxed) thresholds on the four representational metrics**: probes classify the 15-emotion task at 0.73-0.84 (vs the paper's 0.71 on Claude and our text-only lexical baseline of 0.35-0.40); probes generalize to implicit scenarios at 0.67-0.87 diagonal dominance; PC1 of the emotion vectors aligns with hand-labeled valence at |r| = 0.666-0.828 (all p < 0.01, bootstrap CIs in Appendix A) — with three models landing within 0.02 of the paper's r = 0.81; and emotion vectors track continuous severity parameters with rank correlations 0.571-0.971.
+Across six open-source instruction-tuned language models spanning three families (Llama, Qwen, Gemma) and two size tiers (1B-9B), **all six models pass our (deliberately relaxed) thresholds on the four representational metrics**: probes classify the 15-emotion task at 0.73-0.84 (vs the paper's 0.71 on Claude and our text-only lexical baseline of 0.35-0.40); probes generalize to implicit scenarios at 0.67-0.87 diagonal dominance; PC1 of the emotion vectors aligns with hand-labeled valence at |r| = 0.666-0.828 (all p < 0.01, bootstrap CIs in Appendix A, layer-stable across the top-3 probe layers) — with three models landing within 0.02 of the paper's r = 0.81; and emotion vectors track parametric prompt features with rank correlations 0.571-0.971 *but the parametric finding is contaminated by numerical-magnitude artifacts* (negative control gives the same magnitude — see §3.4).
 
-These results are **suggestive of universal representational properties** of transformer LMs in this size range, but cannot establish "universality" in any strong sense from N = 6 models, N = 15 emotions per model, and a deliberately relaxed threshold protocol. The valence geometry finding in particular merits a follow-up at higher concept count.
+So three of our four "representational pass" claims (probe classification, generalization, valence geometry) survive validity checks. The fourth (parametric scaling) survives the threshold check but fails the negative-control validity check. **These results are suggestive of universal representational properties** — specifically, valence-organized linear emotion decoding — in transformer LMs across this size range, but cannot establish "universality" in any strong sense from N = 6 models, N = 15 emotions per model, and a deliberately relaxed threshold protocol. The valence geometry finding in particular merits a follow-up at higher concept count.
 
 **The two behavioral metrics (causal steering, preference steering) produce zero signal across all six models.** Across 135 concept × alpha × scenario triples on the medium tier (45 per model × 3 models, 10 generated samples per condition, batched on A100, classified by LLM-as-judge, and now tested with Fisher's exact rather than placeholder p-values), zero pass our significance criterion. Every baseline, steered, and control response is classified as ethical refusal. We discuss two equal-standing interpretations of this null in §5.2: (a) it is a methodology limitation we could plausibly fix with the changes in §5.3, or (b) emotion representations exist in 1-9B open instruct models but are not causally potent for behavior. Our experiment cannot distinguish between these, and we no longer want to claim it is purely (a).
 
@@ -534,7 +587,30 @@ python -m src.analysis.scaling --paper emotions
 
 The framework is paper-agnostic; adding a new replication requires a new `config/papers/{paper_id}/` directory with `paper_config.yaml` and `stimuli_config.yaml`. Generic experiment types (`probe_classification`, `generalization_test`, `representation_geometry`, `parametric_scaling`, `causal_steering`) cover most mechinterp papers. Paper-specific experiments go in `src/experiments/paper_specific/`.
 
-## Appendix D: Change log (v1 → v2)
+## Appendix D: Change log
+
+### v2 → v3
+
+v3 was a second pass in response to a re-read of the v2 critiques, focused on the "low-hanging fruit" — items that don't require GPU re-runs but address real validity or methodology gaps. Specific v3 changes:
+
+| Area | v2 | v3 |
+|---|---|---|
+| Parametric scaling validity | reported high \|ρ\| with no negative control | added blueberries negative control; **contamination ratio = 1.000 across all 3 small-tier models**; claim 4 reframed as contaminated |
+| Geometry layer fragility | reported only at single best probe layer | re-analyzed at all scanned layers; reported top-3 spread; result is layer-stable |
+| Stimulus leak audit | not run | new `scripts/audit_stimuli.py`; runs against actual stimuli; **0 leaks across 375 stimuli** with whitelist for false-positive English words like "happen" |
+| Stimulus leak runtime check | not present | new `validate_stimuli_for_leaks` in `src/utils/datasets.py`; warns at probe-load time |
+| Run manifest | not captured | git SHA, dirty flag, lib versions, torch device/dtype attached to every fresh `ExperimentResult.metadata['run_manifest']` |
+| Cascading dependency failure | downstream claims crashed with FileNotFoundError | now skip cleanly with `dependency 'X' failed` log line |
+| Topological sort | `list.pop(0)` (O(n)) | `deque.popleft()` (O(1)) |
+| `--fast` mode warning | quiet `INFO` log | loud multi-line `WARNING` block at startup |
+| Behavioral scenarios schema | flagged in critique as possibly mismatched | verified to be correct (all 8 scenarios have `choices` + `ethical_choice`); no fix needed |
+| Per-template parametric breakdown | absent in writeup | now in §3.4 + per-template result JSONs include `is_negative_control` flag |
+
+The v3 fixes are **all done in this commit** and pushed to GitHub. They did not require GPU re-runs (the negative control was run on cached small-tier models on CPU/MPS in a few seconds; the geometry stability check uses cached `concept_vectors.pt`).
+
+---
+
+### v1 → v2
 
 v2 was produced in response to two detailed external critiques of v1. Specific changes:
 

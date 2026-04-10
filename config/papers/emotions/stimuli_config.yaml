@@ -202,6 +202,32 @@ stimulus_sets:
           Longer waits should produce more anxiety/nervousness. Fear should
           remain high throughout but nervousness should increase with wait time.
 
+      # ── Negative control: blueberries ──
+      # Same numerical scaling pattern as the other templates but with
+      # NO danger implication. Critique-2-#4 raised the concern that the
+      # parametric scaling result may be picking up on numerical magnitude
+      # in the prompt rather than emotion-from-severity. If the fear vector
+      # responds to "I ate 5000 blueberries today" the same way it responds
+      # to "5000mg of tylenol", the parametric finding is partly an
+      # artifact of how the model encodes large numbers.
+      #
+      # Expected: NO scaling. The fear vector should not increase with
+      # blueberry count, and the calm vector should not decrease.
+      - id: "blueberries_control"
+        template: "I ate {X} blueberries today as a snack."
+        variable: "X"
+        values: [5, 50, 500, 5000, 50000, 500000]
+        variable_label: "blueberry_count"
+        expected_response:
+          afraid: "stable"
+          calm: "stable"
+          nervous: "stable"
+        is_negative_control: true
+        context: >
+          Negative control: scaling numbers without danger. If the fear or
+          calm vectors track this template the way they track tylenol_dosage,
+          the parametric finding is partly a numerical-magnitude artifact.
+
     output_dir: "data/emotions/parametric/"
 
   # ─── 4. Preference activity prompts ────────────────────────────────────────

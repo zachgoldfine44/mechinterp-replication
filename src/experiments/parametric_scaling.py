@@ -111,17 +111,33 @@ class ParametricScalingExperiment(Experiment):
         templates = self._load_templates()
         logger.info("Loaded %d parametric templates", len(templates))
 
-        # Step 3: For each template, generate stimuli and extract activations
+        # Step 3: For each template, generate stimuli and extract activations.
+        # Templates can be one of two types:
+        #   - "real": expected to produce a positive scaling effect
+        #     (e.g., tylenol_dosage, height_ledge)
+        #   - "negative_control": expected to produce a NEAR-ZERO effect
+        #     (e.g., blueberries_control). If a negative control gives a
+        #     large effect, the parametric finding is contaminated by
+        #     numerical-magnitude artifacts.
+        # We aggregate them separately so the headline metric isn't inflated
+        # by negative-control hits, and we report a contamination signal.
         per_template_correlations: dict[str, dict[str, float]] = {}
-        all_correlations: list[float] = []
-        significant_pairs = 0
-        total_pairs = 0
+        per_template_is_neg_control: dict[str, bool] = {}
+        real_correlations: list[float] = []     # |rho| for real templates only
+        neg_control_correlations: list[float] = []  # |rho| for negative controls
+        significant_pairs = 0  # real templates only
+        total_pairs = 0        # real templates only
 
         for template_info in templates:
             template_id = template_info["id"]
             template_str = template_info["template"]
             variable = template_info["variable"]
             values = template_info["values"]
+            is_neg_control = bool(template_info.get("is_negative_control", False))
+            per_template_is_neg_control[template_id] = is_neg_control
+            # Per-template expected_response from the stimuli config (if present)
+            # overrides the global expected_directions on a per-concept basis.
+            template_expected = template_info.get("expected_response", {}) or {}
 
             # Check for cached results
             template_result_path = self.results_dir / f"template_{template_id}.json"
@@ -130,10 +146,14 @@ class ParametricScalingExperiment(Experiment):
                     cached = json.load(f)
                 per_template_correlations[template_id] = cached["correlations"]
                 for concept, rho in cached["correlations"].items():
-                    all_correlations.append(abs(rho))
-                    total_pairs += 1
-                    if abs(rho) >= 0.5:
-                        significant_pairs += 1
+                    abs_rho = abs(rho)
+                    if is_neg_control:
+                        neg_control_correlations.append(abs_rho)
+                    else:
+                        real_correlations.append(abs_rho)
+                        total_pairs += 1
+                        if abs_rho >= 0.5:
+                            significant_pairs += 1
                 continue
 
             # Generate stimuli from template
@@ -164,42 +184,80 @@ class ParametricScalingExperiment(Experiment):
                 else:
                     rho, p_val = stats.pearsonr(param_values, projections)
 
-                # Adjust sign based on expected direction
-                expected = self.expected_directions.get(concept, "increasing")
+                # Resolve expected direction. Per-template config wins over
+                # the global. "stable" / "stable_high" → expectation of
+                # near-zero correlation; we record the raw rho but do NOT
+                # sign-adjust (sign-adjusting a stable target would just
+                # measure the same magnitude either way).
+                expected = template_expected.get(
+                    concept, self.expected_directions.get(concept, "increasing")
+                )
                 if expected == "decreasing":
-                    # For "decreasing", a negative correlation is correct
                     rho_adjusted = -float(rho) if not np.isnan(rho) else 0.0
-                else:
+                elif expected in ("stable", "stable_high"):
+                    rho_adjusted = float(rho) if not np.isnan(rho) else 0.0
+                else:  # "increasing" or anything else
                     rho_adjusted = float(rho) if not np.isnan(rho) else 0.0
 
                 template_corrs[concept] = rho_adjusted
-                all_correlations.append(abs(float(rho)) if not np.isnan(rho) else 0.0)
-                total_pairs += 1
-                if abs(float(rho)) >= 0.5 and not np.isnan(rho):
-                    significant_pairs += 1
+                abs_rho = abs(float(rho)) if not np.isnan(rho) else 0.0
+                if is_neg_control:
+                    neg_control_correlations.append(abs_rho)
+                else:
+                    real_correlations.append(abs_rho)
+                    total_pairs += 1
+                    if abs_rho >= 0.5:
+                        significant_pairs += 1
 
                 logger.info(
-                    "  %s x %s: rho=%.3f (expected=%s, adjusted=%.3f)",
+                    "  %s x %s: rho=%.3f (expected=%s, adjusted=%.3f)%s",
                     template_id, concept, float(rho), expected, rho_adjusted,
+                    " [NEG_CONTROL]" if is_neg_control else "",
                 )
 
             per_template_correlations[template_id] = template_corrs
 
             # Save per-template result (resume-safe)
-            template_result = {"correlations": template_corrs, "values": values}
+            template_result = {
+                "correlations": template_corrs,
+                "values": values,
+                "is_negative_control": is_neg_control,
+            }
             tmp = template_result_path.with_suffix(".tmp")
             with open(tmp, "w") as f:
                 json.dump(template_result, f, indent=2)
             tmp.rename(template_result_path)
 
-        # Step 4: Aggregate
-        mean_abs_corr = float(np.mean(all_correlations)) if all_correlations else 0.0
+        # Step 4: Aggregate. Headline metric uses REAL templates only;
+        # negative-control templates are aggregated separately so they don't
+        # inflate the headline. The negative_control_mean is reported as a
+        # contamination signal: if it is comparable to rank_correlation, the
+        # parametric finding is partly an artifact of numerical magnitude in
+        # the prompt rather than a genuine emotion-from-severity effect
+        # (critique #2-4).
+        rank_correlation = float(np.mean(real_correlations)) if real_correlations else 0.0
+        neg_control_mean = (
+            float(np.mean(neg_control_correlations)) if neg_control_correlations else None
+        )
+        # Contamination ratio: how much of the headline effect could be
+        # explained by numerical magnitude alone. 1.0 means the negative
+        # control is just as strong as the real templates (full contamination);
+        # 0.0 means the negative control is silent.
+        contamination_ratio = (
+            (neg_control_mean / rank_correlation)
+            if (neg_control_mean is not None and rank_correlation > 0)
+            else None
+        )
 
         metrics = {
-            "rank_correlation": mean_abs_corr,
+            "rank_correlation": rank_correlation,
             "per_template_correlations": per_template_correlations,
+            "per_template_is_negative_control": per_template_is_neg_control,
             "significant_pairs": significant_pairs,
             "total_pairs_tested": total_pairs,
+            "negative_control_mean_abs_rho": neg_control_mean,
+            "negative_control_contamination_ratio": contamination_ratio,
+            "n_negative_control_pairs": len(neg_control_correlations),
             "best_layer": best_layer,
         }
 
