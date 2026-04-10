@@ -154,7 +154,7 @@ The user explicitly called out that PROGRESS.md was getting overwritten in a pre
 │   └── utils/
 │       ├── activations.py          # Extract, cache, manage activations
 │       ├── datasets.py             # Stimulus/dataset generation & loading
-│       ├── env.py                  # Environment detection (MacBook vs Colab), paths
+│       ├── env.py                  # Environment detection (MacBook vs Colab vs GPU), paths
 │       └── metrics.py              # Cosine sim, accuracy, effect sizes, CIs
 ├── tests/
 │   ├── test_smoke.py               # Quick sanity (loads 1 model, runs 1 technique)
@@ -307,7 +307,7 @@ echo "my_paper" > config/active_paper.txt
 python -m src.core.pipeline --paper my_paper --validate-only  # dry run
 python -m src.core.pipeline --paper my_paper --model llama_1b  # single small model (local)
 python -m src.core.pipeline --paper my_paper --tier small      # all small models (local)
-python -m src.core.pipeline --paper my_paper --tier medium     # all medium models (Colab)
+python -m src.core.pipeline --paper my_paper --tier medium     # all medium models (Colab or hosted GPU)
 python -m src.core.pipeline --paper my_paper --all             # everything
 ```
 
@@ -362,7 +362,7 @@ access), but we CAN verify our methodology produces analogous patterns.
   you implement a claim, re-read that section of the paper before writing
   code.
 - First, validate the pipeline runs end-to-end on a small model locally.
-  This catches infrastructure bugs for free before using Colab.
+  This catches infrastructure bugs for free before using Colab or a hosted GPU.
 - Then, validate the methodology produces interpretable results on a medium
   model. If it doesn't work on any 7-9B model, the pipeline has a bug —
   don't scale garbage.
@@ -390,7 +390,7 @@ access), but we CAN verify our methodology produces analogous patterns.
 - Default dev cycle: `--fast` after every change, full suite before commit.
 - Model loading is the bottleneck — cache aggressively.
 - Always develop and test against small models locally first. Only move to
-  Colab once the pipeline passes all local tests.
+  Colab or a hosted GPU once the pipeline passes all local tests.
 
 ### 4. Keep CHANGELOG.md and PROGRESS.md current
 
@@ -433,15 +433,15 @@ See `config/models.yaml` for the full matrix:
 
 **Small tier first (locally on MacBook Air M3).** This catches all
 infrastructure bugs — loading, extraction, caching, resume, path resolution —
-for free before burning Colab GPU-hours. If probes are broken or stimuli are
+for free before burning Colab or hosted GPU-hours. If probes are broken or stimuli are
 malformed, you find out in 2 minutes not 45. Null results on 1B models are
 expected and fine; treat small-tier as "pipeline validation + scaling floor."
 
-**Medium tier second (on Colab).** This is the primary replication target.
+**Medium tier second (on Colab or a hosted GPU).** This is the primary replication target.
 Debug methodology here until results are interpretable. If a finding doesn't
 show up on a 7-9B model, that's a meaningful null result worth reporting.
 
-**Large tier last (on Colab, if compute allows).** Scaling ceiling. Only run
+**Large tier last (on Colab or a hosted GPU, if compute allows).** Scaling ceiling. Only run
 after medium tier is fully analyzed.
 
 **Note**: Some papers study base models (e.g., IOI studied GPT-2 Small).
@@ -463,13 +463,13 @@ For each paper claim, the workflow has three phases:
    the finding.
 4. Run on remaining small-tier models to verify cross-model infrastructure.
 
-### Phase B: Primary replication (Medium tier, Colab)
+### Phase B: Primary replication (Medium tier, Colab or a hosted GPU)
 5. **Run on one medium model** (e.g., Llama-3.1-8B): this is where you debug
    methodology. If results aren't interpretable here, the approach needs work —
    don't scale further until they are.
 6. Scale to all medium-tier models. Cache everything.
 
-### Phase C: Scaling analysis (Large tier, Colab, if compute allows)
+### Phase C: Scaling analysis (Large tier, Colab or a hosted GPU, if compute allows)
 7. Run on large-tier models for scaling ceiling.
 8. **Analyze**: Cross-model comparison. Effect sizes and CIs.
 9. **Write up**: Add to `writeup/{paper_id}/draft.md`.
@@ -493,7 +493,7 @@ For each paper claim, the workflow has three phases:
 
 ## Checkpoint everything — assume runs WILL be interrupted
 
-Long runs get killed constantly — Colab timeouts, laptop sleeps, OOM crashes.
+Long runs get killed constantly — Colab or a hosted GPU timeouts, laptop sleeps, OOM crashes.
 Every pipeline must be designed so that interruption loses at most one item.
 
 **Rules:**
@@ -519,7 +519,7 @@ Every pipeline must be designed so that interruption loses at most one item.
 
 ## Storage layout (single source of truth: the repo)
 
-**Past sessions used a Google Drive symlink (`./drive_data`) and Colab
+**Past sessions used a Google Drive symlink (`./drive_data`) and Colab or a hosted GPU 
 mount magic. That layer caused two problems**: results were invisible to
 the user (they didn't know where to look), and nothing flowed into git
 during a run. We've removed it. Everything now lives inside the repo,
@@ -552,7 +552,7 @@ repo plus a model download is enough to re-run everything end-to-end.
 
 - `get_data_root()` — root for **local-only** caches and heavy artifacts.
   Defaults to `<repo>/local_data/`. Can be overridden via
-  `MECHINTERP_DATA_ROOT` for an external mount (e.g., a Colab disk you
+  `MECHINTERP_DATA_ROOT` for an external mount (e.g., a Colab or hosted GPU disk you
   want to keep across sessions).
 - `get_committed_artifacts_root()` — root for **git-tracked** result
   files. Always `<repo>/results/`. Never overridden.
@@ -578,11 +578,11 @@ if not os.path.exists(REPO_DIR):
 !git pull
 !pip install -q -r requirements.txt
 # That's it. local_data/ lives in /content/mechinterp-replication/local_data/.
-# It will not survive Colab disconnect — that's fine, the pipeline is
+# It will not survive Colab or hosted GPU disconnect — that's fine, the pipeline is
 # resume-aware and the *important* artifacts get committed to git as we go.
 ```
 
-If you want a Colab session's caches to survive disconnects, set
+If you want a Colab or hosted GPU session's caches to survive disconnects, set
 `MECHINTERP_DATA_ROOT=/content/drive/MyDrive/...` before importing
 anything from `src.`. This is opt-in, not the default.
 
@@ -599,8 +599,8 @@ anything from `src.`. This is opt-in, not the default.
 - **Push after every commit** unless the user says otherwise. The user
   cannot see local-only commits and will assume nothing is happening.
 - **Pull at the start of every session.**
-- **Don't edit code in Colab notebooks.** Pattern: develop locally → push
-  → pull on Colab → run. Colab is for execution.
+- **Don't edit code in Colab notebooks or hosted GPU.** Pattern: develop locally → push
+  → pull on Colab or hosted GPU → run. Colab or hosted GPU is for execution.
 - **MPS compatibility**: Some TransformerLens operations don't work on
   MPS. Fall back to CPU for probe training locally — it's fast enough
   for small models.
