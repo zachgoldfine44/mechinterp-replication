@@ -34,7 +34,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 import torch
 from jaxtyping import Float
@@ -55,13 +55,20 @@ def extract_activations(
     tokenizer: Any,
     texts: list[str],
     layers: list[int] | None = None,
-    aggregation: Literal["last_token", "mean"] = "last_token",
+    aggregation: str = "last_token",
     batch_size: int = 4,
     cache_dir: Path | None = None,
     stimulus_ids: list[str] | None = None,
     device: str | None = None,
 ) -> dict[int, Float[Tensor, "n_texts hidden_dim"]]:
     """Extract residual stream activations from *model* for each text.
+
+    Legacy entry point kept for the integration / regression tests in
+    ``tests/test_integration_tiny_model.py`` and
+    ``tests/test_regression_activation_extraction.py``. New experiment code
+    should use ``src.utils.extraction.extract_for_experiment`` instead — it
+    has a richer cache (in-memory + per-stimulus disk) that matches the
+    ``ActivationCache`` interface used by the pipeline.
 
     Args:
         model: A TransformerLens ``HookedTransformer`` **or** a HuggingFace
@@ -71,9 +78,10 @@ def extract_activations(
             models it is the ``AutoTokenizer`` instance.
         texts: List of input strings to extract activations for.
         layers: Layer indices to extract.  *None* means all layers.
-        aggregation: How to reduce the sequence dimension:
-            ``"last_token"`` -- use the final non-padding token's activation.
-            ``"mean"`` -- mean over all non-padding tokens.
+        aggregation: Sequence-reduction strategy. Any value accepted by
+            ``src.utils.aggregation.aggregate_hidden_states``:
+            ``"last_token"``, ``"first_token"``, ``"mean"``, ``"max"``, or
+            ``"last_k:N"``.
         batch_size: Number of texts processed per forward pass.
         cache_dir: If provided, per-stimulus activations are saved here and
             previously cached results are loaded instead of recomputed.
@@ -209,7 +217,7 @@ def _extract_transformerlens(
     model: Any,
     texts: list[str],
     layers: list[int],
-    aggregation: Literal["last_token", "mean"],
+    aggregation: str,
     batch_size: int,
     device: str,
 ) -> dict[int, Float[Tensor, "n_texts hidden_dim"]]:
@@ -263,7 +271,7 @@ def _extract_huggingface(
     tokenizer: Any,
     texts: list[str],
     layers: list[int],
-    aggregation: Literal["last_token", "mean"],
+    aggregation: str,
     batch_size: int,
     device: str,
 ) -> dict[int, Float[Tensor, "n_texts hidden_dim"]]:
@@ -352,15 +360,17 @@ def _extract_huggingface(
 def _aggregate(
     acts: Float[Tensor, "batch seq_len hidden_dim"],
     tokens: Tensor | None,
-    aggregation: Literal["last_token", "mean"],
+    aggregation: str,
     *,
     tokenizer: Any | None = None,
     attention_mask: Tensor | None = None,
 ) -> Float[Tensor, "batch hidden_dim"]:
     """Reduce the sequence dimension of activation tensors.
 
-    For ``"last_token"``, uses the last non-padding position.
-    For ``"mean"``, averages over all non-padding positions.
+    Thin wrapper around ``src.utils.aggregation.aggregate_hidden_states``
+    that figures out the attention mask first. Supports every strategy the
+    canonical aggregator supports: ``last_token``, ``first_token``,
+    ``mean``, ``max``, ``last_k:N``.
 
     Padding is determined from *attention_mask* (HuggingFace path) or by
     finding the pad_token_id in *tokens* (TransformerLens path).
@@ -369,7 +379,7 @@ def _aggregate(
         acts: Activations of shape ``(batch, seq_len, hidden_dim)``.
         tokens: Token IDs of shape ``(batch, seq_len)``.  Used to derive
             padding mask for TransformerLens models.
-        aggregation: ``"last_token"`` or ``"mean"``.
+        aggregation: Strategy understood by ``aggregate_hidden_states``.
         tokenizer: TransformerLens tokenizer, used to get pad_token_id.
         attention_mask: Explicit attention mask of shape ``(batch, seq_len)``
             with 1 for real tokens and 0 for padding.
@@ -377,9 +387,10 @@ def _aggregate(
     Returns:
         Tensor of shape ``(batch, hidden_dim)``.
     """
-    batch_size, seq_len, hidden_dim = acts.shape
+    from src.utils.aggregation import aggregate_hidden_states
 
-    # Build attention mask if not provided
+    batch_size, seq_len, _ = acts.shape
+
     if attention_mask is None:
         if tokens is not None and tokenizer is not None:
             pad_id = getattr(tokenizer, "pad_token_id", None)
@@ -390,27 +401,7 @@ def _aggregate(
         else:
             attention_mask = torch.ones(batch_size, seq_len, dtype=torch.long)
 
-    if aggregation == "last_token":
-        # Find the index of the last non-padding token per sequence
-        # Sum of mask gives the count of real tokens; subtract 1 for 0-index
-        seq_lengths = attention_mask.sum(dim=1) - 1  # (batch,)
-        seq_lengths = seq_lengths.clamp(min=0)
-
-        # Gather the last-token activation
-        indices = seq_lengths.unsqueeze(-1).unsqueeze(-1).expand(-1, 1, hidden_dim)
-        result = acts.gather(1, indices).squeeze(1)  # (batch, hidden_dim)
-        return result
-
-    elif aggregation == "mean":
-        # Masked mean: sum over real tokens, divide by count
-        mask_expanded = attention_mask.unsqueeze(-1).float()  # (batch, seq, 1)
-        masked_acts = acts * mask_expanded
-        summed = masked_acts.sum(dim=1)  # (batch, hidden_dim)
-        counts = attention_mask.sum(dim=1, keepdim=True).float().clamp(min=1)
-        return summed / counts
-
-    else:
-        raise ValueError(f"Unknown aggregation: {aggregation!r}")
+    return aggregate_hidden_states(acts, attention_mask, aggregation)
 
 
 # ---------------------------------------------------------------------------

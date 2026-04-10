@@ -159,9 +159,11 @@ class ParametricScalingExperiment(Experiment):
             # Generate stimuli from template
             texts = [template_str.replace(f"{{{variable}}}", str(v)) for v in values]
 
-            # Extract activations
+            # Extract activations (thread the shared in-memory cache through
+            # so the same parametric prompt is never re-extracted)
             activations = self._extract_activations_single_layer(
-                model, tokenizer, texts, best_layer, aggregation
+                model, tokenizer, texts, best_layer, aggregation,
+                activations_cache=activations_cache,
             )  # (n_values, hidden_dim)
 
             # Project onto concept vectors and compute correlations
@@ -328,7 +330,6 @@ class ParametricScalingExperiment(Experiment):
             f"Expected at {templates_file} or in stimuli_config.yaml."
         )
 
-    @torch.no_grad()
     def _extract_activations_single_layer(
         self,
         model: Any,
@@ -336,30 +337,26 @@ class ParametricScalingExperiment(Experiment):
         texts: list[str],
         layer: int,
         aggregation: str = "last_token",
+        activations_cache: Any | None = None,
     ) -> np.ndarray:
         """Extract activations for a list of texts at a single layer.
 
-        Returns:
-            Array of shape (n_texts, hidden_dim).
+        Thin wrapper around ``extract_for_experiment`` for one layer. The
+        per-template results are cached at the experiment level (one file
+        per parametric template) so disk caching is unnecessary here, but
+        the in-memory ``activations_cache`` is still threaded through so a
+        prompt that has already been extracted by another experiment on the
+        same model is reused.
         """
-        from src.experiments.probe_classification import ProbeClassificationExperiment
+        from src.utils.extraction import extract_for_experiment
 
-        # Create a minimal instance for extraction
-        temp = ProbeClassificationExperiment.__new__(ProbeClassificationExperiment)
-        temp.config = self.config
-        temp.model_key = self.model_key
-        temp.data_root = self.data_root
-        temp.results_dir = self.results_dir
-        temp.aggregation = aggregation
-        temp.concept_set = []
-        temp.n_stimuli = 0
-        temp.probe_type = "logistic_regression"
-        temp.layers = [layer]
-        temp.n_folds = 1
-        temp.train_split = 0.8
-        temp.seed = 42
-
-        acts_by_layer = temp._extract_activations(
-            model, tokenizer, texts, [layer], None
+        acts_by_layer = extract_for_experiment(
+            model=model,
+            tokenizer=tokenizer,
+            texts=texts,
+            layers=[layer],
+            aggregation=aggregation,
+            cache_dir=None,
+            activations_cache=activations_cache,
         )
         return acts_by_layer[layer]

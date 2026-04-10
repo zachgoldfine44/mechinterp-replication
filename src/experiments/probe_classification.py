@@ -49,8 +49,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from src.core.claim import ClaimConfig, ExperimentResult
 from src.core.experiment import Experiment
-from src.utils.activations import get_hf_layer_modules
-from src.utils.aggregation import aggregate_hidden_states
+from src.utils.extraction import extract_for_experiment
 
 logger = logging.getLogger(__name__)
 
@@ -324,7 +323,6 @@ class ProbeClassificationExperiment(Experiment):
         logger.warning("Could not determine layer count; defaulting to 32")
         return 32
 
-    @torch.no_grad()
     def _extract_activations(
         self,
         model: Any,
@@ -335,189 +333,20 @@ class ProbeClassificationExperiment(Experiment):
     ) -> dict[int, np.ndarray]:
         """Extract residual stream activations for all stimuli at specified layers.
 
-        Layered caching:
-          1. activations_cache (in-memory, shared across experiments per model) —
-             fastest, keyed by (layer, aggregation, text_hash).
-          2. results_dir/activations/stimulus_*.pt (disk, per-experiment) —
-             resume-safe, survives process restart.
-          3. Live extraction from the model.
-
-        When activations_cache is None (e.g. in tests), falls back to the
-        old behavior: disk cache + live extraction only.
-
-        Returns:
-            Dict mapping layer index -> numpy array of shape (n_stimuli, hidden_dim).
+        Thin wrapper around ``src.utils.extraction.extract_for_experiment``.
+        Kept as a method for backward compatibility with any caller that
+        accesses the experiment's instance state; new callers should import
+        ``extract_for_experiment`` directly.
         """
-        cache_dir = self.results_dir / "activations"
-        cache_dir.mkdir(parents=True, exist_ok=True)
-
-        n = len(stimuli)
-        # Per-stimulus, per-layer slot. None means "not yet filled".
-        slots: dict[int, list[np.ndarray | None]] = {
-            layer: [None] * n for layer in layers
-        }
-        needs_extraction: list[int] = []
-
-        for i, text in enumerate(stimuli):
-            # 1. Try the shared in-memory cache first.
-            if activations_cache is not None:
-                all_hit = True
-                for layer in layers:
-                    vec = activations_cache.get(layer, self.aggregation, text)
-                    if vec is None:
-                        all_hit = False
-                        break
-                    slots[layer][i] = vec
-                if all_hit:
-                    continue
-                # Partial hit: clear so the disk/live path fills everything
-                # consistently for this stimulus.
-                for layer in layers:
-                    slots[layer][i] = None
-
-            # 2. Per-stimulus disk cache.
-            cache_path = cache_dir / f"stimulus_{i:04d}.pt"
-            if cache_path.exists():
-                cached = torch.load(cache_path, map_location="cpu", weights_only=True)
-                missing_layer = False
-                for layer in layers:
-                    if layer not in cached:
-                        missing_layer = True
-                        break
-                    arr = cached[layer].numpy()
-                    slots[layer][i] = arr
-                    if activations_cache is not None:
-                        activations_cache.put(layer, self.aggregation, text, arr)
-                if not missing_layer:
-                    continue
-                # Fall through to live extraction if disk cache lacks some layers.
-
-            needs_extraction.append(i)
-
-        if needs_extraction:
-            logger.info(
-                "Extracting activations for %d/%d stimuli",
-                len(needs_extraction), n,
-            )
-
-        # Extract in batches
-        batch_size = 8
-        for batch_start in range(0, len(needs_extraction), batch_size):
-            batch_indices = needs_extraction[batch_start : batch_start + batch_size]
-            batch_texts = [stimuli[idx] for idx in batch_indices]
-
-            batch_acts = self._extract_batch(model, tokenizer, batch_texts, layers)
-
-            for local_idx, global_idx in enumerate(batch_indices):
-                # Save per-stimulus activations (resume-safe)
-                per_stimulus: dict[int, torch.Tensor] = {}
-                text = stimuli[global_idx]
-                for layer in layers:
-                    act_vec = batch_acts[layer][local_idx]
-                    arr = act_vec.numpy()
-                    slots[layer][global_idx] = arr
-                    per_stimulus[layer] = act_vec
-                    if activations_cache is not None:
-                        activations_cache.put(layer, self.aggregation, text, arr)
-
-                cache_path = cache_dir / f"stimulus_{global_idx:04d}.pt"
-                tmp = cache_path.with_suffix(".tmp")
-                torch.save(per_stimulus, tmp)
-                tmp.rename(cache_path)
-
-        # Stack into arrays. Every slot should now be filled.
-        out: dict[int, np.ndarray] = {}
-        for layer in layers:
-            filled = slots[layer]
-            if any(v is None for v in filled):
-                missing = [i for i, v in enumerate(filled) if v is None]
-                raise RuntimeError(
-                    f"Activation extraction incomplete at layer {layer}: "
-                    f"{len(missing)} stimuli missing (indices {missing[:5]}...)"
-                )
-            out[layer] = np.stack(filled)  # type: ignore[arg-type]
-        return out
-
-    def _extract_batch(
-        self,
-        model: Any,
-        tokenizer: Any,
-        texts: list[str],
-        layers: list[int],
-    ) -> dict[int, list[torch.Tensor]]:
-        """Extract activations for a batch of texts at specified layers.
-
-        Returns dict[layer, list[Tensor]] where each tensor is shape (hidden_dim,).
-        """
-        result: dict[int, list[torch.Tensor]] = {layer: [] for layer in layers}
-
-        # TransformerLens path
-        if hasattr(model, "run_with_cache"):
-            for text in texts:
-                tokens = model.to_tokens(text)
-                _, cache = model.run_with_cache(tokens, names_filter=lambda name: "resid_post" in name)
-                # TransformerLens has no pad tokens here (single example),
-                # so the attention mask is all ones.
-                tl_mask = torch.ones(
-                    tokens.shape[0], tokens.shape[1], device=tokens.device
-                )
-
-                for layer in layers:
-                    hook_name = f"blocks.{layer}.hook_resid_post"
-                    acts = cache[hook_name]  # (1, seq_len, hidden_dim)
-                    pooled = aggregate_hidden_states(acts, tl_mask, self.aggregation)
-                    result[layer].append(pooled[0].float().cpu())
-
-            return result
-
-        # HuggingFace / nnsight fallback
-        activations_store: dict[int, list[torch.Tensor]] = {layer: [] for layer in layers}
-        hooks = []
-
-        # Get the underlying HF model
-        hf_model = model.model if hasattr(model, "model") else model
-
-        def make_hook(layer_idx: int):
-            def hook_fn(module, input, output):
-                # output is (hidden_states, ...) or just hidden_states
-                hidden = output[0] if isinstance(output, tuple) else output
-                activations_store[layer_idx].append(hidden.detach().float().cpu())
-            return hook_fn
-
-        # Register hooks on residual stream (post-layer)
-        layer_modules = get_hf_layer_modules(hf_model)
-        for layer_idx in layers:
-            if layer_idx < len(layer_modules):
-                h = layer_modules[layer_idx].register_forward_hook(make_hook(layer_idx))
-                hooks.append(h)
-
-        try:
-            for text in texts:
-                # Clear store
-                for layer in layers:
-                    activations_store[layer] = []
-
-                inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
-                inputs = {k: v.to(next(hf_model.parameters()).device) for k, v in inputs.items()}
-
-                with torch.no_grad():
-                    hf_model(**inputs)
-
-                attn_mask_cpu = inputs["attention_mask"].detach().cpu()
-                for layer in layers:
-                    if activations_store[layer]:
-                        acts = activations_store[layer][0]  # (1, seq_len, hidden_dim)
-                        pooled = aggregate_hidden_states(
-                            acts, attn_mask_cpu, self.aggregation
-                        )
-                        result[layer].append(pooled[0])
-                    else:
-                        logger.warning("No activations captured for layer %d", layer)
-        finally:
-            for h in hooks:
-                h.remove()
-
-        return result
+        return extract_for_experiment(
+            model=model,
+            tokenizer=tokenizer,
+            texts=stimuli,
+            layers=layers,
+            aggregation=self.aggregation,
+            cache_dir=self.results_dir / "activations",
+            activations_cache=activations_cache,
+        )
 
     def _train_and_eval_probe(
         self,

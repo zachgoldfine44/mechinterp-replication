@@ -265,7 +265,6 @@ class GeneralizationTestExperiment(Experiment):
 
         return texts, labels
 
-    @torch.no_grad()
     def _extract_test_activations(
         self,
         model: Any,
@@ -274,12 +273,13 @@ class GeneralizationTestExperiment(Experiment):
         layer: int,
         activations_cache: Any,
     ) -> np.ndarray:
-        """Extract activations for test stimuli at a single layer.
+        """Extract activations for held-out test stimuli at a single layer.
 
-        Returns:
-            Array of shape (n_stimuli, hidden_dim).
+        Aggregation is read from the training experiment's saved metadata so
+        the test extraction matches what the probes were trained on.
         """
-        # Determine aggregation from training metadata (match training).
+        from src.utils.extraction import extract_for_experiment
+
         training_results_dir = (
             self.data_root / "results" / self.config.paper_id
             / self.model_key / self.training_claim_id
@@ -291,28 +291,14 @@ class GeneralizationTestExperiment(Experiment):
                 tr = json.load(f)
             aggregation = tr.get("metadata", {}).get("aggregation", "last_token")
 
-        # Reuse probe_classification's extraction machinery (it owns caching
-        # and batching). We build a shallow instance without triggering
-        # __init__ because we don't have a concept_set here; we only need
-        # the extraction helpers.
-        from src.experiments.probe_classification import ProbeClassificationExperiment
-
-        temp = ProbeClassificationExperiment.__new__(ProbeClassificationExperiment)
-        temp.config = self.config
-        temp.model_key = self.model_key
-        temp.data_root = self.data_root
-        temp.results_dir = self.results_dir
-        temp.aggregation = aggregation
-        temp.concept_set = []
-        temp.n_stimuli = 0
-        temp.probe_type = "logistic_regression"
-        temp.layers = [layer]
-        temp.n_folds = 1
-        temp.train_split = 0.8
-        temp.seed = 42
-
-        acts_by_layer = temp._extract_activations(
-            model, tokenizer, texts, [layer], activations_cache
+        acts_by_layer = extract_for_experiment(
+            model=model,
+            tokenizer=tokenizer,
+            texts=texts,
+            layers=[layer],
+            aggregation=aggregation,
+            cache_dir=self.results_dir / "activations",
+            activations_cache=activations_cache,
         )
         return acts_by_layer[layer]
 
