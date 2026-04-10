@@ -63,7 +63,12 @@ committing.
    - Cross-model comparison (what generalizes, what's model-specific)
    - Limitations of your replication
    - Anything surprising
-8. **Open a PR** with a clear title like: `Replication: {Paper Title} ({Author} {Year})`
+8. **Add yourself to the Completed replications table** in [README.md](README.md#completed-replications). Create a new row with:
+   - Paper title and link
+   - Your GitHub handle as `[@yourusername](https://github.com/yourusername)` — this is how you get visible credit
+   - Models tested, writeup link, config link
+   - Leave the AI peer review scores cell blank; the maintainer fills it in after merge
+9. **Open a PR** with a clear title like: `Replication: {Paper Title} ({Author} {Year})`
 
 ### What makes a good replication
 
