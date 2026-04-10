@@ -2,7 +2,14 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.1 + harness v2 incorporating three rounds of critique fixes
+## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.2 + harness v2 incorporating four rounds of critique fixes
+
+**Writeup v3.2 (multi-seed + severity pairs, ~7 min new compute):**
+- Multi-seed probe runs on cached activations: 5 seeds × top-3 layers × 6 models in 94 seconds (CPU only). Std 0.004-0.012; multi-seed means systematically 0.005-0.014 lower than v1 single-seed (random_state=42 was a slight favorable bias). Qualitative result unchanged.
+- Severity-pair test: 10 hand-designed paired prompts with shared numbers but different danger contexts. **5/6 models show real severity signal** when number is held constant. Llama-3.1-8B is cleanest with 4/6 concepts at p<0.01 (`desperate` larger in 10/10 pairs, `happy` smaller in 0/10 pairs). Qwen-2.5-7B is the only failure — converging with v3.1's parametric break.
+- Claim 4 reframed: "5/6 pass real-only metric, all 6 contaminated, but 5/6 also pass stricter severity-pairs validity check (real signal exists underneath)".
+- New scripts: `scripts/multi_seed_probes.py`, `scripts/severity_pairs_test.py`.
+- New data: `drive_data/data/emotions/severity_pairs.json` (10 pairs).
 
 **Writeup v3.1 (GPU follow-ups, 21 min A100 time):**
 - Negative control parametric on medium tier:

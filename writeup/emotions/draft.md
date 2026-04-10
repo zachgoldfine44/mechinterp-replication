@@ -2,15 +2,21 @@
 
 **A preliminary report replicating Sofroniew et al. (2026) across six open-source language models at 1B-9B scale.**
 
-*Draft v3.1 — adds GPU follow-up results (negative control on medium tier, mean-pooling comparison, multi-layer steering check). Large-tier (27B-70B) replication deferred to future work.*
+*Draft v3.2 — adds multi-seed probe error bars and severity-pair test (paired prompts with shared numbers but different danger). Large-tier (27B-70B) replication deferred to future work.*
 
 Repository: https://github.com/zachgoldfine44/mechinterp-replication
 
 ---
 
-## §0. Errata and response to external critique (v2 + v3 + v3.1)
+## §0. Errata and response to external critique (v2 + v3 + v3.1 + v3.2)
 
-**v3.1 changes (newest, GPU follow-ups in 21 minutes of A100 time on a fresh RunPod pod):**
+**v3.2 changes (newest, multi-seed and severity-pair follow-ups):**
+
+- **Multi-seed probe runs (CPU only, ~94 seconds total).** Re-trained probes on cached activations with 5 different seeds (varying both StratifiedKFold split and LogisticRegression random_state) at the top-3 layers per model. **Standard deviations are tiny (0.004-0.012)** — the probe results are very stable across seed choice. **The single-seed v1 numbers were systematically slightly lucky** (multi-seed means are 0.005-0.014 lower than the v1 single-seed numbers). The qualitative result (all 6 pass the 0.50 threshold) is unchanged. Reported in §3.1.
+- **Severity-pair test (8 minutes total: 32 sec local + 4.2 min on RunPod A100).** Hand-designed 10 paired prompts with shared literal numbers but different danger contexts ("I drank 500ml of water" vs "I drank 500ml of bleach", etc.). Tests whether the fear vector responds to severity beyond just numerical magnitude. **5 of 6 models show a real severity signal** (significant in 3+ concepts at p<0.05, in the correct direction). **Llama-3.1-8B is the cleanest** (4 concepts significant at p<0.01, with `desperate` larger in 10/10 pairs and `happy` smaller in 0/10 pairs). **Qwen-2.5-7B is the only failure** — also matches v3.1's finding that Qwen 7B's parametric scaling is broken at the probe-best layer. Reported in §3.4.3.
+- **Net effect on claim 4**: the v3.1 verdict ("5/6 pass real-only, 1 fails, all 6 contaminated") still stands, but is supplemented by v3.2: **the contamination is real but not the whole story — there is a real severity component underneath in 5/6 models on the strongest concepts**. Claim 4 is now described as "partial pass with documented contamination and documented real-signal rescue".
+
+**v3.1 changes (GPU follow-ups in 21 minutes of A100 time on a fresh RunPod pod):**
 
 - **Negative control parametric on the medium tier.** v3 ran the blueberries control on the small tier only (CPU sufficient — projects on cached vectors). v3.1 ran it on Llama 8B / Qwen 7B / Gemma 9B too. Findings:
   - Llama 8B: contamination drops to 0.730 (was 1.000 on small)
@@ -79,14 +85,16 @@ A diff-style change log is in Appendix D.
 
 We replicate Sofroniew et al.'s (2026) [*Emotion Concepts and their Function in a Large Language Model*](https://transformer-circuits.pub/2026/emotions/index.html) across six open-source language models spanning three families (Llama 3.1/3.2, Qwen 2.5, Gemma 2) and two size tiers (1-2B small, 7-9B medium). The paper studied Claude Sonnet 4.5 and reported six core findings. We ask: **which findings are universal properties of transformer LMs, and which are specific to Claude Sonnet 4.5 or frontier scale?**
 
-**Short answer**: all six open models pass our (deliberately relaxed) thresholds on **three** of the four representational metrics — probe classification, generalization, valence geometry — and the magnitudes are in the same ballpark as the paper's Claude results. The fourth representational metric (parametric scaling) **fails outright on Qwen 7B (0.493 < 0.50)** and is contaminated by numerical-magnitude artifacts on all six models (negative-control "blueberries" template gives the same or stronger magnitude on small models — see §3.4). The two *behavioral* metrics (causal steering, preference steering) do not pass any threshold under our evaluation methodology. We discuss two equal-standing interpretations of the steering null in §5.2: (a) it is a limitation of our protocol (floor effects, scenario simplicity, scale gap), or (b) emotion representations exist at this scale but are not causally potent for behavior. Our experiment cannot distinguish between these. A multi-layer steering check on Llama 8B (added in v3.1, §3.4.2) does not rescue the null.
+**Short answer**: all six open models pass our (deliberately relaxed) thresholds on **three** of the four representational metrics — probe classification, generalization, valence geometry — and the magnitudes are in the same ballpark as the paper's Claude results. The fourth representational metric (parametric scaling) is partially rehabilitated in v3.2: it **fails outright on Qwen 7B (0.493 < 0.50)** and is contaminated by numerical-magnitude artifacts on all six models, BUT a stricter v3.2 severity-pairs test (paired prompts holding numbers constant) shows **5 of 6 models DO have a real severity signal underneath the contamination** on the strongest emotion concepts (most clearly Llama-3.1-8B with p<0.01 on 4 concepts). The two *behavioral* metrics (causal steering, preference steering) do not pass any threshold under our evaluation methodology. We discuss two equal-standing interpretations of the steering null in §5.2: (a) it is a limitation of our protocol (floor effects, scenario simplicity, scale gap), or (b) emotion representations exist at this scale but are not causally potent for behavior. Our experiment cannot distinguish between these. A multi-layer steering check on Llama 8B (added in v3.1, §3.4.2) does not rescue the null.
+
+Also new in v3.2: probe accuracies are now reported as **mean ± std across 5 random seeds** (CPU re-run on cached activations). Standard deviations are tiny (0.004-0.012), and the multi-seed means are systematically slightly lower than the single-seed v1 numbers — the original `random_state=42` was a slightly favorable split. None of the qualitative results change.
 
 | Claim | Paper (Claude Sonnet 4.5) | Our 6 open models (range) | Passes our threshold? |
 |---|---|---|---|
 | 1. Probe classification | 0.713 | 0.731 – 0.840 (vs lexical baseline 0.37-0.40) | ✅ All 6 |
 | 2. Generalization to implicit | ~0.76 hidden emotions | 0.667 – 0.867 diagonal dominance | ✅ All 6 |
 | 3. Valence geometry (PC1) | r = 0.81 | \|r\| = 0.666 – 0.828, all p < 0.01 | ✅ All 6 |
-| 4. Parametric scaling | monotonic w/ severity | real-only ρ = 0.493 – 0.971 | 🟡 5/6 pass real-only metric (Qwen 7B fails); all 6 contaminated by neg-control. See §3.4 |
+| 4. Parametric scaling | monotonic w/ severity | real-only ρ = 0.493 – 0.971 | 🟡 5/6 pass real-only metric, all 6 contaminated by neg-control magnitude, but **5/6 also pass severity-pairs validity check** (real signal underneath). See §3.4 / §3.4.3 |
 | 5. Causal steering (blackmail) | 22% → 72% | 0 / 45 Fisher-significant effects | ❌ All 6 fail |
 | 6. Preference steering (Elo) | r = 0.85 | r = 0.000 | ❌ All 6 fail |
 
@@ -207,18 +215,25 @@ Phase A (small tier) ran on a MacBook Air M5 with MPS. Phase B (medium tier) ran
 
 ### 3.1 Probe classification — All 6 models pass, scales with model size
 
-Probes trained on residual stream activations classify all 15 emotions across all six models. (Random chance is 1/15 = 0.067.)
+Probes trained on residual stream activations classify all 15 emotions across all six models. (Random chance is 1/15 = 0.067.) **v3.2 update**: numbers below now report mean ± std across **5 random seeds** (was a single seed=42 in v1/v2/v3). The seed varies both the StratifiedKFold split and the LogisticRegression `random_state`. Multi-seed runs use already-cached activations (no GPU).
 
-| Model | Params | Best layer | Activation probe accuracy |
-|---|---:|---:|---:|
-| Llama-3.2-1B-Instruct | 1.0B | 15 | **0.773** |
-| Qwen2.5-1.5B-Instruct | 1.5B | 24 | **0.731** |
-| Gemma-2-2B-it | 2.0B | 24 | **0.776** |
-| Llama-3.1-8B-Instruct | 8.0B | 28 | **0.819** |
-| Qwen2.5-7B-Instruct | 7.0B | 24 | **0.784** |
-| Gemma-2-9B-it | 9.0B | 41 | **0.840** |
+| Model | Params | Best layer | Activation probe accuracy (5-seed mean ± std) | Single-seed v1 (for comparison) |
+|---|---:|---:|---|---:|
+| Llama-3.2-1B-Instruct | 1.0B | 15 | **0.766 ± 0.008** | 0.773 |
+| Qwen2.5-1.5B-Instruct | 1.5B | 24 | **0.717 ± 0.012** | 0.731 |
+| Gemma-2-2B-it | 2.0B | 24 | **0.771 ± 0.011** | 0.776 |
+| Llama-3.1-8B-Instruct | 8.0B | 28 | **0.813 ± 0.004** | 0.819 |
+| Qwen2.5-7B-Instruct | 7.0B | 24 | **0.772 ± 0.007** | 0.784 |
+| Gemma-2-9B-it | 9.0B | 41 | **0.828 ± 0.004** | 0.840 |
 
 *Paper reports 0.713 on Claude Sonnet 4.5. Every open model we tested meets or exceeds this, in some cases substantially.*
+
+**Two notes from the multi-seed update:**
+
+1. **Standard deviations are small** (0.004 to 0.012). The probe accuracies are very stable across seed choice — the seed is not a meaningful confound for the headline numbers.
+2. **The single-seed v1 numbers were systematically slightly lucky** — multi-seed means are 0.005-0.014 lower in every model. The original `random_state=42` happened to give favorable train/test splits across the board. The 5-seed mean is more honest. None of the models drop below the 0.50 success threshold; the qualitative result (all 6 pass) is unchanged.
+
+Per-layer breakdown across the top-3 probe layers (with 5-seed std at each layer) is in `drive_data/results/emotions/multi_seed_probes.json`.
 
 **Lexical baseline (added in v2 in response to critique).** A critique correctly noted that high probe accuracy could partly reflect surface lexical features that survived our "don't use the emotion word" generation prompt rather than abstract emotion representations — for example, if "afraid" stories consistently mention "heart pounding" while "happy" stories mention "sunshine", a probe might be learning lexical co-occurrences rather than internal emotion structure.
 
@@ -379,6 +394,56 @@ Critique #2-16 noted that the harness defaults to `last_token` aggregation when 
 | Gemma-2-9B-it | 0.840 | 0.824 | -0.016 |
 
 **Qwen 7B benefits from mean pooling (+3.2pp).** Llama and Gemma are essentially indifferent. There is no universally optimal aggregation strategy in our tested set, but for at least one model the default is suboptimal. A future iteration should either pick the better aggregation per-model (after a small held-out tuning set) or report both numbers in the headline. This is *not* a major effect on any model, but it does mean the reported probe accuracies are within ±3pp of an alternative aggregation choice.
+
+### 3.4.3 Severity pairs — does a real severity signal survive when numerical magnitude is held constant?
+
+**v3.2 update**: a critique-driven follow-up that partly rescues claim 4. The §3.4 negative-control analysis showed that the parametric scaling result is heavily contaminated by numerical-magnitude artifacts (a "blueberries" template with the same numerical scaling gives the same fear-vector response as Tylenol dosage). v3 left an open question: is there ANY real "severity" signal underneath the contamination, or is it all artifact?
+
+The cleanest test: build **paired prompts that share a literal number but vary the danger context**. For example, "I drank 500ml of water" vs "I drank 500ml of bleach" — the number is identical, only the meaning differs. If the fear vector responds to severity (not just numbers), the dangerous prompt should consistently project larger.
+
+We hand-designed 10 such pairs spanning seven categories (substance, height, financial, social, medical, danger, exposure) with shared numbers ranging from 7 to 50,000. For each pair, we extract the residual stream at the cached best probe layer for both prompts and project on the normalized concept vector for each emotion. The paired test is a one-sample t-test on `delta = projection(dangerous) − projection(neutral)` against zero.
+
+**Per-concept results across all 6 models** (significant at p<0.05 in correct direction):
+
+| Model | afraid | calm | desperate | vulnerable | happy | nervous |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|
+| Llama-3.2-1B | ✱ | ✱ | ✱✱✱ | | | |
+| Qwen2.5-1.5B | ✱ | ✱✱✱ | | ✱✱✱ | ✱ | |
+| Gemma-2-2B | | ✱ | ✱ | | ✱ | |
+| **Llama-3.1-8B** | **✱✱✱** | **✱✱✱** | **✱✱✱** | | **✱✱✱** | |
+| Qwen2.5-7B | | | | ✱✱✱ | | |
+| Gemma-2-9B | | ✱ | ✱✱✱ | | ✱✱✱ | |
+
+(✱ = p<0.05, ✱✱✱ = p<0.01. "Correct direction" means: afraid/desperate/vulnerable/nervous should be POSITIVE for danger, calm/happy should be NEGATIVE.)
+
+**Five of six models pass the severity-pairs test on at least 3 concepts.** Llama-3.1-8B is the cleanest: 4 of 6 concepts significant at p<0.01, with `desperate` projecting larger in **10/10 pairs** and `happy` projecting smaller in **0/10 pairs**.
+
+**Sample headline numbers (afraid concept, paired delta with t-test):**
+
+| Model | mean delta | fraction of pairs positive | t | p |
+|---|---:|:--:|---:|---:|
+| Llama-3.2-1B | +0.68 | 8/10 | +2.99 | 0.015 ✱ |
+| Qwen2.5-1.5B | +4.45 | 8/10 | +2.72 | 0.024 ✱ |
+| Gemma-2-2B | +10.47 | 7/10 | +1.02 | 0.33 |
+| **Llama-3.1-8B** | +2.10 | **9/10** | +3.59 | **0.006 ✱✱✱** |
+| Qwen2.5-7B | +0.01 | 5/10 | 0.00 | 0.999 |
+| Gemma-2-9B | +14.18 | 6/10 | +1.66 | 0.13 |
+
+**Three things this rescues / clarifies:**
+
+1. **Claim 4 is partly rehabilitated.** The §3.4 contamination finding (negative control gives the same magnitude as the real templates on small models) is still valid — number-magnitude artifacts dominate the headline rank correlation. But v3.2 shows that **a real severity signal does exist underneath the artifact** in 5/6 models. The fear vector does respond to "the dose is dangerous" beyond "the number is large", at least for the strongest concepts (afraid, desperate, calm, happy).
+
+2. **The signal is strongest for Llama-3.1-8B.** With 4/6 concepts significant at p<0.01 and per-pair fractions of 9/10 or 10/10 for the headline cases, this is a genuinely clean result that the original parametric scaling protocol couldn't have established because it confounded number with severity.
+
+3. **Qwen2.5-7B is uniquely broken** — the same model that v3.1 showed had the contaminated parametric headline (real-only ρ = 0.493 just below threshold) also fails the severity-pairs test on every concept except `vulnerable`. Two different protocols, two converging failures. Whatever changed in Qwen 7B's instruction tuning relative to Qwen 1.5B has broken the danger-context encoding at the probe-best layer.
+
+**Caveats:**
+- N = 10 paired comparisons per model is small. With N=10, paired t-test power is moderate; we should expect some genuine effects to be missed (false negatives) and some chance effects to register (false positives). The strongest results (Llama 8B 4/6 concepts at p<0.01, 5 models showing 3+ significant concepts) are robust to that noise; the marginal results aren't.
+- The pairs were hand-designed by one author. They do span 7 distinct categories, but they're not nuisance-balanced for length, vocabulary register, or grammatical construction. A stronger version would have a larger set of automatically-generated pairs with controlled vocabulary.
+- We do NOT compare to a separate "magnitude-only" baseline within the paired test — the comparison is against zero (no shift). A stronger version would compare the size of the danger delta to the size of a number-only delta from a matched control set.
+- The test still uses the probe-best layer. Severity might be even stronger at a different layer; we don't sweep here.
+
+**For claim 4 overall**: the v3.1 verdict ("5/6 models technically pass real-only metric, 1 fails outright, all 6 contaminated") stands, but is now supplemented by the v3.2 finding that **the contamination is not the whole story — there is a real severity component for most models on the strongest emotion concepts**. We update the headline: claim 4 is *partial pass with documented contamination and a documented real-signal rescue*.
 
 ### 3.4.2 Multi-layer steering check on Llama 8B
 
@@ -598,7 +663,7 @@ A follow-up study could give a definitive answer to "do emotion vectors causally
 
 Across six open-source instruction-tuned language models spanning three families (Llama, Qwen, Gemma) and two size tiers (1B-9B), **all six models pass our (deliberately relaxed) thresholds on three of four representational metrics**: probes classify the 15-emotion task at 0.73-0.84 (vs the paper's 0.71 on Claude and our text-only lexical baseline of 0.35-0.40); probes generalize to implicit scenarios at 0.67-0.87 diagonal dominance; PC1 of the emotion vectors aligns with hand-labeled valence at |r| = 0.666-0.828 (all p < 0.01, bootstrap CIs in Appendix A, layer-stable across the top-3 probe layers) — with three models landing within 0.02 of the paper's r = 0.81.
 
-The fourth representational claim — **parametric scaling** — is in much worse shape than the v1/v2 headline suggested. Five of six models technically pass the 0.50 threshold under the v3 real-templates-only metric (range: 0.493 - 0.971), but **Qwen 7B fails outright at 0.493**, and **all six models have substantial negative-control contamination** ranging from 0.559 (Gemma 9B) to 1.449 (Qwen 7B, where the negative control is actually stronger than the real templates). The original v1/v2 headline of "0.886-0.971 across all models" was inflated by an aggregation that mixed real templates with what we now recognize as numerical-magnitude artifacts. Three of four representational claims survive the validity checks added in v3 + v3.1; the fourth no longer does.
+The fourth representational claim — **parametric scaling** — is in much worse shape than the v1/v2 headline suggested, but partially rehabilitated by v3.2. Under the v3 real-templates-only metric: 5/6 models pass the 0.50 threshold (range 0.493-0.971), Qwen 7B fails at 0.493, and all six models have substantial negative-control contamination (0.559-1.449). The original v1/v2 headline of "0.886-0.971 across all models" was inflated by an aggregation that mixed real templates with numerical-magnitude artifacts. **However**, the v3.2 severity-pairs test (paired prompts with shared literal numbers but different danger context) shows that **5 of 6 models DO have a real severity signal underneath the contamination** — most clearly Llama-3.1-8B, where 4 of 6 emotion concepts are significant at p<0.01 and `desperate` is larger in 10/10 dangerous prompts. So the corrected story for claim 4 is: the original headline metric is contaminated, but a cleaner protocol shows the underlying signal does exist for most models on the strongest concepts. Qwen 7B fails both the real-only metric and the severity-pairs test, suggesting a model-specific break at the probe-best layer.
 
 These results are **suggestive of three universal representational properties** of transformer LMs in this size range — emotion decodability, generalization to implicit scenarios, and valence-organized geometry — but cannot establish "universality" in any strong sense from N = 6 models, N = 15 emotions per model, and a deliberately relaxed threshold protocol. The valence geometry finding in particular merits a follow-up at higher concept count.
 
@@ -669,6 +734,24 @@ python -m src.analysis.scaling --paper emotions
 The framework is paper-agnostic; adding a new replication requires a new `config/papers/{paper_id}/` directory with `paper_config.yaml` and `stimuli_config.yaml`. Generic experiment types (`probe_classification`, `generalization_test`, `representation_geometry`, `parametric_scaling`, `causal_steering`) cover most mechinterp papers. Paper-specific experiments go in `src/experiments/paper_specific/`.
 
 ## Appendix D: Change log
+
+### v3.1 → v3.2
+
+v3.2 adds two follow-ups requested by the user as "remaining low-hanging fruit":
+
+| Area | v3.1 | v3.2 |
+|---|---|---|
+| Probe accuracy seed variance | single seed (random_state=42) | **5-seed mean ± std at top-3 layers per model** (CPU only, 94 sec total). Std is 0.004-0.012 across all models. Multi-seed means are systematically slightly lower than the single-seed v1 numbers (the v1 random_state=42 was a slightly favorable split). Reported in §3.1. |
+| Severity validity | only the negative-control test (blueberries) | **NEW: severity-pair test.** 10 hand-designed paired prompts that share a literal number but vary the danger context ("I drank 500ml of water" vs "I drank 500ml of bleach"). Tests whether the fear vector responds to severity beyond just numerical magnitude. **5/6 models pass** (significant on 3+ concepts at p<0.05 in correct direction); Llama-3.1-8B is the cleanest with 4/6 concepts at p<0.01. Reported in §3.4.3. |
+| Parametric claim 4 verdict | "5/6 pass real-only metric, 1 fails, all 6 contaminated" | **"5/6 pass real-only metric, all 6 contaminated by numerical magnitude, BUT 5/6 ALSO pass the stricter severity-pairs validity check"** — the contamination is real but the underlying signal is also real for most models on the strongest concepts. |
+| Qwen 7B status | broken parametric headline (0.493) | **converging failure**: also fails severity-pairs on every concept except `vulnerable`. Two different protocols, two pointing to the same conclusion that Qwen 7B's danger-context encoding at the probe-best layer is broken. |
+| New scripts | none | `scripts/multi_seed_probes.py` (CPU, no GPU needed); `scripts/severity_pairs_test.py` (works locally on CPU/MPS or on RunPod GPU) |
+| New data files | none | `drive_data/data/emotions/severity_pairs.json` (10 paired templates) |
+| New result files | none | `multi_seed_probes.json` + `severity_pairs.json` per model + `severity_pairs_combined.json` |
+| GPU time | (v3.1 used 21 min) | additional 4.2 min on RunPod (severity pairs medium tier) + ~1 min local (severity pairs small tier) + ~94 sec local CPU (multi-seed). Total ~7 min new compute. |
+| Test counts | 162 unit + 20 integration | unchanged (v3.2 is pure analysis; no new harness code that needs unit tests beyond what `pytest tests/` already covers) |
+
+---
 
 ### v3 → v3.1
 
