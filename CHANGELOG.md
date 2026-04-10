@@ -19,7 +19,7 @@ Anthropic emotions paper. This entry covers the work that follows.
 - `edbaa39` Added `GOTCHAS.md` (Sofroniew/anonymous mech-interp guardrails
   document) to repo root and wired it into `CLAUDE.md` as the canonical
   preflight + post-result checklist for new paper implementations.
-- *(this commit, hash TBD)* Major `CLAUDE.md` rewrite covering:
+- `2e18e00` Major `CLAUDE.md` rewrite covering:
   - **Commit cadence**: explicit "initial commit at session start, commit
     after every work unit, push every commit, pile-ups not allowed."
   - **CHANGELOG.md vs PROGRESS.md** distinction: changelog is the running
@@ -33,6 +33,46 @@ Anthropic emotions paper. This entry covers the work that follows.
     caches, probe weights) stay under `local_data/` (gitignored).
   - References to the new sanity-check + critique systems (built in
     follow-on commits).
+- `a8e3a48` **Paper as oracle** loader. `PaperConfig.paper_text` reads
+  `config/papers/{paper_id}/paper.md` automatically; `ClaimConfig.paper_section`
+  added so each claim points at the section it came from. Placeholder
+  `paper.md` written for the emotions paper. 4 new tests.
+- `958783d` **Sanity-check system** (`src/core/sanity_checks.py`, ~420 LOC).
+  Ten checks fire after every experiment, write `sanity.json` next to
+  `result.json`, and surface warnings/errors in stdout. Specifically
+  catches the `0.800 = 12/15` resolution-artifact case that took hours
+  to debug in a previous session. 11 new tests.
+- `621b0ee` **Critique agent system** (`src/core/critique.py`, ~500 LOC).
+  At end of each model: Claude critic + optional ChatGPT critic +
+  evaluator. Outputs four files to
+  `results/{paper}/{model}/critiques/` which are git-tracked and flow
+  into commit history. 9 new tests, all mocked. anthropic + openai
+  added to requirements.txt.
+- *(this commit, hash TBD)* Pipeline cleanup: use
+  `paper_config.paper_text` directly instead of re-reading from disk;
+  build the critique payload from the loaded `PaperConfig` including
+  `paper_section` pointers. CHANGELOG rolled forward.
+
+### Where things stand after this session
+
+- 212 unit tests passing (was 180 at start of session; +32 across
+  paper-loading, sanity, critique, and the prior Tier-2 work).
+- Six failure modes from the user's experience are now structurally
+  prevented or surfaced automatically. See list below.
+- Three Tier-2 items (#3 multi-layer × multi-alpha steering sweep, #4
+  external LLM-as-judge, #5 base-model variants, #6 multi-turn
+  scenarios) remain and need GPU or API budget.
+
+### Bugs structurally addressed by this session
+
+| Original observation | Mechanism that now prevents it |
+|---|---|
+| Nothing committed during run | `CLAUDE.md` commit-cadence rules + small artifacts whitelisted in `.gitignore` |
+| Nothing visible in Google Drive | Drive layer dropped; `local_data/` for caches, `results/` for committed artifacts |
+| `PROGRESS.md` overwritten | `CLAUDE.md` "never delete history" rule + new `CHANGELOG.md` for incremental log |
+| Paper not loaded as oracle | `PaperConfig.paper_text` field + mandatory `paper.md` per paper |
+| Steering forgot / mis-implemented | `paper_section` pointers + critique agents that compare against paper text |
+| Suspicious results caught only by user | `src/core/sanity_checks.py` runs after every experiment |
 
 ### Bug-class context for future Claude sessions
 

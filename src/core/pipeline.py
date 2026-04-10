@@ -37,6 +37,8 @@ from pathlib import Path
 from typing import Any
 
 from src.core.claim import ClaimConfig, ExperimentResult
+from src.core.critique import run_critique_pass
+from src.core.sanity_checks import run_sanity_checks
 from src.core.config_loader import (
     PaperConfig,
     load_model_config,
@@ -408,6 +410,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
 
             model_results: dict[str, ExperimentResult] = {}
             claim_results_cache: dict[str, ExperimentResult] = {}
+            model_sanity: list[dict[str, Any]] = []
+            last_experiment_results_dir: Path | None = None
 
             for claim in sorted_claims:
                 # Check dependency met. The dependency must (a) have run AND
@@ -495,11 +499,99 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
                     metric_val, claim.success_threshold, elapsed,
                 )
 
+                # Remember the results_dir of the most recent experiment; we
+                # use its parent as the base for the critiques directory.
+                last_experiment_results_dir = experiment.results_dir
+
+                # Post-experiment sanity checks (catch artifacts immediately).
+                try:
+                    sanity_path = experiment.results_dir / "sanity.json"
+                    sanity_report = run_sanity_checks(result, claim, sanity_path)
+                    model_sanity.append(sanity_report)
+                    if sanity_report["n_errors"] > 0:
+                        logger.error(
+                            "SANITY CHECK ERRORS for %s/%s/%s:",
+                            args.paper, model_key, claim.claim_id,
+                        )
+                        for chk in sanity_report["checks"]:
+                            if chk["severity"] == "error":
+                                logger.error("  x %s: %s", chk["name"], chk["message"])
+                    elif sanity_report["n_warnings"] > 0:
+                        logger.warning(
+                            "Sanity warnings for %s/%s/%s: %d (see %s)",
+                            args.paper, model_key, claim.claim_id,
+                            sanity_report["n_warnings"], sanity_path,
+                        )
+                except Exception as exc:
+                    logger.warning("Sanity checks failed to run: %s", exc)
+
                 model_results[claim.claim_id] = result
                 claim_results_cache[claim.claim_id] = result
 
             logger.info("  activation cache stats for %s: %s", model_key, activations_cache.stats())
             all_results[model_key] = model_results
+
+            # --------------------------------------------------------------
+            # Critique pass: spawn critic agents to review this model's
+            # results. Wrapped in try/except so any failure (missing API key,
+            # network hiccup, etc.) never aborts the pipeline.
+            # --------------------------------------------------------------
+            try:
+                # The PaperConfig dataclass already loaded paper.md at startup
+                # via load_paper_config(), so use its paper_text field directly
+                # rather than re-reading from disk. This honors the
+                # paper_text_path field from paper_config.yaml.
+                paper_text = getattr(paper_config, "paper_text", "")
+
+                if last_experiment_results_dir is not None:
+                    critique_dir = last_experiment_results_dir.parent / "critiques"
+                else:
+                    critique_dir = (
+                        data_root / "results" / args.paper / model_key / "critiques"
+                    )
+                critique_dir.mkdir(parents=True, exist_ok=True)
+
+                # run_critique_pass takes a dict (it's the YAML view a critic
+                # would see). Build a minimal one from the loaded PaperConfig.
+                paper_config_dict: dict[str, Any] = {
+                    "paper": {
+                        "id": paper_config.id,
+                        "title": paper_config.title,
+                        "authors": paper_config.authors,
+                        "url": paper_config.url,
+                        "original_model": paper_config.original_model,
+                        "model_variant": paper_config.model_variant,
+                    },
+                    "techniques_required": paper_config.techniques_required,
+                    "claims": [
+                        {
+                            "id": c.claim_id,
+                            "description": c.description,
+                            "experiment_type": c.experiment_type,
+                            "params": c.params,
+                            "success_metric": c.success_metric,
+                            "success_threshold": c.success_threshold,
+                            "depends_on": c.depends_on,
+                            "paper_section": c.paper_section,
+                        }
+                        for c in paper_config.claims
+                    ],
+                }
+
+                run_critique_pass(
+                    paper_id=args.paper,
+                    model_key=model_key,
+                    paper_text=paper_text,
+                    paper_config=paper_config_dict,
+                    results=list(model_results.values()),
+                    sanity_reports=model_sanity,
+                    output_dir=critique_dir,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Critique pass failed for %s/%s: %s",
+                    args.paper, model_key, exc,
+                )
 
     finally:
         # Clean up last model
