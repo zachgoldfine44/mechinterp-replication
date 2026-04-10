@@ -39,12 +39,14 @@ The goal: **lower the barrier so that more papers get replicated more often, by 
 
 ### Completed replications
 
-| Paper | Models tested | Status | Writeup | Config |
-|-------|:---:|:---:|:---:|:---:|
-| [Emotion Concepts (Sofroniew et al. 2026)](https://transformer-circuits.pub/2026/emotions/index.html) | 6 (1B-9B) | v3.3 | [writeup/emotions/draft.md](writeup/emotions/draft.md) | [config/papers/emotions/](config/papers/emotions/) |
-| *Your paper here* | | | | |
+| Paper | Models tested | Status | Writeup | Config | AI peer review scores |
+|-------|:---:|:---:|:---:|:---:|:---|
+| [Emotion Concepts (Sofroniew et al. 2026)](https://transformer-circuits.pub/2026/emotions/index.html) | 6 (1B-9B) | v3.3 | [draft.md](writeup/emotions/draft.md) | [config/](config/papers/emotions/) | [ChatGPT 7/10](writeup/emotions/reviews/chatgpt-extended-thinking.md) · [Claude 7.5/10](writeup/emotions/reviews/claude-opus-4-6-extended-thinking.md) · [Gemini 8.5/10](writeup/emotions/reviews/gemini-3-1-pro.md) · [summary](writeup/emotions/reviews/) |
+| *Your paper here* | | | | | |
 
 We want this table to grow. If you replicate a paper using this harness, please open a PR to add your replication (see [Contributing](#contributing)).
+
+Every replication submitted to this repo is reviewed by three frontier LLM referees (currently ChatGPT with extended thinking, Claude Opus with extended thinking, and Gemini Pro) using a standardized prompt. The reviews are stored alongside the writeup and linked from this table. The reviews are not a substitute for human peer review — they're a low-cost, high-signal way to stress-test claims, catch methodological issues, and give authors immediate feedback. See [CONTRIBUTING.md](CONTRIBUTING.md#ai-review-policy) for the protocol.
 
 ---
 
