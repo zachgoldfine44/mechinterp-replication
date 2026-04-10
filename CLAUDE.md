@@ -15,8 +15,12 @@ whether the findings generalize.
 ## Quick reference
 
 * **Design document**: `DESIGN.md` (framework architecture, replication protocol)
-* **Progress log**: `PROGRESS.md` (read this first every session)
+* **Mech-interp guardrails**: `GOTCHAS.md` (preflight + post-result checklists — read before designing experiments and after every positive result)
+* **Milestone log**: `PROGRESS.md` (read this first every session — big-picture state)
+* **Running changelog**: `CHANGELOG.md` (append-only entry per work unit — your incremental memory)
+* **Active paper**: `config/papers/{paper_id}/` — config + paper text + stimuli
 * **Active paper config**: `config/papers/{paper_id}/paper_config.yaml`
+* **Paper as ground truth**: `config/papers/{paper_id}/paper.md` (full paper text — see "Paper as oracle" below)
 * **Model matrix**: `config/models.yaml`
 
 ## Setup
@@ -46,12 +50,43 @@ pytest tests/ -v --fast
 ## Orientation (read this first every session)
 
 1. `git pull` — get latest code.
-2. Read `PROGRESS.md` — what's done, what's next, what failed.
-3. Check which paper is active: `cat config/active_paper.txt`
-4. Read the active paper config: `cat config/papers/{paper_id}/paper_config.yaml`
-5. Run `pytest tests/ -v --fast 2>&1 | tail -30` — current test status.
-6. Pick the next unchecked item from PROGRESS.md.
-7. When you finish a unit of work, update PROGRESS.md, commit, and push.
+2. Read `PROGRESS.md` — milestone state.
+3. Read the last ~30 entries of `CHANGELOG.md` — fine-grained recent history (what failed yesterday, what I tried last hour).
+4. Check which paper is active: `cat config/active_paper.txt`
+5. Read the active paper config: `cat config/papers/{paper_id}/paper_config.yaml`
+6. **Read the paper itself**: `cat config/papers/{paper_id}/paper.md` (or skim if it's long). This is the oracle. Every claim, every success threshold, every methodology choice should be checkable against the paper.
+7. Skim `GOTCHAS.md` if you're about to design an experiment (preflight checklist) or interpret a result (post-result checklist).
+8. Run `pytest tests/ -v --fast 2>&1 | tail -30` — current test status.
+9. **Make an initial commit at the start of a session** — even if it's just appending to CHANGELOG.md saying "session started, plan: X". This proves the commit pipe works and gives you a stable base to revert to.
+10. Pick the next unchecked item from PROGRESS.md.
+11. When you finish a unit of work: append to CHANGELOG.md, commit, push. **Commits should flow throughout the session, not pile up at the end.**
+
+## Commit cadence rules (important)
+
+The user explicitly wants to see work progressing in git history, not a single end-of-session dump. Specifically:
+
+- **Initial commit** at the start of every session, even if it's just a CHANGELOG entry.
+- **Commit after every meaningful unit of work** — a passing experiment, a finished refactor, a stimulus generation pass, a fixed test. If you find yourself with more than ~30 minutes of uncommitted changes during active development, that's too long.
+- **Commit before moving to a new file** — don't pile multi-file changes into one commit unless they're intrinsically coupled.
+- **Push after each commit** unless the user has said otherwise. Local-only commits don't show up in the user's web view of GitHub, so they think nothing is happening.
+- **Each commit must pass `pytest tests/ -q --fast`** — no exceptions, no broken-tests-on-main.
+- **Never `git add .` blindly.** Always `git status` first, then `git add` specific files. This is especially important now that small result files ARE meant to be committed (see "Storage layout" below) — be careful not to accidentally commit large `.pt` cache files.
+
+## CHANGELOG.md vs PROGRESS.md
+
+These are different documents serving different purposes:
+
+| | PROGRESS.md | CHANGELOG.md |
+|---|---|---|
+| Cadence | Milestones (claim done, paper done, version bump) | Every commit / work unit / failed attempt |
+| Style | Curated, big-picture, replaceable sections | Append-only running log |
+| Editing | OK to rewrite a section when status changes | Never rewrite past entries; always append |
+| Scope | "Where does this paper replication stand?" | "What did I try at 3pm and did it work?" |
+| Length cap | Keep tight (~200 lines) | Grows forever; that's fine |
+
+When in doubt, append to CHANGELOG.md. PROGRESS.md should not be touched on every commit — only when a milestone changes.
+
+The user explicitly called out that PROGRESS.md was getting overwritten in a previous session. **Do not overwrite past PROGRESS.md content.** Treat its sections as updates-in-place for current state, never as a place to delete history. Move retired information to CHANGELOG.md or the writeup before deleting from PROGRESS.md.
 
 ---
 
@@ -141,6 +176,34 @@ This is the core workflow. It generalizes to any mechinterp paper.
 Read the paper carefully. Identify its 3-7 key claims — the findings that,
 if they replicate, would constitute a successful replication. Each claim must
 be falsifiable and have a quantitative success criterion.
+
+**You MUST save the paper text into the repo at the start.** Without this,
+future sessions and sub-agents will drift from the paper's methodology and
+silently invent things. Specifically:
+
+1. Get the paper as text (HTML → markdown, PDF → markdown via `pdftotext`
+   or `pandoc`, or copy from Anthropic / arXiv directly).
+2. Save it as `config/papers/{paper_id}/paper.md`. This is the **oracle**
+   for everything that comes after.
+3. Reference it in `paper_config.yaml`:
+   ```yaml
+   paper:
+     id: "my_paper"
+     title: "..."
+     paper_text_path: "paper.md"   # relative to config/papers/{paper_id}/
+   ```
+4. **Every claim in `paper_config.yaml` should have a `paper_section` field
+   pointing at the section/page of `paper.md` it comes from.** Future
+   sessions need to be able to verify "did we actually do what the paper
+   said?" without re-downloading the paper.
+5. **Every methodology choice that copies the paper** (steering layer,
+   alpha, sample count, evaluation prompt, judge model) **should have a
+   citation comment** linking to where in `paper.md` it came from.
+
+The pipeline loads `paper.md` once and exposes it via
+`PaperConfig.paper_text` so experiments and critique agents can reference
+it. The critique agents are explicitly instructed to compare results
+against the paper as a sanity check.
 
 ### Step 2: Create a paper config
 
@@ -280,6 +343,15 @@ We can't always reproduce them exactly (different model, maybe no internals
 access), but we CAN verify our methodology produces analogous patterns.
 
 **Rules:**
+- The paper text MUST live at `config/papers/{paper_id}/paper.md`. If it
+  doesn't, that's the first thing to fix in any new session — without it,
+  every methodology decision is a guess.
+- Open `paper.md` regularly. When the user asks "what about preference
+  steering?" or "how did they evaluate?", the answer is in the paper, not
+  in your memory of the paper.
+- Every claim row in `paper_config.yaml` should cite a paper section. When
+  you implement a claim, re-read that section of the paper before writing
+  code.
 - First, validate the pipeline runs end-to-end on a small model locally.
   This catches infrastructure bugs for free before using Colab.
 - Then, validate the methodology produces interpretable results on a medium
@@ -288,6 +360,10 @@ access), but we CAN verify our methodology produces analogous patterns.
 - Write the test for each experiment BEFORE implementing it.
 - When results look wrong, check upstream: is the activation extraction
   correct? Are the probes/circuits correct? Is the stimulus set valid?
+- When in doubt, **diff your methodology against the paper.** Most
+  silent-divergence bugs come from "I forgot the paper used pairwise
+  Elo, not absolute scoring" — exactly the kind of thing that has bitten
+  us in past sessions.
 
 ### 2. Concise output (context window hygiene)
 
@@ -307,11 +383,14 @@ access), but we CAN verify our methodology produces analogous patterns.
 - Always develop and test against small models locally first. Only move to
   Colab once the pipeline passes all local tests.
 
-### 4. Keep PROGRESS.md current
+### 4. Keep CHANGELOG.md and PROGRESS.md current
 
 **Rules:**
-- Update after every meaningful unit of work.
-- Record: what worked, what didn't, accuracy numbers, failed approaches.
+- Append to CHANGELOG.md after every commit. One bullet, dated, including
+  what worked, what didn't, and any accuracy numbers worth remembering.
+- Update PROGRESS.md only on milestones (claim done, paper done, version
+  bump). Treat its sections as live status; never delete history without
+  first moving it to CHANGELOG or the writeup.
 - **Record failed approaches** so they aren't re-attempted.
 - Track per-model results in a table.
 
@@ -429,211 +508,93 @@ Every pipeline must be designed so that interruption loses at most one item.
 
 ---
 
-## Git, GitHub, and multi-environment workflow
+## Storage layout (single source of truth: the repo)
 
-### The split: code in GitHub, data in Google Drive
+**Past sessions used a Google Drive symlink (`./drive_data`) and Colab
+mount magic. That layer caused two problems**: results were invisible to
+the user (they didn't know where to look), and nothing flowed into git
+during a run. We've removed it. Everything now lives inside the repo,
+with a clear distinction between what is committed vs. what is local-only.
 
-Two things need to stay in sync across MacBook and Colab, and they have
-different characteristics:
+### What lives where — current model
 
-| What | Where | Why |
-|------|-------|-----|
-| **Code** (src/, tests/, config/, CLAUDE.md, etc.) | **GitHub repo** | Small files, needs version history, needs to be identical across environments |
-| **Data** (activations, stimuli, probe weights, results) | **Google Drive** | Large files (GBs of tensors), no version history needed, needs to persist across Colab sessions |
+| Item | Path | Committed to git? | Notes |
+|------|------|:-:|------|
+| Source code | `src/`, `tests/`, `scripts/` | ✓ | |
+| Process docs | `CLAUDE.md`, `DESIGN.md`, `PROGRESS.md`, `CHANGELOG.md`, `GOTCHAS.md` | ✓ | |
+| Paper configs | `config/papers/{paper_id}/paper_config.yaml` | ✓ | |
+| **Paper text (oracle)** | `config/papers/{paper_id}/paper.md` | ✓ | New — see "Paper as oracle" |
+| Stimuli (small JSONs) | `config/papers/{paper_id}/stimuli/` | ✓ | Tracked so a fresh clone can run end-to-end |
+| `result.json` per claim | `results/{paper_id}/{model_key}/{claim_id}/result.json` | ✓ | Whitelisted in `.gitignore` |
+| Sanity-check + critique reports | `results/{paper_id}/{model_key}/{claim_id}/critiques/*.json` | ✓ | Whitelisted |
+| Figures | `figures/{paper_id}/*.png` | ✓ | Whitelisted |
+| Writeups | `writeup/{paper_id}/draft.md` | ✓ | |
+| **Activation caches** | `local_data/cache/activations/{model_key}/*.npy` | ✗ | Local-only, regenerated on demand |
+| **Probe weights** | `local_data/results/{paper_id}/{model_key}/{claim_id}/probes/*.pt` | ✗ | Heavy, regenerated on demand |
+| **Per-stimulus activation files** | `local_data/results/{paper_id}/{model_key}/{claim_id}/activations/stimulus_*.pt` | ✗ | |
 
-These two storage layers should NEVER be mixed:
-- Never commit activations or large tensors to GitHub.
-- Never put source code only in Google Drive.
+The principle: **anything that documents what happened gets committed;
+anything that's a re-derivable cache stays local.** A fresh clone of the
+repo plus a model download is enough to re-run everything end-to-end.
 
-### GitHub repo setup (one-time)
+### Paths in code
 
-```bash
-# On MacBook — create repo and push
-cd ~/projects/mechinterp-replication
-git init
-git remote add origin git@github.com:zachgoldfine44/mechinterp-replication.git
+`src/utils/env.py` exposes two functions:
 
-# .gitignore — keep data out of git
-cat > .gitignore << 'EOF'
-# Data and results (live on Google Drive, not in git)
-data/
-results/
-figures/
-activations/
-checkpoints/
-drive_results/
+- `get_data_root()` — root for **local-only** caches and heavy artifacts.
+  Defaults to `<repo>/local_data/`. Can be overridden via
+  `MECHINTERP_DATA_ROOT` for an external mount (e.g., a Colab disk you
+  want to keep across sessions).
+- `get_committed_artifacts_root()` — root for **git-tracked** result
+  files. Always `<repo>/results/`. Never overridden.
 
-# Environment
-.venv/
-__pycache__/
-*.pyc
-.ipynb_checkpoints/
+Experiments that produce small artifacts (`result.json`, figures,
+critique reports) write under `get_committed_artifacts_root()`.
+Experiments that produce heavy artifacts (cached activations, probe
+weights) write under `get_data_root()`.
 
-# Large files
-*.pt
-*.safetensors
-*.bin
-*.npy
-*.npz
+### Colab usage
 
-# OS
-.DS_Store
-EOF
-
-git add .
-git commit -m "Initial project structure"
-git push -u origin main
-```
-
-### Google Drive data folder setup (one-time)
-
-Create this folder structure in Google Drive (manually or via script):
-```
-Google Drive/
-└── mechinterp-replication/
-    ├── data/                  # Generated stimuli per paper
-    ├── results/               # All experiment outputs
-    ├── checkpoints/           # Probe weights, intermediate state
-    └── activations/           # Cached activations (largest files)
-```
-
-### MacBook local setup
-
-```bash
-# Clone repo
-cd ~/projects
-git clone git@github.com:zachgoldfine44/mechinterp-replication.git
-cd mechinterp-replication
-
-# Create venv
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-
-# Symlink Google Drive data folder into the repo directory
-ln -s ~/Library/CloudStorage/GoogleDrive-*/My\ Drive/mechinterp-replication ./drive_data
-
-# Set environment variable (add to ~/.zshrc)
-export MECHINTERP_DATA_ROOT="./drive_data"
-```
-
-### Colab notebook setup (top of every notebook)
+Colab is still supported for medium/large-tier runs, but the pattern is
+much simpler now:
 
 ```python
-# ── 1. Mount Google Drive (data persistence) ──
-from google.colab import drive
-drive.mount('/content/drive')
-DATA_ROOT = "/content/drive/MyDrive/mechinterp-replication"
-
-# ── 2. Clone GitHub repo (latest code) ──
-import os
+import os, subprocess
 REPO_DIR = "/content/mechinterp-replication"
 if not os.path.exists(REPO_DIR):
-    !git clone https://github.com/zachgoldfine44/mechinterp-replication.git {REPO_DIR}
-else:
-    !cd {REPO_DIR} && git pull
-
-# ── 3. Install dependencies ──
-!cd {REPO_DIR} && pip install -q -r requirements.txt
-
-# ── 4. Set data root ──
-os.environ["MECHINTERP_DATA_ROOT"] = DATA_ROOT
-
-# ── 5. Run ──
+    subprocess.run(["git", "clone",
+                    "https://github.com/zachgoldfine44/mechinterp-replication.git",
+                    REPO_DIR], check=True)
 %cd {REPO_DIR}
+!git pull
+!pip install -q -r requirements.txt
+# That's it. local_data/ lives in /content/mechinterp-replication/local_data/.
+# It will not survive Colab disconnect — that's fine, the pipeline is
+# resume-aware and the *important* artifacts get committed to git as we go.
 ```
 
-To pull code updates mid-session (e.g., after pushing a fix from MacBook):
-```python
-!cd {REPO_DIR} && git pull
-```
-
-### Environment detection (`src/utils/env.py`)
-
-```python
-import platform, os
-from pathlib import Path
-
-def detect_environment() -> str:
-    """Returns 'colab', 'macbook', or 'other'."""
-    try:
-        get_ipython()
-        if "google.colab" in str(type(get_ipython())):
-            return "colab"
-    except NameError:
-        pass
-    if platform.system() == "Darwin" and platform.processor() == "arm":
-        return "macbook"
-    return "other"
-
-def get_data_root() -> Path:
-    """Returns the root for all data/results (Google Drive path)."""
-    env_override = os.environ.get("MECHINTERP_DATA_ROOT")
-    if env_override:
-        return Path(env_override)
-
-    env = detect_environment()
-    if env == "colab":
-        return Path("/content/drive/MyDrive/mechinterp-replication")
-    elif env == "macbook":
-        return Path("./drive_data")
-    else:
-        return Path("./local_data")
-
-def get_device() -> str:
-    """Returns best available torch device for current environment."""
-    import torch
-    if torch.cuda.is_available():
-        return "cuda"
-    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-        return "mps"
-    return "cpu"
-```
+If you want a Colab session's caches to survive disconnects, set
+`MECHINTERP_DATA_ROOT=/content/drive/MyDrive/...` before importing
+anything from `src.`. This is opt-in, not the default.
 
 ### Git workflow rules
 
 - **Commit after every meaningful unit of work.** Each commit should pass
   `pytest tests/ -q --fast`.
-- **Never commit data files.** The `.gitignore` blocks them, but be vigilant
-  about `git add .` — always review `git status` first.
-- **Commit messages should be greppable**: `"Add probe_classification experiment"`
-  not `"updates"`.
-- **Push before switching environments.** If you're done working on MacBook and
-  moving to Colab, push first. If you made code changes in a Colab notebook
-  (rare — prefer making code changes locally), commit and push from Colab:
-  ```python
-  !cd {REPO_DIR} && git add -A && git commit -m "Fix extraction batch size" && git push
-  ```
-- **Pull at the start of every session.** Both locally and on Colab.
-- **Don't edit code in Colab notebooks** unless it's a quick fix. The pattern
-  is: develop code locally on MacBook → push → pull on Colab → run experiments.
-  Colab is for execution, MacBook is for development.
-
-### What lives where — summary
-
-| Item | GitHub repo | Google Drive | .gitignore'd |
-|------|:-----------:|:------------:|:------------:|
-| `src/`, `tests/`, `config/` | ✓ | | |
-| `CLAUDE.md`, `DESIGN.md`, `PROGRESS.md` | ✓ | | |
-| `requirements.txt`, `.gitignore` | ✓ | | |
-| `data/` (generated stimuli) | | ✓ | ✓ |
-| `results/` (experiment outputs) | | ✓ | ✓ |
-| `activations/` (cached tensors) | | ✓ | ✓ |
-| `checkpoints/` (probe weights) | | ✓ | ✓ |
-| `figures/` (generated plots) | | ✓ | ✓ |
-| `writeup/` (draft markdown) | ✓ | | |
-
-### Rules for multi-environment work
-
-- **Never hardcode paths.** Always use `get_data_root()` from `src/utils/env.py`.
-- **Save data to Google Drive, not local /tmp.** Colab wipes /tmp on disconnect.
-- **Small models locally, big models on Colab.**
-- **Generate stimuli locally, extract activations on Colab.** Stimulus generation
-  doesn't need a GPU; activation extraction does.
-- **Resume logic is especially critical on Colab** — per-item saves to Drive
-  mean a killed session just picks up where it left off.
-- **MPS compatibility**: Some TransformerLens operations don't work on MPS.
-  Fall back to CPU for probe training locally — it's fast enough for small
-  models.
+- **`git add` specific files, never `git add .`** — even though large
+  files are gitignored, an oversight is one stray commit away. Be
+  particularly careful about `*.pt` files, `local_data/`, and the
+  symlinked HF cache.
+- **Commit messages should be greppable**: `"Add probe_classification
+  experiment"` not `"updates"`. Use the `topic: short summary` format.
+- **Push after every commit** unless the user says otherwise. The user
+  cannot see local-only commits and will assume nothing is happening.
+- **Pull at the start of every session.**
+- **Don't edit code in Colab notebooks.** Pattern: develop locally → push
+  → pull on Colab → run. Colab is for execution.
+- **MPS compatibility**: Some TransformerLens operations don't work on
+  MPS. Fall back to CPU for probe training locally — it's fast enough
+  for small models.
 
 ---
 
@@ -657,6 +618,35 @@ Scan all layers; report both best layer and paper's recommended depth.
 ### Respect the paper's methodology before deviating
 First replicate the exact method. If it fails, THEN try variations.
 Record which method you used.
+
+### Run the live sanity checks; do not wait until the end to look at results
+The pipeline runs `src.core.sanity_checks` after every experiment finishes
+and writes the report to `results/{paper_id}/{model_key}/{claim_id}/sanity.json`.
+It catches things like:
+- confusion-matrix resolution artifacts ("0.800 = 12/15" trap that bit a
+  past session — see CHANGELOG entry for that incident)
+- chance-level accuracy reported as a positive result
+- exactly-identical metrics across models (impossible coincidence)
+- suspiciously round numbers (0.5, 0.8, 1.0)
+- per-concept accuracy that's all the same (probe collapsed)
+- success_metric that doesn't match what `paper_config.yaml` declared
+
+If a sanity check fires, you must address it before moving on.
+The pipeline also surfaces these warnings in stdout — read them, don't
+let them scroll past.
+
+### Run the critique agents at the end of every model
+After each model finishes its full claim sweep, the pipeline calls
+`src.core.critique` which spawns:
+- A Claude-Sonnet critique agent reviewing the model's results against
+  the paper text and GOTCHAS.md
+- An optional ChatGPT critique agent doing the same (requires
+  `OPENAI_API_KEY`; silently skipped if absent)
+- An evaluator agent that reads both critiques and produces a prioritized
+  list of next steps
+
+Critique outputs land in `results/{paper_id}/{model_key}/critiques/` and
+are committed to git so they show up in the user's view of the repo.
 
 ---
 

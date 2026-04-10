@@ -1,9 +1,17 @@
-# Data and results (live on Google Drive / RunPod, not in git)
-data/
-results/
+# Local-only caches and heavy artifacts.
+# Anything that documents what happened lives under results/ (whitelisted
+# below). Anything that's a re-derivable cache (activations, probe weights,
+# per-stimulus tensors) lives under local_data/ and stays out of git.
+
+local_data/
+drive_data/
 activations/
 checkpoints/
-drive_data/
+data/
+
+# results/ is mostly ignored — see whitelist at bottom of file
+results/
+
 # NOTE: figures/ is NOT ignored — we commit publication-ready figures
 # so the writeup renders correctly on GitHub.
 
@@ -14,7 +22,7 @@ __pycache__/
 .ipynb_checkpoints/
 .pytest_cache/
 
-# Large files
+# Large files (still blocked even under whitelisted dirs)
 *.pt
 *.safetensors
 *.bin
@@ -26,3 +34,21 @@ __pycache__/
 
 # Claude
 .claude/
+
+# ─────────────────────────────────────────────────────────────────────
+# Whitelist: small documenting artifacts under results/ DO get committed.
+# These describe what happened and need to flow through git history so
+# the user can see results land in real time and so a fresh clone can
+# rebuild the writeup without re-running experiments.
+# ─────────────────────────────────────────────────────────────────────
+!results/
+!results/**/
+!results/**/result.json
+!results/**/sanity.json
+!results/**/critiques/
+!results/**/critiques/*.json
+!results/**/critiques/*.md
+!results/**/*.png
+!results/**/*.svg
+!results/**/*.csv
+!results/**/manifest.json
