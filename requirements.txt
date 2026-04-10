@@ -31,3 +31,10 @@ huggingface_hub>=0.20.0
 
 # Quantization (for large models)
 bitsandbytes>=0.41.0; sys_platform == "linux"
+
+# Critique agents (src/core/critique.py spawns these at the end of each
+# model's claim sweep). The Claude SDK is required; the OpenAI SDK is
+# optional and will be silently skipped if missing or if OPENAI_API_KEY
+# is unset.
+anthropic>=0.40.0
+openai>=1.50.0
