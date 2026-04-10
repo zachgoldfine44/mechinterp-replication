@@ -49,6 +49,7 @@ from scipy import stats
 
 from src.core.claim import ClaimConfig, ExperimentResult
 from src.core.experiment import Experiment
+from src.utils.activations import get_hf_layer_modules
 
 logger = logging.getLogger(__name__)
 
@@ -777,7 +778,7 @@ class CausalSteeringExperiment(Experiment):
                             return (hidden,) + output[1:]
                         return hidden
 
-                    layer_modules = self._get_layer_modules(hf_model)
+                    layer_modules = get_hf_layer_modules(hf_model)
                     if layer < len(layer_modules):
                         hook_handle = layer_modules[layer].register_forward_hook(hf_hook_fn)
 
@@ -894,7 +895,7 @@ class CausalSteeringExperiment(Experiment):
                     return (hidden,) + output[1:]
                 return hidden
 
-            layer_modules = self._get_layer_modules(hf_model)
+            layer_modules = get_hf_layer_modules(hf_model)
             if layer < len(layer_modules):
                 hook_handle = layer_modules[layer].register_forward_hook(hf_hook_fn)
 
@@ -1154,17 +1155,6 @@ class CausalSteeringExperiment(Experiment):
     # function was removed in response to external critique. If you need a
     # preference comparator on CPU/MPS, use _llm_judge_choice via _score_choices.
 
-    def _get_layer_modules(self, model: Any) -> list:
-        """Get transformer layer modules from an HF model."""
-        for attr in ("model.layers", "transformer.h", "gpt_neox.layers", "model.decoder.layers"):
-            parts = attr.split(".")
-            obj = model
-            try:
-                for part in parts:
-                    obj = getattr(obj, part)
-                return list(obj)
-            except AttributeError:
-                continue
-        raise AttributeError(
-            f"Cannot find transformer layers in model of type {type(model).__name__}"
-        )
+    # Layer-module accessor lives in src.utils.activations.get_hf_layer_modules
+    # (imported at the top of this file). The duplicated local helper was
+    # removed in favor of the canonical implementation.

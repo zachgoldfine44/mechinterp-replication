@@ -17,6 +17,7 @@ Registry:
     representation_geometry  -> RepresentationGeometryExperiment
     parametric_scaling       -> ParametricScalingExperiment
     causal_steering          -> CausalSteeringExperiment
+    circuit_identification   -> CircuitIdentificationExperiment
 """
 
 from __future__ import annotations
@@ -24,6 +25,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from src.experiments.causal_steering import CausalSteeringExperiment
+from src.experiments.circuit_identification import CircuitIdentificationExperiment
 from src.experiments.generalization_test import GeneralizationTestExperiment
 from src.experiments.parametric_scaling import ParametricScalingExperiment
 from src.experiments.probe_classification import ProbeClassificationExperiment
@@ -38,6 +40,7 @@ EXPERIMENT_REGISTRY: dict[str, type[Experiment]] = {
     "representation_geometry": RepresentationGeometryExperiment,
     "parametric_scaling": ParametricScalingExperiment,
     "causal_steering": CausalSteeringExperiment,
+    "circuit_identification": CircuitIdentificationExperiment,
 }
 
 

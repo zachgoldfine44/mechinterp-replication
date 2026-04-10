@@ -2,16 +2,30 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B COMPLETE; writeup v2 incorporating external critique fixes
+## Status: 🟢 Phase A + Phase B COMPLETE; writeup v2 + harness v2 incorporating external critique fixes
 
-**v2 critique-response fixes (analysis-only, no GPU rerun needed):**
+**Harness v2 (technique modules + tests, in response to "implement the missing files" critique):**
+- 5 previously-vapor technique modules now exist with full implementations and unit tests:
+  - `src/techniques/patching.py` (13 tests) — `causal_trace`, `patch_residual_stream`, denoising/noising sweeps
+  - `src/techniques/attention.py` (14 tests) — pattern extraction, head attribution, induction-head detection, entropy
+  - `src/techniques/sae.py` (17 tests) — `SimpleSAE` train-from-scratch + optional SAELens loader, top-features-per-concept
+  - `src/techniques/logit_lens.py` (9 tests) — projections, per-layer top tokens, target-token trajectory
+  - `src/techniques/circuit_discovery.py` (16 tests) — edge attribution patching, single-edge path patching, ACDC stub
+- New `circuit_identification` experiment type (12 tests) wires patching/attention/circuit_discovery into a paper-agnostic experiment for IOI/induction-head/causal-trace style replications
+- Consolidated `_get_layer_modules` duplication: now `src/utils/activations.get_hf_layer_modules` is the single canonical implementation (was duplicated across 4 files)
+- New integration tests (10) load a real pythia-14m via TransformerLens and exercise the full harness end-to-end (extract → probe → contrastive → steer → patch → attention → logit lens → EAP)
+- New regression tests (10) pin structural properties of activation extraction (norms, monotonicity with depth, dtype preservation, determinism, etc.) to catch silent regressions
+- Updated DESIGN.md: status column on the techniques table; all 8 modules now ✅ except ACDC which is 🟡
+
+**Test counts after harness v2:** 162 unit tests pass in 1.16s; 20 integration tests pass against real pythia-14m in 2.8s when run with `--integration` flag.
+
+**v2 critique-response fixes from previous round (analysis-only, no GPU rerun needed):**
 - Real Fisher's exact test on CUDA steering path; placeholder p-values removed
 - PCA geometry now scores PC1 specifically (was max-over-PCs); + bootstrap 95% CIs
 - Lexical baseline added (text-only TF-IDF/BoW): 0.35-0.40 vs activation 0.73-0.84
 - Per-concept probe accuracy reported (`happy` is the worst class at 0.36-0.52)
 - Stimulus count discrepancy fixed (config aligned to actual 25/concept)
 - Dead `_compare_responses` word-count preference heuristic removed
-- DESIGN.md phantom modules marked as planned, not implemented
 - Writeup language downgraded from "universally replicates" to "passes our thresholds"
 - Steering null reframed as two equal-standing hypotheses (not just "our methodology")
 - Errata + change log added as §0 / Appendix D of writeup

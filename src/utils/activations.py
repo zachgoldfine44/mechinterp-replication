@@ -280,7 +280,7 @@ def _extract_huggingface(
         tokenizer.pad_token = tokenizer.eos_token
 
     # Locate the layer modules
-    layer_modules = _get_hf_layer_modules(model)
+    layer_modules = get_hf_layer_modules(model)
 
     per_layer: dict[int, list[Tensor]] = {layer: [] for layer in layers}
 
@@ -508,27 +508,50 @@ def _get_num_layers(model: Any) -> int:
         return model.cfg.n_layers
 
     # HuggingFace: try common layer accessor patterns
-    layer_modules = _get_hf_layer_modules(model)
+    layer_modules = get_hf_layer_modules(model)
     return len(layer_modules)
 
 
-def _get_hf_layer_modules(model: Any) -> list[Any]:
+def get_hf_layer_modules(model: Any) -> list[Any]:
     """Return the list of transformer layer modules from a HuggingFace model.
 
-    Tries several common attribute paths used by different model families:
-        - model.model.layers      (Llama, Qwen, Gemma, Mistral)
-        - model.transformer.h     (GPT-2, GPT-Neo)
-        - model.gpt_neox.layers   (GPT-NeoX, Pythia)
+    This is the **canonical** layer-accessor used everywhere in the
+    codebase. All experiment classes and technique modules should import
+    from here rather than redefining their own copy — adding support for a
+    new architecture should require editing exactly one file.
+
+    Tries several common attribute paths used by different model families,
+    in order:
+
+        - ``model.model.layers``         (Llama, Qwen, Gemma, Mistral, Phi)
+        - ``model.transformer.h``        (GPT-2, GPT-Neo)
+        - ``model.gpt_neox.layers``      (GPT-NeoX, Pythia)
+        - ``model.model.decoder.layers`` (OPT)
+
+    Args:
+        model: A HuggingFace ``AutoModelForCausalLM`` (or compatible) whose
+            transformer block list lives at one of the known paths above.
+
+    Returns:
+        Python ``list`` of layer modules (in order, layer 0 first).
 
     Raises:
-        AttributeError: If none of the known paths exist.
+        AttributeError: If none of the known paths exist on the model. The
+            error message lists the paths that were tried.
     """
-    # Most common: Llama / Qwen / Gemma / Mistral
+    # Most common: Llama / Qwen / Gemma / Mistral / Phi
     inner = getattr(model, "model", None)
     if inner is not None:
         layers = getattr(inner, "layers", None)
         if layers is not None:
             return list(layers)
+
+        # OPT-style: model.model.decoder.layers
+        decoder = getattr(inner, "decoder", None)
+        if decoder is not None:
+            opt_layers = getattr(decoder, "layers", None)
+            if opt_layers is not None:
+                return list(opt_layers)
 
     # GPT-2 / GPT-Neo
     transformer = getattr(model, "transformer", None)
@@ -546,6 +569,12 @@ def _get_hf_layer_modules(model: Any) -> list[Any]:
 
     raise AttributeError(
         f"Cannot find transformer layers in model of type {type(model).__name__}. "
-        f"Known patterns: model.model.layers, model.transformer.h, model.gpt_neox.layers. "
-        f"Add support for this architecture in _get_hf_layer_modules()."
+        f"Tried paths: model.model.layers (Llama/Qwen/Gemma/Mistral/Phi), "
+        f"model.model.decoder.layers (OPT), model.transformer.h (GPT-2/GPT-Neo), "
+        f"model.gpt_neox.layers (GPT-NeoX/Pythia). "
+        f"Add support for this architecture in src/utils/activations.py::get_hf_layer_modules()."
     )
+
+
+# Back-compat private alias. New code should use ``get_hf_layer_modules``.
+_get_hf_layer_modules = get_hf_layer_modules

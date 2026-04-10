@@ -21,7 +21,7 @@ class TestExperimentRegistry:
     """Verify the experiment registry maps all expected types."""
 
     def test_experiment_registry_complete(self) -> None:
-        """All 5 generic experiment types should be registered."""
+        """All 6 generic experiment types should be registered."""
         from src.experiments import EXPERIMENT_REGISTRY
 
         expected_types = {
@@ -30,6 +30,7 @@ class TestExperimentRegistry:
             "representation_geometry",
             "parametric_scaling",
             "causal_steering",
+            "circuit_identification",
         }
         assert set(EXPERIMENT_REGISTRY.keys()) == expected_types
 

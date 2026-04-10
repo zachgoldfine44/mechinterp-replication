@@ -548,9 +548,13 @@ v2 was produced in response to two detailed external critiques of v1. Specific c
 | Stimulus count | config said 50, actual 25 (silent fallback) | config aligned to 25; probe code now warns when fewer stimuli are loaded than requested |
 | Dead word-count preference heuristic | present but unused | removed |
 | `register_experiment` API | unused but documented | left in (low priority) |
-| `_get_layer_modules` duplication across 4 files | flagged in critique | left in (refactor for v3) |
-| `activations_cache` always None | flagged in critique | left in (refactor for v3) |
-| Phantom modules in DESIGN.md (`patching.py`, `attention.py`, `sae.py`, `logit_lens.py`, `circuit_discovery.py`) | listed without status | added status column; explicitly marked as planned; harness self-described as representation-engineering rather than general mechinterp |
+| `_get_layer_modules` duplication across 4 files | duplicated | **fixed in harness v2**: consolidated into `src/utils/activations.get_hf_layer_modules` |
+| `activations_cache` always None | always None | left in (refactor for v3) |
+| Phantom modules in DESIGN.md | listed without status | **fixed in harness v2**: all 5 missing modules (`patching.py`, `attention.py`, `sae.py`, `logit_lens.py`, `circuit_discovery.py`) are now actually implemented with full unit tests; status column updated; harness now legitimately supports patching/attention/SAE/logit-lens/circuit-discovery workflows |
+| `circuit_identification` experiment | listed but never implemented | **fixed in harness v2**: now exists at `src/experiments/circuit_identification.py`, registered in `EXPERIMENT_REGISTRY`, supports causal_trace / EAP / head_attribution methods, 12 unit tests |
+| Activation extraction integration tests | absent | **fixed in harness v2**: 10 integration tests in `tests/test_integration_tiny_model.py` load real pythia-14m and exercise extraction → probe → contrastive → steering → patching → attention → logit lens → EAP end-to-end |
+| Activation extraction regression tests | absent | **fixed in harness v2**: 10 regression tests in `tests/test_regression_activation_extraction.py` pin structural properties (norms, monotonicity with depth, dtype preservation, determinism, etc.) |
+| `register_experiment` API | unused but documented | left in (low priority) |
 | "Universally replicates" language | repeated throughout | replaced with "all 6 models pass our (relaxed) thresholds" / "in the same ballpark as paper" |
 | Steering null framing | "limitation of our methodology" | two equal-standing hypotheses (protocol limitation vs. representations-without-causal-potency) |
 | Multi-seed | absent | still absent (flagged) |
@@ -558,7 +562,7 @@ v2 was produced in response to two detailed external critiques of v1. Specific c
 | Base-model variants | absent | still absent (flagged) |
 | Multi-layer or unnormalized steering | absent | still absent (flagged as critique-recommended follow-up) |
 | Per-template parametric breakdown | absent | still absent in writeup (data exists in result.json) |
-| Activation extraction integration tests | absent | still absent (flagged for harness v2) |
+| Test count | 81 unit tests | **162 unit tests + 20 integration tests** (101 new tests for the new modules + integration suite) |
 
 ## Acknowledgments
 

@@ -2,10 +2,15 @@
 
 Provides:
 - ``--fast`` flag to limit test scope (fewer concepts, samples, etc.)
+- ``--integration`` flag to opt into integration tests that download a real
+  tiny TransformerLens model. Integration tests are SKIPPED by default so the
+  fast/dev suite stays fast.
 - ``project_root`` fixture pointing to the repo directory
 - ``data_root`` fixture using a temporary directory
 - ``sample_activations`` and ``sample_labels`` for synthetic data
 - ``sample_claim_config`` for a minimal ClaimConfig
+- ``tiny_model`` fixture (module-scoped) that lazily loads pythia-14m for
+  integration / regression tests; auto-skips if the download fails.
 """
 
 from __future__ import annotations
@@ -19,7 +24,7 @@ import torch
 
 
 # ---------------------------------------------------------------------------
-# Pytest option: --fast
+# Pytest option: --fast and --integration
 # ---------------------------------------------------------------------------
 
 def pytest_addoption(parser: Any) -> None:
@@ -29,6 +34,30 @@ def pytest_addoption(parser: Any) -> None:
         default=False,
         help="Run tests in fast mode: fewer concepts, samples, and models.",
     )
+    parser.addoption(
+        "--integration",
+        action="store_true",
+        default=False,
+        help="Run integration tests (downloads pythia-14m, ~30MB).",
+    )
+
+
+def pytest_configure(config: Any) -> None:
+    config.addinivalue_line(
+        "markers",
+        "integration: requires loading a real model (pythia-14m); "
+        "skipped unless --integration is passed.",
+    )
+
+
+def pytest_collection_modifyitems(config: Any, items: list[Any]) -> None:
+    """Skip integration-marked tests unless --integration was passed."""
+    if config.getoption("--integration"):
+        return
+    skip_integration = pytest.mark.skip(reason="needs --integration to run")
+    for item in items:
+        if "integration" in item.keywords:
+            item.add_marker(skip_integration)
 
 
 @pytest.fixture
@@ -120,3 +149,36 @@ def sample_claim_config():
         success_metric="probe_accuracy",
         success_threshold=0.50,
     )
+
+
+# ---------------------------------------------------------------------------
+# Tiny real model fixture (integration / regression tests)
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def tiny_model():
+    """Load pythia-14m via TransformerLens.
+
+    Module-scoped so we only pay the download/load cost once per test session.
+    Auto-skips the test if transformer_lens is missing or the download fails
+    (e.g. no network, HuggingFace rate-limit).
+
+    Used by both ``tests/test_integration_tiny_model.py`` and
+    ``tests/test_regression_activation_extraction.py``.
+    """
+    pytest.importorskip("transformer_lens")
+    from transformer_lens import HookedTransformer
+
+    try:
+        model = HookedTransformer.from_pretrained(
+            "pythia-14m",
+            device="cpu",  # CPU is fine; this is tiny
+            fold_ln=False,
+            center_writing_weights=False,
+            center_unembed=False,
+        )
+    except Exception as exc:  # network errors, missing files, etc.
+        pytest.skip(f"Could not load pythia-14m (likely no network): {exc}")
+
+    model.eval()
+    return model

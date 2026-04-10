@@ -92,22 +92,26 @@ class ClaimConfig:
 | Status | Module | What it provides | Used by which experiments |
 |:--:|--------|-----------------|--------------------------|
 | ✅ | `probes.py` | Train/eval linear probes, logistic regression, MLP probes | probe_classification, generalization_test |
-| ✅ | `contrastive.py` | Mean-difference vectors, CAA extraction | probe_classification, causal_steering |
-| ✅ | `steering.py` | Activation addition at inference time | causal_steering |
-| ❌ | `patching.py` | Activation patching, causal tracing | circuit_identification |
-| ❌ | `attention.py` | Attention pattern analysis, head attribution | circuit_identification |
-| ❌ | `sae.py` | SAE feature extraction (via SAELens or custom) | representation_geometry, circuit_identification |
-| ❌ | `logit_lens.py` | Logit lens / tuned lens projections | circuit_identification, representation_geometry |
-| ❌ | `circuit_discovery.py` | Path patching, ACDC, edge attribution | circuit_identification |
+| ✅ | `contrastive.py` | Mean-difference vectors, CAA extraction, PCA, similarity matrices | probe_classification, causal_steering, representation_geometry |
+| ✅ | `steering.py` | Activation addition at inference time, control vectors | causal_steering |
+| ✅ | `patching.py` | Activation patching, causal tracing, denoising/noising sweeps | circuit_identification |
+| ✅ | `attention.py` | Attention pattern extraction, head attribution, induction-head detection, attention entropy | circuit_identification |
+| ✅ | `sae.py` | `SimpleSAE` train-from-scratch + optional `sae_lens` pretrained loader, feature extraction, top-features-per-concept | representation_geometry, circuit_identification |
+| ✅ | `logit_lens.py` | Logit lens projections + per-layer top tokens + target-token trajectory; tuned-lens hook | representation_geometry, circuit_identification |
+| ✅ | `circuit_discovery.py` | Edge attribution patching (gradient-based), path patching, subgraph extraction | circuit_identification |
+| 🟡 | `circuit_discovery.py::acdc` | Full ACDC algorithm (Conmy et al.) | (raises NotImplementedError; use EAP + path_patch instead) |
 
-The current harness fully supports **probing + contrastive + steering** workflows
-(the techniques used by the emotions paper). Patching, SAE, logit lens, and
-circuit-discovery support is **planned but not yet implemented** — papers that
-require those techniques are not yet replicable through this framework. The
-`circuit_identification` experiment type is similarly a planned slot, not a
-working experiment. We do not advertise the harness as a general mechinterp
-replication engine until those modules exist; until then it is more accurately
-described as a **representation probing / representation engineering harness**.
+All eight technique modules now exist with working implementations and unit tests
+(150+ unit tests across the harness, plus 20 integration tests against a real
+pythia-14m model). Coverage of mechinterp methods supported by the harness:
+**probing, contrastive activation steering, activation patching, attention head
+analysis, SAE features, logit lens, edge attribution patching, single-edge path
+patching.** This is enough surface area to attempt replications of papers like
+IOI (Wang et al.), induction heads (Olsson et al.), and ROME-style causal traces
+(Meng et al.) — see the `circuit_identification` experiment type for the glue.
+
+Notable gaps: ACDC is stubbed (use EAP as a fast approximation), and tuned lens
+requires bringing your own checkpoint (no automatic training pipeline).
 
 ---
 

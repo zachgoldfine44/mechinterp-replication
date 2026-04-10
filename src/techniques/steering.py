@@ -41,6 +41,8 @@ from typing import Any, Literal
 import torch
 from torch import Tensor
 
+from src.utils.activations import get_hf_layer_modules
+
 logger = logging.getLogger(__name__)
 
 
@@ -323,30 +325,9 @@ def _tl_steer_score(
 # HuggingFace backend
 # ---------------------------------------------------------------------------
 
-def _get_hf_layer_modules(model: Any) -> list[Any]:
-    """Get the list of transformer layer modules from a HuggingFace model.
-
-    Handles common model architectures (Llama, Qwen, Gemma, GPT-2, etc.).
-    """
-    # Try common attribute names for the transformer block list
-    for attr_path in [
-        "model.layers",          # Llama, Qwen, Gemma
-        "transformer.h",         # GPT-2, GPT-Neo
-        "gpt_neox.layers",       # GPT-NeoX, Pythia
-        "model.decoder.layers",  # OPT
-    ]:
-        obj = model
-        try:
-            for part in attr_path.split("."):
-                obj = getattr(obj, part)
-            return list(obj)
-        except AttributeError:
-            continue
-
-    raise RuntimeError(
-        "Could not find transformer layers in model. "
-        "Supported architectures: Llama, Qwen, Gemma, GPT-2, GPT-NeoX, OPT."
-    )
+# Layer-module accessor lives in src.utils.activations.get_hf_layer_modules
+# (imported at the top of this file). This used to be a duplicated local
+# helper; consolidated to one canonical implementation.
 
 
 def _hf_steer_generate(
@@ -360,7 +341,7 @@ def _hf_steer_generate(
     device: str,
 ) -> str:
     """Generate with HuggingFace model using register_forward_hook."""
-    layer_modules = _get_hf_layer_modules(model)
+    layer_modules = get_hf_layer_modules(model)
     steering_vec = (alpha * vector).to(device)
     handles = []
 
@@ -410,7 +391,7 @@ def _hf_steer_score(
     device: str,
 ) -> dict[str, float]:
     """Score choices with HuggingFace model steering."""
-    layer_modules = _get_hf_layer_modules(model)
+    layer_modules = get_hf_layer_modules(model)
     steering_vec = (alpha * vector).to(device)
     scores: dict[str, float] = {}
 

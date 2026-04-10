@@ -47,6 +47,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from src.core.claim import ClaimConfig, ExperimentResult
 from src.core.experiment import Experiment
+from src.utils.activations import get_hf_layer_modules
 
 logger = logging.getLogger(__name__)
 
@@ -425,7 +426,7 @@ class ProbeClassificationExperiment(Experiment):
             return hook_fn
 
         # Register hooks on residual stream (post-layer)
-        layer_modules = self._get_layer_modules(hf_model)
+        layer_modules = get_hf_layer_modules(hf_model)
         for layer_idx in layers:
             if layer_idx < len(layer_modules):
                 h = layer_modules[layer_idx].register_forward_hook(make_hook(layer_idx))
@@ -459,22 +460,6 @@ class ProbeClassificationExperiment(Experiment):
                 h.remove()
 
         return result
-
-    def _get_layer_modules(self, model: Any) -> list:
-        """Get the list of transformer layer modules from an HF model."""
-        # Common attribute names for transformer layers
-        for attr in ("model.layers", "transformer.h", "gpt_neox.layers", "model.decoder.layers"):
-            parts = attr.split(".")
-            obj = model
-            try:
-                for part in parts:
-                    obj = getattr(obj, part)
-                return list(obj)
-            except AttributeError:
-                continue
-        raise AttributeError(
-            f"Cannot find transformer layers in model of type {type(model).__name__}"
-        )
 
     def _train_and_eval_probe(
         self,
