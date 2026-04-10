@@ -851,7 +851,7 @@ v2 was produced in response to two detailed external critiques of v1. Specific c
 
 ## Acknowledgments
 
-This work was done in a personal capacity as a mechanistic interpretability research exercise using Claude Code for implementation assistance. Thanks to the original Sofroniew et al. team for writing that made replication tractable, to the TransformerLens and HuggingFace teams whose tools made cross-model experimentation possible, and to two detailed external reviewers whose v1 critiques shaped this v2 draft.
+This work was done in a personal capacity as a mechanistic interpretability research exercise using Claude Code for implementation assistance. Thanks to the original Sofroniew et al. team for writing that made replication tractable, to the TransformerLens and HuggingFace teams whose tools made cross-model experimentation possible, and to two detailed external reviewers whose v1 critiques shaped this v2 draft. Thanks to Callum McDougall, Neel Nanda, and the ARENA 3.0 curriculum team for producing excellent mechanistic interpretability educational materials that informed the techniques and best practices used throughout this harness. Thanks to Siddharth Mishra-Sharma for his Anthropic blog post "Long-running Claude for scientific computing," which inspired the idea of building a science replication harness for Claude Code and provided much of the structural scaffolding (incremental checkpointing, changelog discipline, paper-as-oracle pattern) that this project relies on.
 
 ## References
 
