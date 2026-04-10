@@ -381,24 +381,54 @@ def fig4_universality_scorecard():
     ax_scale = fig.add_subplot(gs[1])
 
     # ── Heatmap ──
-    # Custom colormap: red for fail, green for pass
-    cmap_pass = mcolors.ListedColormap(["#E8B4B4", "#B4DEB4"])
-    bounds = [-0.5, 0.5, 1.5]
-    norm_pass = mcolors.BoundaryNorm(bounds, cmap_pass.N)
+    # Intensity-graded colors: stronger greens for higher passing values,
+    # stronger reds for values further below threshold.  Each column is
+    # normalised independently so the colour gradient is meaningful within
+    # each claim (different metrics have different natural ranges).
+    from matplotlib.colors import LinearSegmentedColormap
 
-    ax_heat.imshow(pass_matrix.astype(float), cmap=cmap_pass, norm=norm_pass,
-                   aspect="auto", interpolation="nearest")
+    green_cmap = LinearSegmentedColormap.from_list(
+        "greens", ["#daf2da", "#4caf50", "#1b5e20"], N=256
+    )
+    red_cmap = LinearSegmentedColormap.from_list(
+        "reds", ["#fce4e4", "#e57373", "#b71c1c"], N=256
+    )
+
+    # Build an RGBA image so each cell can use an independent colourmap.
+    cell_colors = np.zeros((n_models, n_claims, 4))
+    for j in range(n_claims):
+        col_vals = data_matrix[:, j]
+        thresh = thresholds[j]
+
+        # Passing cells: normalise to [0, 1] within the range
+        # [threshold, column_max].  Higher values -> darker green.
+        pass_mask = col_vals >= thresh
+        col_max = col_vals[pass_mask].max() if pass_mask.any() else thresh + 1e-9
+        col_min_pass = thresh
+        span = max(col_max - col_min_pass, 1e-9)
+
+        for i in range(n_models):
+            if pass_matrix[i, j]:
+                normed = np.clip((col_vals[i] - col_min_pass) / span, 0, 1)
+                cell_colors[i, j] = green_cmap(normed)
+            else:
+                # Failing cells: normalise within [0, threshold].
+                # Lower values -> darker red.
+                normed = np.clip(1.0 - col_vals[i] / max(thresh, 1e-9), 0, 1)
+                cell_colors[i, j] = red_cmap(normed)
+
+    ax_heat.imshow(cell_colors, aspect="auto", interpolation="nearest")
 
     # Annotate cells with values
     for i in range(n_models):
         for j in range(n_claims):
             val = data_matrix[i, j]
-            # Format: integers for causal_effect_count, else 2 decimal places
-            if j == 4:  # causal_steering_behavior
+            if j == 4:  # causal_steering_behavior (integer count)
                 text = f"{int(val)}"
             else:
                 text = f"{val:.2f}"
-            text_color = "#1a5e1a" if pass_matrix[i, j] else "#8b1a1a"
+            # Dark text for readability against the gradient backgrounds
+            text_color = "#0d3b0d" if pass_matrix[i, j] else "#5a0000"
             ax_heat.text(j, i, text, ha="center", va="center",
                          fontsize=10, fontweight="bold", color=text_color)
 
