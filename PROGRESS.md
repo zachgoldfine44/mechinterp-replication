@@ -2,7 +2,18 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3 + harness v2 incorporating two rounds of external critique fixes
+## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.1 + harness v2 incorporating three rounds of critique fixes
+
+**Writeup v3.1 (GPU follow-ups, 21 min A100 time):**
+- Negative control parametric on medium tier:
+  - Llama 8B: contamination 0.730 (was 1.000 small)
+  - Qwen 7B: real-only rank correlation 0.493 — **FAILS** the 0.50 threshold; contamination 1.449 (negative control STRONGER than real)
+  - Gemma 9B: contamination 0.559 (was 1.000 small)
+  - Headline parametric verdict downgraded: "5/6 pass real-only metric, 1 fails outright, all 6 contaminated"
+- Mean-pooling vs last-token comparison: cross-model deltas tiny (-0.016 to +0.032). Qwen 7B benefits from mean-pooling.
+- Multi-layer steering on Llama 8B (9 layers × 1 concept × 1 alpha × 1 scenario × 5 samples): only layer 12 has 1/5 sample flipped, well within noise. Does NOT rescue the steering null.
+- New `scripts/gpu_followups.py` (582 LOC, runnable on any pod with HF token).
+
 
 **Writeup v3 (low-hanging-fruit pass on the v2 critiques):**
 - Parametric scaling: added negative-control template ("blueberries"). Contamination ratio = 1.000 across all 3 small models — fear vector activates monotonically with blueberry count just as strongly as with Tylenol dosage. Claim 4 reframed as contaminated, not "passes universally".

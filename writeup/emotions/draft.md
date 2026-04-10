@@ -2,15 +2,26 @@
 
 **A preliminary report replicating Sofroniew et al. (2026) across six open-source language models at 1B-9B scale.**
 
-*Draft v3 — incorporates fixes from two rounds of external critique (see §0 below). Large-tier (27B-70B) replication deferred to future work.*
+*Draft v3.1 — adds GPU follow-up results (negative control on medium tier, mean-pooling comparison, multi-layer steering check). Large-tier (27B-70B) replication deferred to future work.*
 
 Repository: https://github.com/zachgoldfine44/mechinterp-replication
 
 ---
 
-## §0. Errata and response to external critique (v2 + v3)
+## §0. Errata and response to external critique (v2 + v3 + v3.1)
 
-**v3 changes (newest, in response to a re-read of the v2 critiques):**
+**v3.1 changes (newest, GPU follow-ups in 21 minutes of A100 time on a fresh RunPod pod):**
+
+- **Negative control parametric on the medium tier.** v3 ran the blueberries control on the small tier only (CPU sufficient — projects on cached vectors). v3.1 ran it on Llama 8B / Qwen 7B / Gemma 9B too. Findings:
+  - Llama 8B: contamination drops to 0.730 (was 1.000 on small)
+  - Qwen 7B: real-templates rank correlation drops to **0.493 — fails the 0.50 threshold under the v3 real-only metric**. Contamination ratio = 1.449 (negative control STRONGER than real templates). Multiple templates broke with rho in the wrong direction.
+  - Gemma 9B: contamination drops to 0.559 (was 1.000 on small)
+  - **Net effect on the headline**: claim 4 (parametric scaling) goes from "passes universally" → "5 of 6 models technically pass on real templates, 1 fails outright, all 6 have substantial contamination, the original 'passes universally' headline was inflated by mixing real and (now) negative-control templates in the v1/v2 aggregate".
+- **Mean-pooling vs last-token aggregation comparison on medium tier.** Mean delta is essentially 0 across the 3 models (Llama 8B: -0.003, Qwen 7B: **+0.032**, Gemma 9B: -0.016). For Qwen 7B specifically, mean-pooling adds 3pp to probe accuracy. Suggestive but not large enough to rewrite the probe section. Reported in §3.4.1.
+- **Multi-layer steering check on Llama 8B.** Single concept × single alpha × single scenario × 9 layers, 5 samples per condition. Result: only layer 12 produces any non-zero steered effect (1/5 sample), and it's well within sampling noise of zero. Does NOT rescue the v2/v3 steering null. Reported in §3.4.2.
+- **GPU time budget**: 21 min total across 3 medium-tier models on a single A100 80GB. The negative control + mean pooling + multi-layer steering scripts together fit comfortably in a 60-minute budget.
+
+**v3 changes (response to a re-read of the v2 critiques):**
 
 - **Parametric scaling claim 4 is now flagged as contaminated.** A negative-control template ("blueberries", same numerical scaling, no danger) was added in v3. On all 3 small-tier models, the negative control gives a contamination ratio of **1.000** — i.e., the fear vector activates monotonically with blueberry count just as strongly as it does with Tylenol dosage. The parametric scaling result on small models is mostly an artifact of how transformer LMs encode numerical magnitude in the prompt, not a meaningful "severity → emotion" effect. See §3.4 for details.
 - **Geometry layer-stability check added.** Across the top-3 probe layers per model, the PC1↔valence correlation varies by ~0.1 — the result is robust within the top-probe-layer regime, not a single-layer artifact. See §3.3.
@@ -68,14 +79,14 @@ A diff-style change log is in Appendix D.
 
 We replicate Sofroniew et al.'s (2026) [*Emotion Concepts and their Function in a Large Language Model*](https://transformer-circuits.pub/2026/emotions/index.html) across six open-source language models spanning three families (Llama 3.1/3.2, Qwen 2.5, Gemma 2) and two size tiers (1-2B small, 7-9B medium). The paper studied Claude Sonnet 4.5 and reported six core findings. We ask: **which findings are universal properties of transformer LMs, and which are specific to Claude Sonnet 4.5 or frontier scale?**
 
-**Short answer**: all six open models pass our (deliberately relaxed) thresholds on the four representational metrics, and the magnitudes are in the same ballpark as the paper's Claude results — **but** v3 of this draft reveals that one of the four (parametric scaling) is mostly an artifact of numerical-magnitude encoding, not severity-from-context (see §3.4 negative-control analysis: contamination ratio = 1.0 across all 3 small-tier models). The two *behavioral* metrics (causal steering, preference steering) do not pass any threshold under our evaluation methodology. We discuss two equal-standing interpretations of that null in §5.2: (a) it is a limitation of our protocol (floor effects, scenario simplicity, scale gap), or (b) emotion representations exist at this scale but are not causally potent for behavior. Our experiment cannot distinguish between these.
+**Short answer**: all six open models pass our (deliberately relaxed) thresholds on **three** of the four representational metrics — probe classification, generalization, valence geometry — and the magnitudes are in the same ballpark as the paper's Claude results. The fourth representational metric (parametric scaling) **fails outright on Qwen 7B (0.493 < 0.50)** and is contaminated by numerical-magnitude artifacts on all six models (negative-control "blueberries" template gives the same or stronger magnitude on small models — see §3.4). The two *behavioral* metrics (causal steering, preference steering) do not pass any threshold under our evaluation methodology. We discuss two equal-standing interpretations of the steering null in §5.2: (a) it is a limitation of our protocol (floor effects, scenario simplicity, scale gap), or (b) emotion representations exist at this scale but are not causally potent for behavior. Our experiment cannot distinguish between these. A multi-layer steering check on Llama 8B (added in v3.1, §3.4.2) does not rescue the null.
 
 | Claim | Paper (Claude Sonnet 4.5) | Our 6 open models (range) | Passes our threshold? |
 |---|---|---|---|
 | 1. Probe classification | 0.713 | 0.731 – 0.840 (vs lexical baseline 0.37-0.40) | ✅ All 6 |
 | 2. Generalization to implicit | ~0.76 hidden emotions | 0.667 – 0.867 diagonal dominance | ✅ All 6 |
 | 3. Valence geometry (PC1) | r = 0.81 | \|r\| = 0.666 – 0.828, all p < 0.01 | ✅ All 6 |
-| 4. Parametric scaling | monotonic w/ severity | ρ = 0.571 – 0.971 | 🟡 contaminated (see §3.4 — neg-control gives same magnitude) |
+| 4. Parametric scaling | monotonic w/ severity | real-only ρ = 0.493 – 0.971 | 🟡 5/6 pass real-only metric (Qwen 7B fails); all 6 contaminated by neg-control. See §3.4 |
 | 5. Causal steering (blackmail) | 22% → 72% | 0 / 45 Fisher-significant effects | ❌ All 6 fail |
 | 6. Preference steering (Elo) | r = 0.85 | r = 0.000 | ❌ All 6 fail |
 
@@ -311,17 +322,85 @@ The geometry result is **stable across the top-3 probing layers** for every mode
 
 **v3 update from external critique**: A critique noted that the parametric experiment doesn't isolate severity from numerical-magnitude artifacts — the model may be responding to "5000" being a bigger number than "200", not to the embedded danger meaning. We added a negative-control template ("I ate {X} blueberries today" with X ∈ {5, 50, 500, 5000, 50000, 500000}) which has the same numerical scaling pattern but no danger implication. Expected behavior: the fear vector should NOT scale with blueberries.
 
-**The negative control fails to be silent in all three small-tier models we re-ran:**
+**The negative control fails to be silent in all six tested models, but the medium-tier results tell a more nuanced (and worse) story than the small tier.**
 
-| Model | Real templates rank correlation | Negative control mean \|ρ\| | Contamination ratio |
+**Small-tier (CPU run):**
+
+| Model | Real templates \|ρ\| | Negative control \|ρ\| | Contamination ratio |
 |---|---:|---:|---:|
 | Llama-3.2-1B-Instruct | 0.943 | 0.943 | **1.000** |
 | Qwen2.5-1.5B-Instruct | 0.886 | 0.886 | **1.000** |
 | Gemma-2-2B-it | 0.971 | 0.971 | **1.000** |
 
-**Contamination ratio of 1.0 means the negative control gives exactly the same magnitude correlation as the real templates.** Concretely: the "afraid" probe activates monotonically with blueberry count, and the "calm" probe deactivates monotonically with blueberry count, at exactly the same strength as it does for Tylenol dosage. **This strongly suggests the parametric scaling result on small models is mostly an artifact of how transformer LMs encode numerical magnitude in the prompt, not a meaningful representation of "severity → emotion".** A "happy" or "calm" probe would presumably also scale with any monotonically increasing numerical scalar at the same position, regardless of context.
+**Medium-tier (v3.1 GPU run on RunPod A100):**
 
-We have not yet rerun the negative control on the medium tier (Llama 8B / Qwen 7B / Gemma 9B) — that requires extracting activations for the new template prompts on the GPU pod. We expect a similar pattern but cannot yet report it.
+| Model | Real templates \|ρ\| | Negative control \|ρ\| | Contamination ratio | Status under real-only metric |
+|---|---:|---:|---:|---|
+| Llama-3.1-8B-Instruct | 0.900 | 0.657 | 0.730 | PASS (0.900 > 0.50) |
+| Qwen2.5-7B-Instruct | **0.493** | **0.714** | **1.449** | **FAIL (0.493 < 0.50)** |
+| Gemma-2-9B-it | 0.664 | 0.371 | 0.559 | PASS (0.664 > 0.50) |
+
+**Three observations:**
+
+1. **Contamination drops at scale for Llama and Gemma** (1.000 → 0.730 / 0.559), suggesting the larger models do start to differentiate "danger context" from "raw numerical magnitude". But the contamination is still substantial — 56-73% of the headline effect could be explained by numerical magnitude alone.
+
+2. **Qwen 7B is dramatically worse than Qwen 1.5B.** The real-template rank correlation drops from 0.886 (small) → 0.493 (medium), while the negative control stays high at 0.714. The contamination ratio is **above 1.0** — the negative control is *stronger* than the real templates. Inspecting per-template rhos on Qwen 7B: `financial_loss × afraid` = -0.200 (the WRONG direction; the fear vector goes DOWN with bigger losses), `medical_wait × afraid` = -0.371 (wrong direction), `height_ledge × calm` = +0.029 (no decrease). Most of Qwen 7B's parametric scaling is broken in v3.1 testing.
+
+3. **The reported v1/v2/v3 headline rank correlation for Qwen 7B (0.943) is largely an artifact of the bug we fixed in v3.** Before v3 the parametric experiment used `mean(|rho|)` over both real and (now) negative-control templates. The 0.943 number was unweighted absolute correlation, which counted Qwen 7B's broken templates as equally "successful" as the working ones. The correct real-only metric (0.493) just barely fails the 0.50 threshold.
+
+**The corrected verdict on parametric scaling claim 4 across all 6 models, using the v3.1 real-templates-only metric:**
+
+| Model | rank_correlation_real | passes 0.50? | contamination ratio |
+|---|---:|:---:|---:|
+| Llama-3.2-1B | 0.943 | ✅ | 1.000 |
+| Qwen2.5-1.5B | 0.886 | ✅ | 1.000 |
+| Gemma-2-2B | 0.971 | ✅ | 1.000 |
+| Llama-3.1-8B | 0.900 | ✅ | 0.730 |
+| **Qwen2.5-7B** | **0.493** | **❌** | 1.449 |
+| Gemma-2-9B | 0.664 | ✅ | 0.559 |
+
+**5 of 6 models technically pass the threshold on real templates, but every model has substantial contamination, and Qwen 7B fails outright.** Claim 4 is no longer "passes universally" — it's *contaminated, mixed, and one model fails*. This is a meaningful downgrade from v1/v2/v3.
+
+A clean replication of the parametric scaling claim would require:
+- Templates where danger is varied independently of numerical magnitude (e.g., "I drank 1000ml of water" vs "I drank 1000ml of bleach")
+- Multiple negative controls covering different number ranges
+- A correlation metric that explicitly subtracts the negative-control baseline rather than just reporting it alongside
+
+We leave that to follow-up work.
+
+### 3.4.1 Aggregation strategy: mean-pooling vs last-token
+
+Critique #2-16 noted that the harness defaults to `last_token` aggregation when extracting probe features. For long stories (50-80 words), the last token may primarily encode discourse-completion signals rather than emotion content. We re-extracted activations from the same training stimuli with `mean` aggregation at the cached best probe layer for each medium-tier model and re-trained the probe with the same 5-fold CV protocol:
+
+| Model | last_token accuracy | mean_pool accuracy | delta |
+|---|---:|---:|---:|
+| Llama-3.1-8B-Instruct | 0.819 | 0.816 | -0.003 |
+| Qwen2.5-7B-Instruct | 0.784 | **0.816** | **+0.032** |
+| Gemma-2-9B-it | 0.840 | 0.824 | -0.016 |
+
+**Qwen 7B benefits from mean pooling (+3.2pp).** Llama and Gemma are essentially indifferent. There is no universally optimal aggregation strategy in our tested set, but for at least one model the default is suboptimal. A future iteration should either pick the better aggregation per-model (after a small held-out tuning set) or report both numbers in the headline. This is *not* a major effect on any model, but it does mean the reported probe accuracies are within ±3pp of an alternative aggregation choice.
+
+### 3.4.2 Multi-layer steering check on Llama 8B
+
+Critique #2-13 raised that we steer at the probe-best layer (which maximizes linear *decodability*) but causal *potency* may peak at a different layer. We ran a focused test on Llama 8B: one concept (`desperate`), one alpha (0.5 — the strongest from our v2 sweep), one scenario (`blackmail_01`), 5 samples per condition, sweeping the steering layer across every ~4th layer of the network.
+
+| Layer | baseline | steered | control | effect | significant? |
+|---:|---:|---:|---:|---:|:---:|
+| 0 | 0.00 | 0.00 | 0.00 | +0.00 | |
+| 4 | 0.00 | 0.00 | 0.00 | +0.00 | |
+| 8 | 0.00 | 0.00 | 0.00 | +0.00 | |
+| 12 | 0.00 | **0.20** | 0.00 | +0.20 | (1/5 sample) |
+| 16 | 0.00 | 0.00 | 0.00 | +0.00 | |
+| 20 | 0.00 | 0.00 | 0.00 | +0.00 | |
+| 24 | 0.00 | 0.00 | 0.00 | +0.00 | |
+| 28 (probe-best) | 0.00 | 0.00 | 0.00 | +0.00 | |
+| 31 | 0.00 | 0.00 | 0.00 | +0.00 | |
+
+**No layer produces a robust steering effect.** Layer 12 has a single sample out of 5 flip to a non-refusal response (with steered "desperate" + α=0.5), while baseline and control are uniformly 0. With n=5 samples, the binomial 95% CI on 1/5 is roughly [0.005, 0.72] — so the layer-12 result is well within sampling noise of zero. It is suggestive enough to mention but not enough to claim a significant effect.
+
+**Interpretation**: this small follow-up does not rescue the steering null result. The probe-best-layer choice is not the bottleneck — every layer we tested gives a 0% steered unethical rate at α=0.5 on the blackmail scenario for Llama 8B Instruct. The two equal-standing hypotheses from §5.2 (protocol limitation vs. representations-without-causal-potency) remain equally consistent with the data.
+
+A more decisive test would need (a) more samples per condition (10-20 not 5), (b) multiple alphas, (c) multiple concepts, (d) multiple scenarios. That's a much larger budget than 60 minutes. We leave it to follow-up work.
 
 **This is a significant downgrade of claim 4** from v1/v2. Where we previously reported "emotion vectors track continuous severity parameters with rank correlations 0.886-0.971", we should now report: "emotion-vector projections monotonically track numerical magnitude in the prompt, but a numerical-only negative control (blueberry count) shows the same monotonic effect, so the scaling is not specific to severity at this scale and protocol".
 
@@ -517,9 +596,11 @@ A follow-up study could give a definitive answer to "do emotion vectors causally
 
 ## 6. Conclusion
 
-Across six open-source instruction-tuned language models spanning three families (Llama, Qwen, Gemma) and two size tiers (1B-9B), **all six models pass our (deliberately relaxed) thresholds on the four representational metrics**: probes classify the 15-emotion task at 0.73-0.84 (vs the paper's 0.71 on Claude and our text-only lexical baseline of 0.35-0.40); probes generalize to implicit scenarios at 0.67-0.87 diagonal dominance; PC1 of the emotion vectors aligns with hand-labeled valence at |r| = 0.666-0.828 (all p < 0.01, bootstrap CIs in Appendix A, layer-stable across the top-3 probe layers) — with three models landing within 0.02 of the paper's r = 0.81; and emotion vectors track parametric prompt features with rank correlations 0.571-0.971 *but the parametric finding is contaminated by numerical-magnitude artifacts* (negative control gives the same magnitude — see §3.4).
+Across six open-source instruction-tuned language models spanning three families (Llama, Qwen, Gemma) and two size tiers (1B-9B), **all six models pass our (deliberately relaxed) thresholds on three of four representational metrics**: probes classify the 15-emotion task at 0.73-0.84 (vs the paper's 0.71 on Claude and our text-only lexical baseline of 0.35-0.40); probes generalize to implicit scenarios at 0.67-0.87 diagonal dominance; PC1 of the emotion vectors aligns with hand-labeled valence at |r| = 0.666-0.828 (all p < 0.01, bootstrap CIs in Appendix A, layer-stable across the top-3 probe layers) — with three models landing within 0.02 of the paper's r = 0.81.
 
-So three of our four "representational pass" claims (probe classification, generalization, valence geometry) survive validity checks. The fourth (parametric scaling) survives the threshold check but fails the negative-control validity check. **These results are suggestive of universal representational properties** — specifically, valence-organized linear emotion decoding — in transformer LMs across this size range, but cannot establish "universality" in any strong sense from N = 6 models, N = 15 emotions per model, and a deliberately relaxed threshold protocol. The valence geometry finding in particular merits a follow-up at higher concept count.
+The fourth representational claim — **parametric scaling** — is in much worse shape than the v1/v2 headline suggested. Five of six models technically pass the 0.50 threshold under the v3 real-templates-only metric (range: 0.493 - 0.971), but **Qwen 7B fails outright at 0.493**, and **all six models have substantial negative-control contamination** ranging from 0.559 (Gemma 9B) to 1.449 (Qwen 7B, where the negative control is actually stronger than the real templates). The original v1/v2 headline of "0.886-0.971 across all models" was inflated by an aggregation that mixed real templates with what we now recognize as numerical-magnitude artifacts. Three of four representational claims survive the validity checks added in v3 + v3.1; the fourth no longer does.
+
+These results are **suggestive of three universal representational properties** of transformer LMs in this size range — emotion decodability, generalization to implicit scenarios, and valence-organized geometry — but cannot establish "universality" in any strong sense from N = 6 models, N = 15 emotions per model, and a deliberately relaxed threshold protocol. The valence geometry finding in particular merits a follow-up at higher concept count.
 
 **The two behavioral metrics (causal steering, preference steering) produce zero signal across all six models.** Across 135 concept × alpha × scenario triples on the medium tier (45 per model × 3 models, 10 generated samples per condition, batched on A100, classified by LLM-as-judge, and now tested with Fisher's exact rather than placeholder p-values), zero pass our significance criterion. Every baseline, steered, and control response is classified as ethical refusal. We discuss two equal-standing interpretations of this null in §5.2: (a) it is a methodology limitation we could plausibly fix with the changes in §5.3, or (b) emotion representations exist in 1-9B open instruct models but are not causally potent for behavior. Our experiment cannot distinguish between these, and we no longer want to claim it is purely (a).
 
@@ -588,6 +669,23 @@ python -m src.analysis.scaling --paper emotions
 The framework is paper-agnostic; adding a new replication requires a new `config/papers/{paper_id}/` directory with `paper_config.yaml` and `stimuli_config.yaml`. Generic experiment types (`probe_classification`, `generalization_test`, `representation_geometry`, `parametric_scaling`, `causal_steering`) cover most mechinterp papers. Paper-specific experiments go in `src/experiments/paper_specific/`.
 
 ## Appendix D: Change log
+
+### v3 → v3.1
+
+v3.1 adds GPU follow-ups in 21 minutes of A100 time on a fresh RunPod pod:
+
+| Area | v3 | v3.1 |
+|---|---|---|
+| Negative control parametric — small tier | ran on small tier, contamination=1.000 across 3 models | unchanged (small-tier results held up — no GPU needed) |
+| Negative control parametric — medium tier | not run | **NEW: contamination drops at scale (0.730 / 1.449 / 0.559) but Qwen 7B real-templates rank correlation drops to 0.493 — fails the v3 real-only metric**. The original v1/v2 headline of 0.943 for Qwen 7B was inflated by mixing real + (then-unmarked) negative-control templates. |
+| Mean-pooling vs last-token | not tested | NEW: cross-model delta is essentially 0 (Llama -0.003, Qwen +0.032, Gemma -0.016). Qwen 7B benefits from mean-pooling, the others don't. |
+| Multi-layer steering on Llama 8B | not tested | NEW: 9-layer sweep at α=0.5 on `desperate × blackmail_01`. Only layer 12 has a non-zero steered effect (1/5 sample, within noise). Does not rescue the v2/v3 steering null. |
+| Headline parametric verdict | "passes universally" | **"5/6 models pass real-only metric, 1 fails outright, all 6 contaminated"** |
+| New script | none | `scripts/gpu_followups.py` (582 LOC, runnable on any pod with HF token) |
+| New result files | none | `gpu_followups.json` per medium model + `gpu_followups_combined.json` |
+| Test counts | 162 unit + 20 integration | unchanged (v3.1 is pure analysis on cached results + new GPU runs; no new harness code) |
+
+---
 
 ### v2 → v3
 
