@@ -9,6 +9,20 @@ and a one-line summary, followed by optional bullets.
 
 ---
 
+## 2026-04-12 — Phase C: Llama-3.1-70B-Instruct (large tier)
+
+Session started. Plan: run all 6 emotion claims on Llama-3.1-70B-Instruct
+using a rented A100 80GB. This is the first large-tier model run.
+
+- Wrote `scripts/run_llama_70b.py`: self-contained script using raw HuggingFace
+  with 4-bit NF4 quantization (bitsandbytes), all 6 claims + critique followups.
+  80 layers → subsampled to ~21 layers for probing.
+- Set up new A100 pod (154.54.102.36:12704), synced code, installed deps.
+- Launched nohup run. Model downloading (30 shards, ~140GB → ~40GB quantized).
+- **In progress**: waiting for model load + claim 1 extraction.
+
+---
+
 ## 2026-04-12 — v3.4: Address three external peer reviews
 
 Three independent peer reviews (ChatGPT extended thinking 7/10, Claude Opus 4.6
