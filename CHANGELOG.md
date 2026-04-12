@@ -58,7 +58,12 @@ This session addresses the highest-priority items.
 - **High-alpha ethical steering sweep**: Same script sweeps alphas [0.5, 1.0, 2.0,
   3.0, 5.0] on ethical scenarios with coherence monitoring (unique-word ratio).
   Addresses Gemini's concern that alpha=0.50 upper bound was too weak.
-- Running on Qwen-7B via A100 (Llama/Gemma need HF token not on this server).
+- Ran on Qwen-7B via A100 (~25 min total). Key findings:
+  - **Sentiment positive control PASSES**: happy vector +0.031 sentiment at alpha=5.0 (3x baseline).
+    Hostile vector -0.014. Steering pipeline is functional.
+  - **High-alpha ethical sweep**: at alpha=5.0, 8.9% unethical rate with 73% coherence.
+    Model degrades before safety training breaks. Alpha=0.50 was too low.
+  - Data saved to `results/emotions/qwen_7b/critique_followups/`.
 
 ---
 

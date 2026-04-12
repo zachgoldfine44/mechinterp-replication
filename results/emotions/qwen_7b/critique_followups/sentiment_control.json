@@ -1,0 +1,1357 @@
+{
+  "model_key": "qwen_7b",
+  "best_layer": 24,
+  "positive_control_passes": true,
+  "summary": {
+    "happy": {
+      "sentiment_by_alpha": {
+        "0.0": 0.010278170897811478,
+        "0.5": 0.01327168343081302,
+        "1.0": 0.01795060833408267,
+        "2.0": 0.015155696048831931,
+        "5.0": 0.04136711701352165
+      },
+      "shifts": {
+        "0.0": 0.0,
+        "0.5": 0.0029935125330015425,
+        "1.0": 0.0076724374362711935,
+        "2.0": 0.004877525151020454,
+        "5.0": 0.031088946115710173
+      },
+      "expected": "positive"
+    },
+    "hostile": {
+      "sentiment_by_alpha": {
+        "0.0": 0.013198398719268388,
+        "0.5": 0.009126288497176003,
+        "1.0": 0.013574955766411392,
+        "2.0": 0.011489441344158989,
+        "5.0": -0.0005
+      },
+      "shifts": {
+        "0.0": 0.0,
+        "0.5": -0.004072110222092385,
+        "1.0": 0.00037655704714300436,
+        "2.0": -0.001708957375109399,
+        "5.0": -0.013698398719268388
+      },
+      "expected": "negative"
+    },
+    "enthusiastic": {
+      "sentiment_by_alpha": {
+        "0.0": 0.012533788392350012,
+        "0.5": 0.01035290282393999,
+        "1.0": 0.017483143710490312,
+        "2.0": 0.01303254571985325,
+        "5.0": 0.003016895845953878
+      },
+      "shifts": {
+        "0.0": 0.0,
+        "0.5": -0.0021808855684100226,
+        "1.0": 0.0049493553181403,
+        "2.0": 0.000498757327503237,
+        "5.0": -0.009516892546396134
+      },
+      "expected": "positive"
+    },
+    "sad": {
+      "sentiment_by_alpha": {
+        "0.0": 0.012108291932239234,
+        "0.5": 0.009844874831080633,
+        "1.0": 0.00841183069439372,
+        "2.0": 0.010845796060880146,
+        "5.0": 0.004176111800879412
+      },
+      "shifts": {
+        "0.0": 0.0,
+        "0.5": -0.002263417101158601,
+        "1.0": -0.003696461237845514,
+        "2.0": -0.001262495871359088,
+        "5.0": -0.007932180131359823
+      },
+      "expected": "negative"
+    }
+  },
+  "detailed_results": [
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.011996598639455782,
+      "std_sentiment": 0.024414784023826124
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.022867437573319927,
+      "std_sentiment": 0.014076388351882956
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.007767722473604827,
+      "std_sentiment": 0.00951422551306797
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.00392156862745098,
+      "std_sentiment": 0.00784313725490196
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.007695153533111357,
+      "std_sentiment": 0.009427503900928485
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.00023547880690737779,
+      "std_sentiment": 0.012538248376292267
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.02774140752864157,
+      "std_sentiment": 0.029154169156743737
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.01675351901766996,
+      "std_sentiment": 0.014705868836459454
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.03398601398601399,
+      "std_sentiment": 0.022514224669855237
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.007275132275132275,
+      "std_sentiment": 0.008912635199959268
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.00824829931972789,
+      "std_sentiment": 0.010102956966176288
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.007692307692307693,
+      "std_sentiment": 0.015384615384615385
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.011616722160562337,
+      "std_sentiment": 0.015614912469866567
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.020601472995090016,
+      "std_sentiment": 0.022832707083710223
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.015724057587707903,
+      "std_sentiment": 0.007911109351808818
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.05052790346907994,
+      "std_sentiment": 0.029130027022364956
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "movie",
+      "mean_sentiment": -0.004651162790697674,
+      "std_sentiment": 0.009302325581395349
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.02346589259796807,
+      "std_sentiment": 0.014710866322125527
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.016513839578384544,
+      "std_sentiment": 0.01580000163408707
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.02623239723239723,
+      "std_sentiment": 0.008848626316008662
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.0037037037037037034,
+      "std_sentiment": 0.007407407407407407
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.012088235294117646,
+      "std_sentiment": 0.009877936299078002
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.026675114642769625,
+      "std_sentiment": 0.018894367708271784
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.04650108932461874,
+      "std_sentiment": 0.03801760673154918
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.015796768428347374,
+      "std_sentiment": 0.012905453867047764
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.008,
+      "std_sentiment": 0.016
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.004,
+      "std_sentiment": 0.008
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.004,
+      "std_sentiment": 0.008
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.016272595994919706,
+      "std_sentiment": 0.014852380737344932
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.03533182503770739,
+      "std_sentiment": 0.02559429243121397
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.07140274549536126,
+      "std_sentiment": 0.023993160174840187
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.04632701467287934,
+      "std_sentiment": 0.020586378092304864
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.020287616315421676,
+      "std_sentiment": 0.012308633595681061
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.03872974084738791,
+      "std_sentiment": 0.012343803889748007
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.04100497541674012,
+      "std_sentiment": 0.014014441789629135
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.03088556499845544,
+      "std_sentiment": 0.009448897282671821
+    },
+    {
+      "concept": "happy",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.04696745332422003,
+      "std_sentiment": 0.011463979675343508
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.019550371091832962,
+      "std_sentiment": 0.01194880659513308
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.03499899959983994,
+      "std_sentiment": 0.022527001385861906
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.019846338535414166,
+      "std_sentiment": 0.02148168975666864
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.011393323657474601,
+      "std_sentiment": 0.015131276677200985
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.00787037037037037,
+      "std_sentiment": 0.009666950471213473
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.008081632653061225,
+      "std_sentiment": 0.00989877968406473
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.0038461538461538464,
+      "std_sentiment": 0.007692307692307693
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.01895424836601307,
+      "std_sentiment": 0.02029303881864055
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.03117369589345172,
+      "std_sentiment": 0.01926010635226894
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.0038461538461538464,
+      "std_sentiment": 0.007692307692307693
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.0037735849056603774,
+      "std_sentiment": 0.007547169811320754
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.0037735849056603774,
+      "std_sentiment": 0.007547169811320754
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.01148904006046863,
+      "std_sentiment": 0.015021617974046457
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.011880591480090855,
+      "std_sentiment": 0.009740167324173049
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.03470235351034463,
+      "std_sentiment": 0.014317811292851434
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.012084833933573428,
+      "std_sentiment": 0.009871552179994142
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.016098456403838134,
+      "std_sentiment": 0.008072509628877192
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.01495457721872816,
+      "std_sentiment": 0.018316874829244864
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "commute",
+      "mean_sentiment": -0.00016006402561024382,
+      "std_sentiment": 0.012655690719175399
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.01903889761032618,
+      "std_sentiment": 0.011735375090653364
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.021165655544320865,
+      "std_sentiment": 0.012708466306941458
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.050512915655772796,
+      "std_sentiment": 0.0262522301383668
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.008695652173913044,
+      "std_sentiment": 0.017391304347826087
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.007767722473604827,
+      "std_sentiment": 0.00951422551306797
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.0037735849056603774,
+      "std_sentiment": 0.007547169811320754
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": -0.004,
+      "std_sentiment": 0.008
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "hostile",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.011320754716981133,
+      "std_sentiment": 0.015094339622641508
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.030569295933177337,
+      "std_sentiment": 0.042260750301017336
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.015846338535414166,
+      "std_sentiment": 0.014719364561315826
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.012284223203532719,
+      "std_sentiment": 0.016806320140738264
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.014835164835164835,
+      "std_sentiment": 0.013525861126473812
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.0035555555555555557,
+      "std_sentiment": 0.01568832230642026
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.011858974358974358,
+      "std_sentiment": 0.015557257819886663
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.01693404634581105,
+      "std_sentiment": 0.020833512062298724
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.03152941176470588,
+      "std_sentiment": 0.0157676321545149
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "movie",
+      "mean_sentiment": -0.008695652173913044,
+      "std_sentiment": 0.010649955403405121
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.007692307692307693,
+      "std_sentiment": 0.015384615384615385
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.00392156862745098,
+      "std_sentiment": 0.00784313725490196
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.015113652245727716,
+      "std_sentiment": 0.007581559147024458
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.00022641509433962286,
+      "std_sentiment": 0.012294244645613425
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 0.5,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.01610147299509002,
+      "std_sentiment": 0.008077485359090496
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.009128205128205127,
+      "std_sentiment": 0.01132114439101262
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.07596882223297317,
+      "std_sentiment": 0.023313051161476427
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.00392156862745098,
+      "std_sentiment": 0.00784313725490196
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.004081632653061224,
+      "std_sentiment": 0.008163265306122448
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.011717996289424862,
+      "std_sentiment": 0.009597025112660803
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.015317580023462377,
+      "std_sentiment": 0.014377424613389155
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 1.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.019729344729344726,
+      "std_sentiment": 0.017956065063446464
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.008290598290598292,
+      "std_sentiment": 0.019996347098652664
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.05123113860928987,
+      "std_sentiment": 0.00885033657223956
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.013223894208846329,
+      "std_sentiment": 0.018294491809385985
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.004347826086956522,
+      "std_sentiment": 0.008695652173913044
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.0193933236574746,
+      "std_sentiment": 0.017397193893338454
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.004,
+      "std_sentiment": 0.008
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 2.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.0037735849056603774,
+      "std_sentiment": 0.007547169811320754
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.0036363636363636364,
+      "std_sentiment": 0.007272727272727273
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.004878048780487805,
+      "std_sentiment": 0.009756097560975611
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.004878048780487805,
+      "std_sentiment": 0.009756097560975611
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.010742705570291777,
+      "std_sentiment": 0.014013240256628425
+    },
+    {
+      "concept": "enthusiastic",
+      "expected": "positive",
+      "alpha": 5.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.0035714285714285713,
+      "std_sentiment": 0.007142857142857143
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.042687612054981644,
+      "std_sentiment": 0.022558999975481858
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.011927786499215071,
+      "std_sentiment": 0.009746334277216273
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.016214342001576044,
+      "std_sentiment": 0.015742840921070336
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.01461279461279461,
+      "std_sentiment": 0.013624678037484688
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "commute",
+      "mean_sentiment": -0.00392156862745098,
+      "std_sentiment": 0.00784313725490196
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.011773940345368916,
+      "std_sentiment": 0.0155090600128458
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.008003201280512203,
+      "std_sentiment": 0.009805146471895496
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.030928597854236035,
+      "std_sentiment": 0.01997588404211806
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.02449659863945578,
+      "std_sentiment": 0.020008332754388795
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.0038461538461538464,
+      "std_sentiment": 0.007692307692307693
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.0037735849056603774,
+      "std_sentiment": 0.007547169811320754
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "commute",
+      "mean_sentiment": -0.007407407407407407,
+      "std_sentiment": 0.014814814814814814
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 0.5,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.015118269530034234,
+      "std_sentiment": 0.0075886459426923025
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.008166666666666666,
+      "std_sentiment": 0.010005554013202423
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.04977207977207977,
+      "std_sentiment": 0.044693095079510185
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "movie",
+      "mean_sentiment": -0.010405405405405407,
+      "std_sentiment": 0.012760077442284192
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.00792156862745098,
+      "std_sentiment": 0.00970269307870878
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.011924769907963184,
+      "std_sentiment": 0.00974091849944816
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.0037735849056603774,
+      "std_sentiment": 0.007547169811320754
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "commute",
+      "mean_sentiment": -0.007940251572327044,
+      "std_sentiment": 0.009744622913425262
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 1.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.004081632653061224,
+      "std_sentiment": 0.008163265306122448
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.021557971014492753,
+      "std_sentiment": 0.013753806446450946
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.049225491489642434,
+      "std_sentiment": 0.028793829889887046
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.0038461538461538464,
+      "std_sentiment": 0.007692307692307693
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.012136752136752138,
+      "std_sentiment": 0.009969637593847036
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "commute",
+      "mean_sentiment": -0.004347826086956522,
+      "std_sentiment": 0.008695652173913044
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 2.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.004347826086956522,
+      "std_sentiment": 0.008695652173913044
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "restaurant",
+      "mean_sentiment": 0.0035714285714285713,
+      "std_sentiment": 0.007142857142857143
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "weather",
+      "mean_sentiment": 0.021568071121199222,
+      "std_sentiment": 0.017473709612743124
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "movie",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "morning",
+      "mean_sentiment": 0.008269394714407501,
+      "std_sentiment": 0.01015029910733996
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "neighborhood",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "hobby",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "commute",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    },
+    {
+      "concept": "sad",
+      "expected": "negative",
+      "alpha": 5.0,
+      "prompt_id": "weekend",
+      "mean_sentiment": 0.0,
+      "std_sentiment": 0.0
+    }
+  ]
+}
