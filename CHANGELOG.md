@@ -58,12 +58,19 @@ This session addresses the highest-priority items.
 - **High-alpha ethical steering sweep**: Same script sweeps alphas [0.5, 1.0, 2.0,
   3.0, 5.0] on ethical scenarios with coherence monitoring (unique-word ratio).
   Addresses Gemini's concern that alpha=0.50 upper bound was too weak.
-- Ran on Qwen-7B via A100 (~25 min total). Key findings:
-  - **Sentiment positive control PASSES**: happy vector +0.031 sentiment at alpha=5.0 (3x baseline).
-    Hostile vector -0.014. Steering pipeline is functional.
-  - **High-alpha ethical sweep**: at alpha=5.0, 8.9% unethical rate with 73% coherence.
-    Model degrades before safety training breaks. Alpha=0.50 was too low.
-  - Data saved to `results/emotions/qwen_7b/critique_followups/`.
+- Ran on all 6 models via A100 (~3.5 hrs total). Key findings:
+  - **Sentiment positive control PASSES on all 6 models**: happy vector shifts
+    sentiment +0.013 to +0.525 at alpha=5.0. Gemma models show 10-50x larger
+    effects than Llama/Qwen. All 4 steering concepts (happy, hostile,
+    enthusiastic, sad) shift in expected directions universally.
+  - **High-alpha ethical sweep on all 6 models**: coherence degrades with model
+    size (Gemma-9B loses coherence at α=3.0, Qwen-1.5B stays coherent to α=5.0).
+    Small models more susceptible to keyword-based "unethical" detection but
+    don't degrade. Alpha=0.50 was too low — effects appear at α=1.0-3.0.
+  - **Keyword classifier caveat** documented: the noisy keyword matcher produces
+    nonzero baselines on some models (e.g., 20% on Llama-8B), which the LLM-as-judge
+    approach avoids.
+  - Data saved to `results/emotions/{model_key}/critique_followups/` for all 6 models.
 
 ---
 

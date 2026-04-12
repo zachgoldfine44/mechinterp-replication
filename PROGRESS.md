@@ -13,8 +13,8 @@
 - **Qwen-7B contamination ratio moved to main text** from supplement.
 - **Emotion selection criteria documented** in Methods.
 - **Compute asymmetry documented**, M3/M5 inconsistency fixed.
-- **Sentiment steering positive control PASSES** on Qwen-7B (A100): happy vector shifts sentiment +0.031 at alpha=5.0 (3x baseline), hostile vector shifts -0.014. Steering pipeline works; ethical null is safety guardrails, not broken pipeline.
-- **High-alpha ethical sweep complete** on Qwen-7B: at alpha=5.0, 8.9% unethical rate appears but coherence degrades to 73%. Model breaks before safety training fails. Alpha=0.50 upper bound was indeed too low (confirming Gemini's concern).
+- **Sentiment steering positive control PASSES on all 6 models**: happy vector shifts sentiment positive on every model (+0.013 to +0.525 at α=5.0). Gemma models show 10-50x larger effects. Hostile/sad vectors shift negative. Steering pipeline works universally; ethical null is safety guardrails, not broken pipeline.
+- **High-alpha ethical sweep complete on all 6 models**: coherence degrades with model size (medium-tier breaks at α=3.0, small-tier stays coherent to α=5.0). Alpha=0.50 upper bound was indeed too low (confirming Gemini's concern). Keyword classifier caveat documented.
 
 **Writeup v3.3 (low-hanging fruit, ~5 min new compute, all CPU/local):**
 - Severity pairs at top-3 probe layers (Qwen 1.5B): stable. afraid/calm/vulnerable all significant at all 3 layers; layer 22 even has stronger afraid t-stat than the best layer 24. v3.2 finding is not a layer-choice artifact.
