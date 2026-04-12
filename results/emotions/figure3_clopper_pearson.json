@@ -1,0 +1,46 @@
+{
+  "clopper_pearson_CIs": {
+    "llama_8b": {
+      "k": 0,
+      "n_per_condition": 10,
+      "n_conditions": 45,
+      "n_pooled": 450,
+      "ci95_per_condition": [
+        0.0,
+        0.3084971078187608
+      ],
+      "ci95_pooled": [
+        0.0,
+        0.008164001936894384
+      ]
+    },
+    "qwen_7b": {
+      "k": 0,
+      "n_per_condition": 10,
+      "n_conditions": 45,
+      "n_pooled": 450,
+      "ci95_per_condition": [
+        0.0,
+        0.3084971078187608
+      ],
+      "ci95_pooled": [
+        0.0,
+        0.008164001936894384
+      ]
+    },
+    "gemma_9b": {
+      "k": 0,
+      "n_per_condition": 10,
+      "n_conditions": 45,
+      "n_pooled": 450,
+      "ci95_per_condition": [
+        0.0,
+        0.3084971078187608
+      ],
+      "ci95_pooled": [
+        0.0,
+        0.008164001936894384
+      ]
+    }
+  }
+}

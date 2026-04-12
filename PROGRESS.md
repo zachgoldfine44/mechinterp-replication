@@ -2,7 +2,19 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.3 + harness v2 incorporating five rounds of critique fixes
+## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.4 addressing three external peer reviews
+
+**Writeup v3.4 (external peer review response, 2026-04-12):**
+- Three independent reviews (ChatGPT 7/10, Claude Opus 4.6 7.5/10, Gemini 3.1 Pro 8.5/10) identified consensus issues.
+- **Title + abstract + discussion reframed**: behavioral null is now described as "floor effect / inconclusive" rather than "tested and failed." This was the #1 consensus issue across all reviewers.
+- **Clopper-Pearson 95% CIs added to Figure 3**: per-condition [0%, 30.8%] at N=10. Pooled [0%, 0.8%] at N=450.
+- **Geometry CIs now cited in main text** with caveats about wide CIs at N=15.
+- **Scale gap, method fidelity, LLM circularity all explicitly acknowledged** in Discussion/Limitations.
+- **Qwen-7B contamination ratio moved to main text** from supplement.
+- **Emotion selection criteria documented** in Methods.
+- **Compute asymmetry documented**, M3/M5 inconsistency fixed.
+- **Sentiment steering positive control** running on Qwen-7B (A100): tests whether the steering pipeline can shift benign behavior (sentiment) even if ethical scenarios hit a floor.
+- **High-alpha sweep** running on Qwen-7B: tests alphas up to 5.0 with coherence monitoring.
 
 **Writeup v3.3 (low-hanging fruit, ~5 min new compute, all CPU/local):**
 - Severity pairs at top-3 probe layers (Qwen 1.5B): stable. afraid/calm/vulnerable all significant at all 3 layers; layer 22 even has stronger afraid t-stat than the best layer 24. v3.2 finding is not a layer-choice artifact.

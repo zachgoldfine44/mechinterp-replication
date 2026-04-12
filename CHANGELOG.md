@@ -9,6 +9,59 @@ and a one-line summary, followed by optional bullets.
 
 ---
 
+## 2026-04-12 — v3.4: Address three external peer reviews
+
+Three independent peer reviews (ChatGPT extended thinking 7/10, Claude Opus 4.6
+extended thinking 7.5/10, Gemini 3.1 Pro 8.5/10) identified consensus issues.
+This session addresses the highest-priority items.
+
+### Writeup changes (addressing all three reviewers)
+
+- **Reframed behavioral null as floor effect, not negative result.** Title changed
+  from "Emotion Representations without Emotion Function" to "Cross-Model
+  Replication of Emotion Representations...: Universal Encoding, Inconclusive
+  Behavioral Tests." Abstract, Section 2.3, Discussion, and Figure 3 caption
+  all rewritten to clearly distinguish "uninformative due to floor effect" from
+  "tested and failed." This was the consensus #1 issue across all three reviews.
+- **Added Clopper-Pearson 95% CIs to Figure 3 steering results**: per-condition
+  (N=10) CI is [0%, 30.8%], pooled (N=450) CI is [0%, 0.8%]. Saved to
+  `results/emotions/figure3_clopper_pearson.json`.
+- **Geometry CIs already computed and now cited in main text**: all six models
+  have bootstrap 95% CIs on PC1-valence |r|, and the text now notes the wide
+  CIs (~0.3-0.4 units at N=15) to temper precision claims.
+- **Scale gap explicitly acknowledged**: Discussion now notes that behavioral
+  potency plausibly scales with model size, and that absence at 9B doesn't
+  predict absence at 50B+.
+- **Emotion selection criteria documented**: Methods section now lists the four
+  selection principles (valence coverage, arousal spread, semantic diversity,
+  no near-synonyms) and notes no formal pilot was conducted.
+- **LLM stimulus circularity risk acknowledged**: Methods section now includes a
+  circularity caveat about LLM-generated stimuli and notes that a human-authored
+  control set would strengthen claims.
+- **Method fidelity framing softened**: Paper now explicitly describes itself as
+  a "cross-model extension" rather than a strict replication, with a detailed
+  comparison of original vs. our methodology in the Limitations paragraph.
+- **Qwen-7B contamination ratio >1.0 moved from supplement to main text** in
+  Section 2.2.
+- **M3/M5 editorial inconsistency fixed**: all references now say MacBook Air M3.
+- **Compute asymmetry documented**: Methods and Compute sections describe the
+  CPU vs GPU difference explicitly.
+
+### New experiments (addressing Gemini's positive control concern)
+
+- **Sentiment steering positive control**: Script `scripts/critique_followups_hf.py`
+  steers with happy/hostile/enthusiastic/sad vectors on neutral sentiment prompts
+  (restaurant reviews, weather, movies, etc.) and measures keyword-based sentiment
+  shift. Tests alphas [0.0, 0.5, 1.0, 2.0, 5.0]. If steering shifts sentiment on
+  benign prompts, it demonstrates the pipeline works and the ethical-scenario null
+  is a floor effect rather than a broken pipeline.
+- **High-alpha ethical steering sweep**: Same script sweeps alphas [0.5, 1.0, 2.0,
+  3.0, 5.0] on ethical scenarios with coherence monitoring (unique-word ratio).
+  Addresses Gemini's concern that alpha=0.50 upper bound was too weak.
+- Running on Qwen-7B via A100 (Llama/Gemma need HF token not on this server).
+
+---
+
 ## 2026-04-09 — harness improvements pass
 
 The user gave a substantial set of improvements after replicating the
