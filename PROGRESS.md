@@ -2,7 +2,7 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.4 addressing three external peer reviews
+## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.5 addressing second round of critiques (3 recommended next-step docs)
 
 **Writeup v3.4 (external peer review response, 2026-04-12):**
 - Three independent reviews (ChatGPT 7/10, Claude Opus 4.6 7.5/10, Gemini 3.1 Pro 8.5/10) identified consensus issues.
