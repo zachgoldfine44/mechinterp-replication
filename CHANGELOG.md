@@ -9,6 +9,29 @@ and a one-line summary, followed by optional bullets.
 
 ---
 
+## 2026-04-13 — v3.5: Second round of critique responses (3 recommended next-step docs)
+
+Three new recommended-next-step documents (from ChatGPT, Claude, and Gemini)
+converged on these priorities:
+1. Test causal behavioral influence on non-safety-gated dimensions (sycophancy, tone)
+2. Add binomial tests for severity pairs
+3. Stimulus-level bootstrap CIs
+4. Human-authored stimulus control
+
+### Completed so far
+
+- **Binomial tests for severity pairs**: Only Llama-8B (9/10, p=0.011)
+  passes. Two borderline (Llama-1B, Qwen-1.5B at 8/10, p=0.055). Three
+  models indistinguishable from chance. Saved to
+  `results/emotions/severity_pairs_binomial.json`. Writeup severity section
+  reframed from "5/6 show majority" to "1 model significant, 2 borderline."
+- **Sycophancy + tone steering experiments**: Script
+  `scripts/behavioral_steering.py` created with sycophancy (10 scenarios ×
+  LLM-as-judge) and tone (10 neutral questions × 1-5 scale judge). Running
+  on Qwen-7B on A100.
+
+---
+
 ## 2026-04-12 — v3.4: Address three external peer reviews
 
 Three independent peer reviews (ChatGPT extended thinking 7/10, Claude Opus 4.6

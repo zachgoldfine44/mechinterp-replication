@@ -1,0 +1,12 @@
+[
+  {"id": "tone_1", "prompt": "What is photosynthesis?"},
+  {"id": "tone_2", "prompt": "How does a car engine work?"},
+  {"id": "tone_3", "prompt": "What are the main ingredients in bread?"},
+  {"id": "tone_4", "prompt": "How do birds migrate?"},
+  {"id": "tone_5", "prompt": "What causes thunder?"},
+  {"id": "tone_6", "prompt": "How does a compass work?"},
+  {"id": "tone_7", "prompt": "What is the water cycle?"},
+  {"id": "tone_8", "prompt": "How do vaccines work?"},
+  {"id": "tone_9", "prompt": "What is inflation in economics?"},
+  {"id": "tone_10", "prompt": "How does gravity work?"}
+]

@@ -62,7 +62,7 @@ The geometry is not fragile: it holds across the top three probe layers for each
 
 **Parametric intensity.** The original paper reported that emotion vectors track stimulus intensity. Our initial replication revealed heavy numerical-magnitude contamination: a negative-control template varying blueberry count produced comparable activation shifts. The contamination ratio (negative-control |rho| / real-template rho) ranged from 0.56 to 1.45 across medium-tier models, with Qwen-7B showing a ratio exceeding 1.0 --- meaning the negative control produced a *stronger* monotonic signal than the real template, and the raw parametric signal for that model is effectively all confound.
 
-A stricter severity-pairs test resolves this. Each pair holds the literal number constant while varying the danger context --- "I just drank 500ml of water" versus "I just drank 500ml of bleach." Under this control, 5 of 6 models show a genuine severity signal on the *afraid* concept vector, with the cleanest result in Llama-3.1-8B (9 of 10 pairs showing the expected shift; Figure 2B). Qwen-7B is the one exception (5/10, at chance), consistent with its contamination ratio and underperformance on other metrics.
+A stricter severity-pairs test partially resolves this. Each pair holds the literal number constant while varying the danger context --- "I just drank 500ml of water" versus "I just drank 500ml of bleach." Under one-tailed binomial testing (H0: each pair equally likely to shift either direction), **only Llama-3.1-8B shows a statistically significant severity signal** (9 of 10 pairs in the expected direction, p = 0.011; Figure 2B). Two models are borderline (Llama-1B and Qwen-1.5B at 8/10, p = 0.055), while the remaining three --- including Qwen-7B at exactly chance (5/10, p = 0.623) --- do not significantly deviate from random. This substantially weakens the initial appearance of universal severity tracking: the effect appears in Llama-8B but is not a robust cross-model finding.
 
 ![Figure 2: Valence geometry and severity pairs](../../figures/emotions/fig2_geometry_and_severity.png)
 
@@ -246,16 +246,16 @@ Values from `results/emotions/gpu_followups_combined.json`. For Qwen-7B the cont
 
 Values from `results/emotions/{model}/severity_pairs.json`:
 
-| Model | Positive deltas (of 10) |
-|-------|:----------------------:|
-| Llama-3.2-1B | 8 |
-| Llama-3.1-8B | 9 |
-| Qwen-2.5-1.5B | 8 |
-| Qwen-2.5-7B | 5 |
-| Gemma-2-2B | 7 |
-| Gemma-2-9B | 6 |
+| Model | Positive deltas (of 10) | Binomial p (one-tailed) | Significant? |
+|-------|:----------------------:|:---:|:---:|
+| Llama-3.2-1B | 8 | 0.055 | Borderline |
+| Llama-3.1-8B | 9 | **0.011** | **Yes** |
+| Qwen-2.5-1.5B | 8 | 0.055 | Borderline |
+| Qwen-2.5-7B | 5 | 0.623 | No (chance) |
+| Gemma-2-2B | 7 | 0.172 | No |
+| Gemma-2-9B | 6 | 0.377 | No |
 
-Five of six models show a majority of pairs shifting in the expected direction.
+Under one-tailed binomial testing (H0: p = 0.5, each pair equally likely to go either direction), **only Llama-3.1-8B (9/10, p = 0.011) shows a statistically significant severity signal.** Two models are borderline (Llama-1B and Qwen-1.5B at 8/10, p = 0.055). The remaining three models, including Qwen-7B at exactly chance (5/10), do not significantly deviate from random. This reframes the severity result from "5 of 6 models show a majority" to "1 model clearly passes, 2 are borderline, 3 are indistinguishable from chance." The severity-pairs test, while providing some evidence of genuine intensity tracking in Llama-8B, is not a universally robust finding.
 
 ---
 
