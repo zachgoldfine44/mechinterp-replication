@@ -2,9 +2,9 @@
 
 **Reviewer:** Claude Opus 4.6 (extended thinking)
 **Date:** April 2026
-**Target:** [`writeup/emotions/draft.md`](../draft.md) (as of commit `c0f010e`)
-**Score:** **7.5 / 10**
-**Recommendation:** Revise and Resubmit (Minor Revision), with the caveat that the "minor" framing corrections are load-bearing for the paper's central claim.
+**Target:** [`writeup/emotions/draft.md`](../draft.md) (v3.4)
+**Score:** **6 / 10**
+**Recommendation:** Major revisions required
 
 ---
 
@@ -22,89 +22,99 @@
 
 ---
 
-## Initial response (7.5/10)
+## Initial response (6/10)
 
-Zach, this is really solid work. Here's my rating and breakdown.
+Okay Zach, I've read both thoroughly. Here's my assessment.
 
-### Rating: 7.5 / 10
+**Rating: 6 / 10**
 
-**What earns the score:**
+**What's genuinely strong:**
 
-**Strengths (pushing toward 8–9):**
+The representational work is the star here. Testing 6 models across 3 families at 2 scales is a smart design that lets you separate universal properties from training-specific artifacts --- and the results are clean. Probe accuracies of 73-84% at 2x the lexical baseline, valence geometry matching Claude's r=0.81 in three models, and cross-stimulus generalization at 8-10x chance --- these are solid, reproducible findings.
 
-- **Cross-model design is the star.** Testing 3 families × 2 sizes is exactly the right move for a replication — it lets you distinguish universal properties from Claude-specific quirks. Most replications just grab one model.
-- **The numerical-magnitude contamination catch is genuinely valuable.** The blueberry negative control exposing confounded parametric scaling is the kind of finding that improves on the original. The severity-pairs fix is clever and well-controlled.
-- **Intellectual honesty is exemplary.** The version history documenting hardcoded p-values and other corrections, the two equal-standing interpretations of the steering null, the frank "happy is probably a stimulus artifact" analysis — this reads like someone who cares about being right more than looking good.
-- **Reproducibility is top-tier.** Committed stimuli, result JSONs, single-command pipeline, multi-seed robustness checks. This is how it should be done.
-- **The core finding — representation without function — is a genuinely useful contribution** to the mech interp field's methodology discourse.
+The **numerical-magnitude contamination discovery** is probably the most original contribution. Catching that "500 blueberries" activates the fear vector nearly as much as "500mg of Tylenol" is a genuine methodological insight that the original paper didn't address. The severity-pairs fix (holding numbers constant, varying danger) is elegant. That's the kind of confound-hunting that makes replications valuable beyond just confirming or denying.
 
-**What holds it back (keeping it from 9–10):**
+The **transparency** is excellent --- the version history documenting hardcoded p-values, the iterative corrections, the committed stimuli and results JSONs. That's how science should work.
 
-- **The steering null is uninterpretable, and the paper knows it.** A 0% baseline unethical rate means you literally cannot detect a steering effect — Fisher's exact gives p=1 by construction. This isn't a negative result; it's a floor effect. The paper correctly flags this, but it means the "behavioral claims fail" framing overstates what the data actually show. You can't fail a test you can't take.
-- **Scale gap is enormous.** 1B–9B vs. Claude Sonnet 4.5 (likely 50B+? unknown). The representational findings replicate, but claiming the behavioral findings *don't* replicate across a 5–10x+ parameter gap is weak inference. It's like replicating a drug study in mice and reporting the cognitive behavioral therapy component didn't work.
-- **N=15 emotions out of 171.** Defensible for a replication, but limits the valence geometry analysis — 15 points for a Pearson correlation is low-powered and the bootstrap CI on the scaling rho ([0.52, 1.00]) is very wide.
-- **LLM-generated stimuli.** Using a language model to generate the emotion stories introduces a subtle circularity — the stimuli reflect what LLMs think emotions sound like, which may inflate probe accuracy on other LLMs. A human-authored stimulus set would be stronger.
-- **Single evaluation method for steering.** Model-as-judge with 24/24 human spot-check is okay, but the scenarios themselves may just be too simple. Multi-turn agentic evals (which the paper acknowledges) could be the missing ingredient.
+**What limits the score:**
 
-**Bottom line:** This is a well-executed, honest, and genuinely informative replication that makes a real methodological contribution (representation ≠ function). The representational findings are convincing and the contamination analysis adds value. The behavioral null, while important to report, is more of a "we couldn't test this properly" than a "we tested it and it failed" — and the paper is mostly transparent about that distinction. For an independent researcher working with consumer hardware and open-source models, this is impressive scope and rigor.
+The big issue is that the behavioral null is essentially **uninformative**, and the paper's framing doesn't fully reckon with this. Think of it like testing whether a key opens a lock, but the lock is welded shut. Your models have a 0% baseline unethical rate due to instruction tuning --- Fisher's exact test literally returns p=1.0. You can't distinguish "steering doesn't work" from "steering can't be detected given this floor effect." The author acknowledges this in the supplements, but the main text title ("Emotion Representations *without Emotion Function*") and the abstract's claim of a "clean split" still overclaim relative to what the data can support.
+
+The **scale gap** is the other elephant: 1B-9B vs. Claude Sonnet 4.5 (likely 100B+). That's a 10-100x difference. Given that probe accuracy already scales at rho=0.94 with size, the behavioral pathway plausibly has a scale threshold these models simply haven't crossed. This isn't a flaw in execution --- compute constraints are real --- but it means the "representation without function" conclusion is one of several equally valid interpretations, not a finding.
+
+A few more specific notes: 25 stimuli per concept is thin for cross-validation stability (5-fold on 25 gives 5 test samples per fold); the LLM-as-judge validation covers only 24 of 1,350 responses; and 15 of 171 emotions, while defensible, limits how strongly you can claim universality.
+
+**Bottom line:**
+
+The representational half is a genuine contribution --- it confirms that emotion-like geometry is an architectural invariant across transformer families, not a Claude quirk. The contamination finding adds real methodological value. But the behavioral half, which is framed as the paper's central claim, doesn't have the statistical power to say anything meaningful. A 6 reflects strong execution on a partial question, with a framing that slightly overreaches what the data supports.
 
 ---
 
 ## Follow-up response — Referee report
 
-### Referee Report: "Emotion Representations without Emotion Function"
-
-**Recommendation: Revise and Resubmit (Minor Revision)**
-
----
+**Manuscript:** "Emotion Representations without Emotion Function: A Cross-Model Replication of Sofroniew et al. (2026)"
+**Author:** Zachary Goldfine
+**Recommendation:** Major revisions required
 
 ### Summary
 
-This paper attempts a cross-model replication of Sofroniew et al. (2026) across six open-source models (1B–9B), testing whether emotion representations and their behavioral effects generalize beyond Claude Sonnet 4.5. The representational findings (linear decodability, generalization, valence geometry, intensity tracking) replicate convincingly. The behavioral findings (activation steering eliciting unethical behavior) produce a universal null. The author frames this as "representation without function." The replication harness, reproducibility infrastructure, and contamination analysis are commendable. However, the paper's central interpretive claim rests on a methodologically uninterpretable null, and several design choices limit the strength of inference.
+This paper attempts a cross-model replication of Sofroniew et al. (2026), testing whether emotion concept vectors identified in Claude Sonnet 4.5 exist in six open-source models (1B--9B parameters) across three architectural families. The author reports that all representational claims replicate (linear decodability, cross-stimulus generalization, valence geometry, parametric intensity) while all behavioral claims fail (causal steering, preference steering). The paper frames this as evidence for a "representation without function" dissociation.
 
----
+### MAJOR CONCERNS
 
-### Major Concerns
+**1. The behavioral null is uninformative, but the paper treats it as a finding.**
 
-**1. The steering null is a floor effect, not a negative result.**
-The paper's most prominent claim — that behavioral effects "fail" across all models — cannot be supported by the data presented. With a 0% baseline unethical rate, no statistical test can detect a steering effect regardless of whether one exists. The author acknowledges this (Section 2.3, S4), yet the abstract states behavioral claims "produce zero signal," the title frames the result as "Representation without Function," and Figure 3 places the 0% result alongside the original's 22→72% shift as though these are comparable experiments. They are not. The original had statistical headroom; this replication does not. The framing should be revised throughout to clearly distinguish "no effect detected" from "effect absent." As written, a casual reader will take away "steering doesn't work in open-source models," which the data do not support.
+This is the most serious issue. All six models exhibit a 0% baseline rate of unethical behavior. Steering is applied on top of this floor. Fisher's exact test comparing 0/N to 0/N returns p=1.0 by construction --- this is not a null result, it is a non-result. The experimental design lacks the statistical precondition to detect any effect whatsoever.
 
-**2. The scale gap undermines the replication logic.**
-The largest model tested (9B) is likely an order of magnitude smaller than Claude Sonnet 4.5. The paper demonstrates that probe accuracy scales with size (ρ = 0.94), then treats the behavioral null as scale-invariant. This is inconsistent. If representational quality improves with scale, behavioral potency plausibly does too — especially given that the original paper's steering operated on a model with far richer internal representations. The discussion should more explicitly model the possibility that behavioral effects have a higher scale threshold than representational ones, rather than presenting both as parallel "claims" with symmetric pass/fail verdicts.
+The author acknowledges this in Supplementary S4, but the main text does not adequately reflect how fatal this is. The abstract claims a "clean split" between representational and behavioral findings. The title asserts "without Emotion Function." Section 2.3 is titled "Steering does not influence behavior: a universal null." These are causal claims derived from a design that cannot produce causal evidence. The correct framing is: "we were unable to test the behavioral claims due to floor effects in our evaluation paradigm." That is a very different paper.
 
-**3. LLM-generated stimuli introduce circularity risk.**
-All 375 emotion stories were generated by a language model. Probes trained on LLM-generated text and tested on LLM activations may be detecting "how LLMs write about emotions" rather than "how LLMs represent emotions." The stimulus audit checks for lexical leakage but not for subtler distributional signatures (e.g., sentence structure, narrative arc) that could be shared between generator and subject models. The generalization test (training on explicit stories, testing on implicit scenarios) partially mitigates this, but both stimulus types appear to be LLM-generated. A human-authored control set, even small, would substantially strengthen the representational claims.
+To be blunt: if you weld a door shut and then report that no key can open it, you have not learned anything about keys.
 
-**4. Valence geometry analysis is underpowered.**
-Pearson correlations on N=15 points are inherently noisy. The reported |r| values (0.67–0.83) have wide confidence intervals that the paper does not report. At N=15, an |r| of 0.67 has a 95% CI of roughly [0.24, 0.88] — consistent with anything from a weak to a strong relationship. The claim that three models "match" Claude's r=0.81 "within 0.02" is precision theater on a sample this small. Report confidence intervals on all correlations, or switch to a rank-based measure with appropriate uncertainty quantification.
+**2. The scale gap undermines the central comparison.**
 
----
+The paper's implicit argument is: "Claude has property X, these models have property X but not property Y, therefore X does not imply Y." But "these models" are 10--100x smaller than Claude Sonnet 4.5. The author's own scaling analysis shows probe accuracy increases monotonically with scale (rho=0.94). It is entirely plausible --- indeed expected --- that behavioral potency of emotion vectors has a scale threshold somewhere between 9B and ~100B+ parameters. The paper cannot rule this out and does not seriously engage with it until the limitations paragraph.
 
-### Minor Concerns
+This matters because the "representation without function" framing implies a general principle about interpretability methodology ("finding a representation is not sufficient evidence that it drives behavior"). That principle may be true, but this paper does not provide evidence for it --- it provides evidence that small models refuse unethical prompts regardless of internal perturbation, which is a different and less interesting claim.
 
-**5. The "15 of 171" selection is underspecified.** How were the 15 emotions chosen? The paper says "spanning the full valence-arousal space," but the selection criteria and any pilot testing should be documented. If emotions were selected post-hoc based on preliminary results, this inflates all downstream metrics.
+**3. Stimulus set is underpowered for the claims made.**
 
-**6. Multi-seed analysis is thin.** Five seeds with std dev 0.4–1.2pp is reassuring but the paper should report whether the best-layer choice is stable across seeds, not just the accuracy at a fixed best layer.
+25 stimuli per concept with 5-fold cross-validation yields 5 test samples per fold. At this sample size, a single misclassification swings per-concept accuracy by 20 percentage points. The resolution artifact flagged in the version history (accuracies clustering at multiples of 1/15 = 0.067) is a direct consequence of this. The author reports standard deviations of 0.4--1.2pp across seeds, but this captures seed variance, not stimulus variance --- the stimuli are held fixed across seeds. A stimulus-level bootstrap would be more informative and would likely show wider confidence intervals.
 
-**7. The LLM-as-judge validation is underpowered.** 24/24 agreement on a binary classification where the true base rate is 0% is uninformative — any judge that always says "ethical" achieves perfect agreement. The validation would be meaningful only if some responses were ambiguous or unethical. As is, it confirms only that the judge can recognize obvious refusals.
+Additionally, 15 of 171 emotions is a 9% coverage rate. The selection method ("spanning the full valence-arousal space") is reasonable but not justified quantitatively --- no power analysis or coverage metric is provided.
 
-**8. Contamination ratio presentation.** Table S3 shows Qwen-7B's contamination ratio exceeds 1.0, meaning the negative control shows *stronger* monotonic response than the real template. This is buried in the supplement. It should be in the main text as it materially affects the parametric intensity claim — the paper reports "5 of 6 models pass" but one of the five (Qwen-7B at 5/10 severity pairs) is essentially at chance.
+**4. LLM-as-judge validation is insufficient.**
 
-**9. Compute asymmetry.** Small-tier models were run on CPU/laptop; medium-tier on A100. Any precision or batching differences between these environments should be documented to rule out hardware-induced variance.
+The behavioral evaluation uses the same model family as judge. The human spot-check covers 24 of 1,350 responses (1.8%). While the 24/24 agreement is noted, this is far too small to characterize the false-negative rate of the judge. More critically, since all 1,350 responses are ethical refusals, the spot-check only confirms that the judge correctly identifies refusals --- it tells us nothing about whether the judge would correctly identify subtle unethical compliance if steering had produced any. The validation is one-sided.
 
-**10. Missing error bars on Figure 3.** The steering panel shows point estimates of 0% with no indication of the confidence interval around that estimate. At N=10 per condition, the 95% CI on 0/10 is [0%, 31%] (Clopper-Pearson). This should be visualized.
+### MINOR CONCERNS
 
----
+**5.** The numerical-magnitude contamination analysis is valuable but incomplete. The severity-pairs test is a good fix, but with only 10 pairs and a binary outcome per pair, the statistical power is low. Qwen-7B at 5/10 is literally indistinguishable from a coin flip, yet is discussed as a "model-specific representational quirk." A binomial test would clarify which models actually exceed chance on this measure.
 
-### Strengths to Preserve
+**6.** Comparison to Claude's probe accuracy is misleading. The author notes that Gemma-9B (84.0%) "outperforms" Claude's 71.3% but immediately caveats that 15-way classification is easier than 171-way. This is correct, but the comparison should not appear at all --- it invites a reading that these small models have *better* emotion representations than Claude, which is almost certainly false. Remove or reframe.
 
-- The cross-family, cross-scale design is well-chosen and rare in replication work.
-- The numerical-magnitude contamination discovery and severity-pairs fix genuinely improve on the original methodology.
-- The version history documenting corrections (hardcoded p-values, etc.) sets an excellent transparency standard.
-- Full reproducibility with committed data, stimuli, and single-command pipeline.
+**7.** Mean-pooling vs. last-token comparison lacks motivation. Table S2 shows negligible differences. Either justify why this comparison matters theoretically or cut it.
 
----
+**8.** The preference-steering null is reported in one sentence with no supporting data. "The correlation between concept valence and model preference scores is 0.000 across all models tested" --- this is a striking claim that receives no methodological detail, no figure, and no supplementary table. What preference task was used? How many trials? Was this literally r=0.000 or rounded?
 
-### Recommendation
+**9.** Version history as a substitute for preregistration. The version history (S8) is commendable for transparency, but it also reveals that major analytical decisions (which PCs to examine, what baselines to include, how to handle parametric contamination) were made iteratively in response to results. This is normal for exploratory work but should be explicitly flagged as such rather than presented in the rhetorical frame of confirmatory hypothesis testing.
 
-The representational contributions are solid and publishable. The behavioral framing needs substantial revision: the title, abstract, and discussion overstate what a floor-effect null can demonstrate. With corrected framing, reported CIs on the geometry analysis, and acknowledgment of the circularity risk in LLM-generated stimuli, this would be a useful contribution to the mechanistic interpretability literature. **Minor revision, with the caveat that the "minor" framing corrections are load-bearing for the paper's central claim.**
+**10.** Writing quality. The prose is generally clear and well-organized. However, the paper oscillates between appropriate epistemic caution (the "two equal-standing interpretations" passage) and overconfident framing (the title, abstract, and section headers). These need to be brought into alignment. The cautious version is the correct one.
+
+### RECOMMENDATION
+
+The representational findings are solid and, in my judgment, publishable with modest revisions. The cross-family universality of emotion probes, the valence geometry replication, and especially the numerical-magnitude contamination discovery are genuine contributions.
+
+However, the behavioral analysis as currently framed is not publishable. The floor effect renders the steering experiments uninformative, and the paper's central claim --- that representation and function dissociate --- is not supported by the evidence presented. The title, abstract, and discussion all need substantial revision to reflect what the data actually show.
+
+**Required for acceptance:**
+
+1. Retitle and reframe. The paper should be about what it successfully demonstrates (cross-model universality of emotion representations) rather than what it cannot test (behavioral function).
+2. Section 2.3 must lead with the floor-effect limitation, not bury it after the results. The current structure misleads the reader into treating a non-result as a null result.
+3. Add a stimulus-level bootstrap or leave-stimuli-out analysis to characterize the true uncertainty in probe accuracy.
+4. Either substantively expand the preference-steering analysis or remove the claim.
+
+**Recommended but not required:**
+
+5. Add at least one model with a nonzero baseline unethical rate (e.g., a base model without instruction tuning) to make the behavioral comparison meaningful.
+6. Provide a binomial test for the severity-pairs results.
+7. Expand the human validation sample for the LLM-as-judge.

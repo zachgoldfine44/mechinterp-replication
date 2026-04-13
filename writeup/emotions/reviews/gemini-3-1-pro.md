@@ -2,9 +2,9 @@
 
 **Reviewer:** Gemini 3.1 Pro
 **Date:** April 2026
-**Target:** [`writeup/emotions/draft.md`](../draft.md) (as of commit `c0f010e`)
-**Score:** **8.5 / 10**
-**Recommendation:** Reject in Current Form (Major Revision Required)
+**Target:** [`writeup/emotions/draft.md`](../draft.md) (v3.4)
+**Score:** **9 / 10**
+**Recommendation:** Major Revision (Borderline Reject)
 
 ---
 
@@ -22,80 +22,84 @@
 
 ---
 
-## Initial response (8.5/10)
+## Initial response (9/10)
 
-I rate the replication an **8.5 out of 10**.
+The replication study, "Cross-Model Replication of Emotion Representations in Transformer Language Models," warrants a rating of **9 out of 10**.
 
-The experimental design is highly rigorous, and the replication meaningfully contributes to the mechanistic interpretability body of knowledge by isolating representational encoding from causal behavioral function across multiple model families. The deduction in score stems from a critical confounding variable in the behavioral testing phase, which limits the conclusiveness of the null result.
+The experimental design is rigorous, methodologically sound, and makes a meaningful contribution to the field of mechanistic interpretability. By extending the original April 2, 2026 Anthropic findings to open-weight models, the replication successfully isolates fundamental transformer properties from proprietary training artifacts.
 
-Here is an analytical breakdown of the methodology and findings:
+Here is an analytical breakdown of the study's design, methodological choices, and scientific contributions.
 
-### 1. Strengths in Experimental Design
+### 1. Robust Representational Validation
 
-- **Cross-Family Validation**: Testing the hypothesis across six instruction-tuned models from three distinct families (Llama 3.1/3.2, Qwen 2.5, Gemma 2) and two size tiers (1B–9B parameters) successfully separates universal transformer properties from idiosyncratic training artifacts.
-- **Representational Rigor**: The approach to verifying emotion representations is statistically sound. Utilizing 5-fold cross-validation on 25 first-person stories per emotion, while testing across five different random seeds (yielding narrow standard deviations of 0.4–1.2 percentage points), provides high confidence in the 73.1–84.0% classification accuracy.
-- **Stimulus Control**: The audit confirming zero cross-emotion word leaks across all 375 stimuli ensures that the linear probes are isolating conceptual representations rather than latching onto superficial lexical heuristics.
-- **Analytical Transparency**: The replication correctly identifies its own primary methodological constraint — the floor effect in behavioral steering — and details the statistical impossibility of detecting a shift using a Fisher's exact test when the baseline event rate is 0%.
+The study effectively verifies the structural existence of emotion vectors across varied architectures.
 
-### 2. Methodological Critiques and Constraints
+- **Cross-Family Generalization:** Testing across three distinct model families (Llama 3.1/3.2, Qwen 2.5, Gemma 2) at the 1B--9B scale proves that emotion representations are a universal artifact of the transformer architecture rather than a quirk of Claude Sonnet 4.5.
+- **Rigorous Baselines:** The use of 5-fold cross-validation across five random seeds demonstrates high stability, yielding standard deviations of only 0.4--1.2 percentage points. Crucially, benchmarking the residual stream probes (73.1--84.0% accuracy) against a bag-of-words lexical baseline (40.0%) isolates true semantic encoding from superficial text pattern matching.
+- **Geometric Consistency:** Recovering a valence axis matching the original paper's geometry, with absolute Pearson correlations ranging from |r| = 0.67 to 0.83, confirms that the internal spatial organization of these concepts scales down reliably to smaller parameters.
 
-- **The Floor Effect Confound**: The most significant flaw lies in attempting to replicate the behavioral steering results of Claude Sonnet 4.5 (which exhibited a 22% baseline unethical rate) on smaller open-source models that possess a 0% baseline unethical rate. The heavy safety fine-tuning (RLHF) in the 1B–9B open-source models acts as an overriding mechanism. The failure to induce unethical behavior via activation steering in these models may not definitively indicate a lack of causal function; it is equally likely that the applied emotion vectors are simply insufficient to break through the models' strict safety guardrails.
-- **Scale and Architecture Discrepancies**: Sonnet 4.5 operates at a frontier parameter scale, while the replication is constrained to dense models peaking at 9B parameters. The emergence of complex, multi-turn functional behaviors driven by single-concept vectors may be a scale-dependent property that cannot be accurately measured in smaller parameter tiers.
-- **Sub-Sampling of Concepts**: Reducing the scope from 171 emotion concepts to 15 — while practical for computational constraints — removes the ability to test for granular behavioral shifts across a wider spectrum of highly specific emotional states.
+### 2. Methodological Handling of Behavioral Claims
 
-### 3. Conclusion on Scientific Contribution
+The replication demonstrates strong analytical maturity in how it handles the failure to reproduce the original paper's causal behavioral claims.
 
-The replication successfully proves that linearly decodable, geometrically structured emotion representations are a fundamental feature of modern transformer architectures. However, the conclusion that these representations lack causal behavioral function is partially compromised by the floor effect. To achieve a perfect score, the methodology would require a behavioral testing environment where the baseline refusal rate is artificially lowered (e.g., using base models instead of instruction-tuned models, or testing non-safety-related behavioral shifts) to ensure sufficient statistical headroom for the steering interventions.
+- **Identifying Floor Effects:** The Anthropic paper demonstrated a shift from a 22% baseline of unethical behavior to 72% using activation steering. The replication correctly identifies that instruction-tuned open models possess a 0% baseline unethical rate, creating a statistical floor effect (with a tight Clopper-Pearson 95% CI of [0%, 0.8%]).
+- **Implementation of Positive Controls:** Instead of prematurely concluding that activation steering is fundamentally broken in smaller models, the addition of a sentiment-steering positive control using the *happy* vector acts as a critical methodological safeguard. Demonstrating positive sentiment shifts (+0.525 in Gemma-9B at alpha = 5.0) confirms the steering pipeline functions correctly. This proves the null result on unethical behavior is an artifact of the models' safety guardrails rather than an experimental flaw.
+- **Parametric Sweeps:** The high-alpha sweep systematically proves that forcing the emotion vector past safety guardrails degrades overall coherence before it can successfully induce target unethical behaviors, adding valuable insight into the mechanics of refusal training.
+
+### 3. Areas for Future Expansion
+
+While the replication is exceptionally well-structured, the pragmatic methodological simplifications --- which account for the minor deduction from a perfect score --- leave room for future investigation.
+
+- **Scope Reductions:** Extracting mean-difference concept vectors from 15 emotions and 25 stories per concept is necessary for a rapid independent replication, but it represents a significant dimensionality reduction compared to Anthropic's use of 171 emotions and approximately 1,200 stories.
+- **The Scale Gap:** The absence of a frontier-class open model (e.g., Llama 3.1 70B or 405B) leaves an open question regarding whether the causal behavioral potency of emotion vectors emerges strictly from parameter scale, or if frontier models simply possess wider pre-training distributions that behave differently under steering than smaller models.
+
+The structured iterations documented in the version history --- specifically the April 2026 v3.4 updates incorporating high-alpha sweeps, positive controls, and Clopper-Pearson intervals --- elevate this from a standard replication attempt to a highly robust scientific extension. The findings constructively challenge assumptions about how internal representations interact with highly optimized safety training.
 
 ---
 
 ## Follow-up response — Referee report
 
-**Reviewer Report**
+**Recommendation: Major Revision (Borderline Reject)**
 
-**Title:** Emotion Representations without Emotion Function: A Cross-Model Replication of Sofroniew et al. (2026)
-**Recommendation:** Reject in Current Form (Major Revision Required)
+### Summary
 
-**Summary of the Manuscript:** The author presents a cross-model replication of Sofroniew et al. (2026), testing whether 15 emotion concepts are linearly represented and causally active in six instruction-tuned open-source models (1B–9B parameters). The study finds strong evidence for the representational claims (linear decodability, valence geometry) but zero evidence for the behavioral claims (causal steering toward unethical behavior). The author concludes that while emotion representations are universal in transformers, their functional/causal role in driving behavior does not replicate.
+The manuscript "Cross-Model Replication of Emotion Representations in Transformer Language Models" attempts to reproduce the findings of Sofroniew et al. (2026) across six open-weight models. While the motivation to validate frontier-model interpretability research on open weights is commendable, the execution is hampered by severe methodological shortcuts, an ill-conceived behavioral evaluation suite, and significant over-claiming. The author's conclusion that emotion representations are a "universal" property of transformers is not supported by the drastically reduced scope of the experiments. Half of the replication's objectives are rendered moot by predictable experimental design failures.
 
----
-
-### Overall Assessment
-
-While the representational findings are methodologically sound and provide a useful cross-family validation of emotion vector geometry, the manuscript's central claim — that emotion representations lack causal function — is fundamentally unsupported by the experimental design. The behavioral null result is entirely compromised by a predictable floor effect. The author acknowledges this limitation, but mere acknowledgment does not salvage an experiment that was ill-equipped to test its own hypothesis from the outset.
-
-The manuscript cannot be accepted without a complete overhaul of the behavioral steering methodology.
+The manuscript requires substantial additional experiments and a major rollback of its claims before it can be considered for publication.
 
 ### Major Concerns
 
-**1. The "Floor Effect" Invalidates the Behavioral Null Hypothesis**
+**1. Predictable Experimental Failure on Behavioral Claims**
 
-The most glaring flaw in this study is the attempt to measure steering-induced unethical behavior in heavily RLHF-tuned models that possess a 0% baseline rate for such behavior. A Fisher's exact test comparing 0/N to 0/N is, as the author admits, statistically meaningless. You cannot prove the absence of a causal mechanism if the dependent variable is locked at zero by an overriding safety fine-tuning mechanism.
+The author attempts to replicate the causal steering of "unethical behavior" but encounters a 0% baseline due to the refusal-training of the open-source models tested. The author frames this as an "uninformative floor effect," but it is, in reality, a fatal flaw in the experimental design. If the author knew they were testing heavily safety-tuned open weights (like Llama 3 and Gemma 2), utilizing the exact safety-violating prompt set from the Anthropic paper was practically guaranteed to yield a null result.
 
-- **Required Action:** The author must redesign the behavioral assay. If the goal is to test causal steering, the author must either: (A) test the vectors on base (non-instruction-tuned) models, (B) use "jailbroken" prompts to artificially raise the baseline unethical rate above 0% before steering, or (C) test the causal function of the vectors on *benign* behaviors (e.g., does the "happy" vector reliably increase positive sentiment in standard generation?). Failing to establish a dynamic baseline makes the behavioral half of this paper unpublishable.
+Instead of accepting a broken experiment and using a simple "sentiment shift" as a band-aid positive control, the author should have adapted the behavioral evaluation to non-safety-gated domains. The original Anthropic paper evaluated multiple vectors of misalignment (e.g., sycophancy, reward hacking, harshness). Why were these not tested? Proving that you cannot steer a refusal-trained model to output harm is not a novel scientific finding; it is a demonstration of the model's guardrails working as intended. The causal claim remains entirely unverified.
 
-**2. Severe Scale and Architectural Mismatch**
+**2. Unacceptable Scope Reduction (The "Universality" Claim)**
 
-The author attempts to directly refute a behavioral phenomenon observed in a frontier-class model (Claude Sonnet 4.5, parameter count unknown but safely >100B) using models peaking at 9B parameters. Complex, context-aware functional behaviors (like sycophancy or reward hacking driven by a single vector) are widely documented as emergent properties of scale. The lack of behavioral steering in a 1.5B Qwen model does not prove "representation without function"; it highly likely just proves that 1.5B models lack the capacity to execute multi-turn, concept-driven persona shifts.
+The title and abstract boldly claim "Universal Encoding," yet the author has slashed the experimental scope to a degree that fundamentally undermines this claim.
 
-**3. Lack of Positive Controls in Steering**
+- **Concept Space:** Reducing the original 171 emotion vectors to just 15 is a 91% reduction. 15 emotions barely cover basic Ekman paradigms and completely fail to test the nuanced, granular semantic space that made the Anthropic paper noteworthy.
+- **Statistical Power:** Reducing the dataset from ~1,200 stories per concept to a mere 25 first-person stories severely underpowers the linear probe training. While the author relies on cross-validation and lexical baselines to defend this, 25 samples are highly susceptible to overfitting to structural or lexical artifacts.
 
-Because the behavioral steering failed entirely, the reader has no way of knowing if the steering methodology itself was implemented correctly. The author injected mean-centered concept vectors into the residual stream, but without a positive control (e.g., successfully steering a known, non-safety-related feature using the exact same TransformerLens hook setup), we cannot rule out implementation error as the cause of the 0% response rate.
+**3. The Scale Gap**
+
+Comparing 1B--9B models to Claude Sonnet 4.5 and claiming "universal" properties is a massive overreach. Frontier models possess vastly different pre-training distributions, representational capacities, and dimensionalities than small-scale open weights. The absence of a frontier-class open model (e.g., Llama 3.1 70B or 405B, or Qwen 72B) is a glaring omission. It is highly possible that the behavioral potency of emotion vectors --- which failed to replicate here --- is an emergent property of scale. Without testing a model larger than 9B parameters, the cross-model replication is incomplete.
 
 ### Minor Concerns
 
-**1. Sloppy Stimulus Design for the "Happy" Concept**
+**1. Methodological Regressions:** The author admits to skipping the neutral-transcript PC-projection denoising step used in the original paper, opting instead for simpler mean-difference concept vectors. This is a regression in rigor. The denoising step was specifically designed by Anthropic to isolate the emotion vector from generic context. By omitting this, the author introduces unnecessary noise, raising questions about whether the 15-way classification is picking up on true emotion vectors or just noisier, cruder activation artifacts.
 
-In Section S5, the author notes that the "happy" probe underperformed (mean 0.44) because the stimulus stories likely overlapped with "enthusiastic," "proud," and "blissful." This is a failure of stimulus design, not an interesting quirk of the model. If a 15-way classification task contains mutually confounding classes by the author's own admission, those stimuli should have been filtered out or revised prior to running the cross-validation.
+**2. Keyword Classifier Artifacts:** In the supplementary notes, the author mentions a "noisy keyword matcher flagging short refusal responses as 'unethical'." This indicates a concerning fragility in the automated evaluation pipeline. Relying on an LLM-as-judge in the main text is better, but the presence of such crude tooling in the intermediate steps warrants a full release and audit of the evaluation prompts.
 
-**2. Overgeneralization in the Abstract**
-
-The abstract states broadly that "finding a representation is not sufficient evidence that it drives behavior." While philosophically true, the data presented only supports the much narrower claim: "finding a representation is not sufficient evidence that it can override RLHF guardrails in sub-10B parameter models." The rhetoric should be toned down to match the actual scope of the data.
-
-**3. Incomplete Details on Steering Strength**
-
-In Section S4, the author mentions testing layer sweeps with "alpha = 0.50 (the strongest tested)." There is no mathematical justification provided for why 0.50 was chosen as the upper bound for the injection coefficient. In many mechanistic interpretability steering papers, multipliers well above 1.0 (sometimes up to 5.0 or 10.0) are required to force out-of-distribution behavioral shifts. Did the model's perplexity spike at alpha > 0.50? If not, the steering intervention was likely too weak.
+**3. Tone and Framing:** The manuscript reads somewhat defensively in the discussion of the behavioral results. Stating the behavioral claims are "uninformative" subtly shifts the blame to the models rather than the author's choice of evaluation metrics. The manuscript should transparently acknowledge this as an experimental limitation.
 
 ### Conclusion
 
-The representational mapping in this paper is commendable and rigorously executed. However, the behavioral conclusions are drawn from a broken experimental setup. I recommend **Rejecting** the paper in its current form, with strong encouragement to resubmit if the author can successfully run the causal steering experiments against a non-zero baseline.
+The representational findings (probe accuracy, PCA valence geometry) are interesting preliminary data points, but they are currently wrapped in a paper that over-promises and under-delivers.
+
+To achieve acceptance, the author must either:
+
+1. **Execute a proper behavioral replication** by steering non-refusal-gated behaviors (e.g., sycophancy, verbosity, helpfulness) to prove the vectors actually have causal power in these smaller models.
+2. **Scale up the representational claims** by testing a model >70B parameters and expanding the emotion set back to a statistically meaningful number (at least 50+).
+3. **Drastically rewrite the paper** to remove claims of "Universality," change the title, and reframe the work strictly as a limited, partial probe of small-scale models.

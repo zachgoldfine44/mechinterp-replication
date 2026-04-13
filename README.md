@@ -39,10 +39,10 @@ The goal: **lower the barrier so that more papers get replicated more often, by 
 
 ### Completed replications
 
-| Paper | Author | Models tested | Status | Writeup | Config | AI peer review scores |
-|-------|:---:|:---:|:---:|:---:|:---:|:---|
-| [Emotion Concepts (Sofroniew et al. 2026)](https://transformer-circuits.pub/2026/emotions/index.html) | [@zachgoldfine44](https://github.com/zachgoldfine44) | 6 (1B-9B) | v3.3 | [draft.md](writeup/emotions/draft.md) | [config/](config/papers/emotions/) | [ChatGPT 7/10](writeup/emotions/reviews/chatgpt-extended-thinking.md) · [Claude 7.5/10](writeup/emotions/reviews/claude-opus-4-6-extended-thinking.md) · [Gemini 8.5/10](writeup/emotions/reviews/gemini-3-1-pro.md) · [summary](writeup/emotions/reviews/) |
-| *Your paper here* | *(your GitHub handle)* | | | | | |
+| Paper | Author | Models | Status | Key findings | Writeup | Config | AI peer reviews |
+|-------|:---:|:---:|:---:|---|:---:|:---:|:---|
+| [Emotion Concepts (Sofroniew et al. 2026)](https://transformer-circuits.pub/2026/emotions/index.html) | [@zachgoldfine44](https://github.com/zachgoldfine44) | 6 (1B-9B) | v3.4 | All 4 representational claims replicate universally (probes at 73-84%, valence geometry matching original). Both behavioral claims uninformative due to 0% baseline floor effect. Sentiment positive control confirms steering pipeline works. | [draft.md](writeup/emotions/draft.md) | [config/](config/papers/emotions/) | [ChatGPT 7/10](writeup/emotions/reviews/chatgpt-extended-thinking.md) · [Claude 6/10](writeup/emotions/reviews/claude-opus-4-6-extended-thinking.md) · [Gemini 9/10](writeup/emotions/reviews/gemini-3-1-pro.md) · [summary](writeup/emotions/reviews/) |
+| *Your paper here* | *(you)* | | | | | | |
 
 We want this table to grow. If you replicate a paper using this harness, please open a PR to add your replication (see [Contributing](#contributing)).
 

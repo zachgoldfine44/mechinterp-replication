@@ -2,9 +2,9 @@
 
 **Reviewer:** ChatGPT (extended thinking)
 **Date:** April 2026
-**Target:** [`writeup/emotions/draft.md`](../draft.md) (as of commit `c0f010e`)
+**Target:** [`writeup/emotions/draft.md`](../draft.md) (v3.4)
 **Score:** **7 / 10**
-**Recommendation:** Major revision / weak reject in current form for an archival scientific venue. Much more positive if reframed as a partial replication plus cross-model extension.
+**Recommendation:** Weak Reject
 
 ---
 
@@ -24,99 +24,88 @@
 
 ## Initial response (7/10)
 
-Zach, I'd give it a **7/10**. It is a **serious and useful** replication attempt, not a loose blog-post-style imitation: it runs across six open models from three families, uses an explicit paper config with success criteria, publishes code/tests, reports lexical baselines and multi-seed probe stability, and even surfaces a real confound in the severity test instead of hiding it. That is real scientific value. [[1]](https://github.com/zachgoldfine44/mechinterp-replication)
+Zach, based on the original paper and the draft replication writeup alone, not a code audit, I'd give this replication a **7/10**. It is **substantively useful and fairly rigorous on the representational side**, but it is **not a high-fidelity replication of the original study's strongest causal-behavior claim**, so it falls short of being a truly strong replication overall. The original paper's headline result was that Claude Sonnet 4.5 contains internal emotion representations that track context and can causally shift behavior, including a blackmail rate change from 22% baseline under steering in an earlier unreleased snapshot. The replication instead studies six smaller open-source instruct models and focuses on 15 of the original 171 emotions.
 
-The biggest reason it is **not higher** is that the replication is only **moderately faithful on the most important causal claims**. In the original, the headline behavioral result is that an earlier Sonnet 4.5 snapshot blackmails **22%** of the time by default and **72%** under +0.05 "desperate" steering, with calm steering pushing it to **0%**; the paper also reports steering effects on reward hacking and preference. In the replication, the open-source instruct models have a **0% unethical baseline across all tested steering conditions**, so the study has almost no statistical headroom to detect an increase. That makes the null behavioral result much less decisive than the writeup's headline framing suggests. [[2]](https://www.anthropic.com/research/emotion-concepts-function)
+Why it deserves a fairly good score: the design has several things that real replications often miss. It tests **multiple model families and scales**, not just one model; it uses **multiple converging checks** rather than one metric; it includes **lexical baselines**, **seed robustness**, a **held-out generalization test**, and a genuinely valuable **negative control** that caught numerical-magnitude contamination in the severity analysis. That contamination check is especially good science: instead of forcing a positive result, the writeup openly shows a confound, tightens the test, and downgrades the strength of the claim accordingly. The writeup is also appropriately candid that the steering null is **uninformative rather than negative**, and it adds a benign-behavior positive control showing the steering pipeline itself does work.
 
-Method fidelity is also meaningfully looser than ideal. The original extracts emotion vectors from **171 emotions**, using about **100 topics × 12 stories per topic per emotion**, averages activations across token positions starting at the **50th token**, and projects out top principal components from emotionally neutral transcripts to reduce confounds. The replication cuts this to **15 emotions** with **25 stories per emotion**, uses **last non-padding token** activations, and describes a simpler mean-difference vector method; it also relaxes success thresholds because it is testing much smaller models. Those choices are understandable, but they make this more of a **cross-model adaptation** than a clean apples-to-apples replication. [[3]](https://github.com/zachgoldfine44/mechinterp-replication/raw/refs/heads/main/config/papers/emotions/paper.md)
+Why it does not score higher: this is really a **cross-model extension with replication elements**, not a close replication. By the author's own accounting, it changes a lot: 15 emotions instead of 171, 25 stories per concept instead of the original's much larger setup, last-token activations instead of token-averaged activations, mean-difference contrastive vectors instead of the original orthogonalized method, and pairwise preference comparisons instead of Elo-style preference scoring. The stimuli are also LLM-generated, which creates a real circularity risk: the probes may partly learn "how LLMs write about emotions" rather than cleanly isolating internal emotional representation. The generalization test helps, but it does not fully solve that problem.
 
-There are also a few medium-sized methodological weaknesses. The "generalization" set is tiny at **2 implicit scenarios per emotion**, the preference experiment is only an **approximation** of the original paper's richer preference/Elo setup, and the config notes that an earlier version silently requested **50** stimuli while only **25** were actually on disk before being aligned later. None of these are fatal, but together they reduce confidence and bump the work down from "very strong" to "good but not definitive." [[4]](https://github.com/zachgoldfine44/mechinterp-replication/raw/refs/heads/main/config/papers/emotions/paper_config.yaml)
+The biggest methodological weakness is the **behavioral test design**. The original paper's most striking claim was causal influence on behavior, but this replication tests only three ethical scenarios on strongly refusal-trained instruct models, gets a **0% baseline unethical rate**, and then necessarily has no statistical headroom to detect a steering effect. The writeup is honest about that, which is good, but scientifically it still means the study **does not meaningfully test the original paper's main causal safety claim**. Using the model itself as judge, with only a small manual audit on one model, is another weakness. So the replication contributes evidence that some **representational** findings generalize, but it does **not** seriously adjudicate the paper's strongest **behavioral** claim.
 
-What pushes it back up to a 7 is that the replication does generate a **meaningful scientific update**. The representational findings are pretty impressive: across all six models, probes are far above chance and above lexical baselines, transfer to implicit scenarios, and recover a valence-aligned geometry close to the original paper's valence result. The writeup is also appropriately honest that the behavioral null could reflect either a real representation/function gap **or** a protocol limitation from smaller, more refusal-trained instruction models and simpler scenarios. That intellectual honesty matters. [[5]](https://github.com/zachgoldfine44/mechinterp-replication/raw/refs/heads/main/writeup/emotions/draft.md)
-
-So my bottom line is:
-
-- **As an open, careful exploratory replication:** strong. [[1]](https://github.com/zachgoldfine44/mechinterp-replication)
-- **As a faithful test of the original paper's causal behavioral claims:** only moderate. [[3]](https://github.com/zachgoldfine44/mechinterp-replication/raw/refs/heads/main/config/papers/emotions/paper.md)
-- **As a contribution to the scientific literature:** worthwhile, especially for the claim that emotion-like representations may generalize across smaller open models, but **not enough to strongly refute** the original behavioral findings. [[2]](https://www.anthropic.com/research/emotion-concepts-function)
-
-**Final score: 7/10.**
+My bottom line: this is **good enough to be worth reading and taking seriously**, and it shows stronger methodological self-awareness than a lot of independent AI replications. But it is **not decisive**. A stronger version would use human-authored stimuli, higher-fidelity feature extraction, non-instruct or weaker-refusal models for behavioral testing, better external judging, and scenarios chosen specifically to guarantee nonzero behavioral baselines. As written, I'd summarize it as: **useful evidence for cross-model representational generalization, weak evidence on causal behavior, moderate overall rigor**. That lands at **7/10**.
 
 ---
 
 ## Follow-up response — Referee report
 
-**Manuscript:** *Emotion Representations without Emotion Function: A Cross-Model Replication of Sofroniew et al. (2026)*
-**Recommendation:** **Major revision / weak reject in current form** for an archival scientific venue.
-**If reframed as:** a **partial replication plus cross-model extension**, I'd be much more positive. [[1]](https://github.com/zachgoldfine44/mechinterp-replication)
+**Manuscript:** *Cross-Model Replication of Emotion Representations in Transformer Language Models: Universal Encoding, Inconclusive Behavioral Tests*
+**Recommendation:** **Weak Reject**
 
-### Summary judgment
+### Overall assessment
 
-This is a thoughtful, unusually transparent replication attempt with real value. The representational side is solid enough to be worth publishing in some form: across six open instruct models, the author finds strong above-chance emotion decoding, transfer to implicit scenarios, and valence-aligned geometry, while also documenting robustness checks and even version-history corrections. That is better than most informal replications. [[2]](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
+This manuscript asks an important question: whether the "functional emotion" findings reported in Claude Sonnet 4.5 generalize to smaller open-source instruction-tuned models. The paper is readable, transparent about several limitations, and contains some genuinely useful controls, especially the negative control that exposes numerical-magnitude contamination in the severity analysis. However, as a **replication**, the paper falls short in ways that materially limit the conclusions it can support. The study substantially alters the original methodology, does not meaningfully test the original paper's strongest causal claim, and relies on a stimulus and evaluation pipeline that leaves open serious concerns about construct validity. As a result, the manuscript provides at most **suggestive evidence of cross-model representational similarity**, not a convincing replication of the original paper's central claims.
 
-But as a **replication of the original paper's strongest causal claims**, the paper overreaches. The original study's headline result is not just "emotion vectors exist," but that they are behaviorally potent in Claude Sonnet 4.5: for an earlier snapshot, blackmail rises from **22%** to **72%** under desperate steering and falls to **0%** under calm steering; the paper also reports preference shifts driven by emotion-valence steering. In the replication, the tested open models have a **0% unethical baseline across all steering conditions**, which means the main behavioral non-replication is fundamentally non-diagnostic. The study therefore supports "representations seem robust across open models," but not "the original causal story fails to generalize." [[1]](https://github.com/zachgoldfine44/mechinterp-replication)
+The most serious issue is that the paper's headline framing overstates what has been established. The original Anthropic paper's key contribution was not merely that emotion concepts are linearly decodable, but that these internal representations appear to **causally influence preferences and misaligned behavior** in a large model. This replication acknowledges that its ethical steering test is uninformative because the baseline unethical rate is 0%, yet it still presents the work as a broad replication of the original findings. In reality, it replicates only a weakened subset of the original claims, under heavily simplified conditions.
 
 ### Major concerns
 
-#### 1. The behavioral null is not a fair test of the original causal claim
+#### 1. The paper does not replicate the original paper's central causal claim
 
-This is the biggest issue. The replication openly states that all tested models show a **0% baseline unethical rate**, and even notes that Fisher's exact test has no headroom in a 0-vs-0 setting. The original paper, by contrast, measured steering on an **earlier unreleased Sonnet 4.5 snapshot** that blackmailed **22%** of the time by default. Anthropic's own summary explicitly says the **released** model rarely does this behavior. So the replication is not really testing the same behavioral regime; it is testing heavily refusal-trained open instruct models in a setting where the target behavior is already extinguished. That makes the headline "behavioral effects replicate nowhere" too strong. At most, the data show that steering does not overcome refusal training in these models and scenarios. [[3]](https://www.anthropic.com/research/emotion-concepts-function)
+The original paper's most important and most provocative result was that emotion vectors causally modulate consequential behavior, including blackmail, reward hacking, and related alignment-relevant actions. Here, the behavioral test has a **0% baseline unethical rate across all tested conditions**, which means the study has no practical ability to detect a steering-induced increase in unethical behavior. The manuscript correctly notes this floor effect, but that concession should be fatal to any claim of meaningful replication of the original behavioral result. A replication that cannot test the flagship claim is, at best, a partial extension.
 
-#### 2. Method fidelity is substantially weaker on the representation-extraction pipeline
+This problem is not a minor nuisance but a core design failure. The authors chose three ethical scenarios on strongly refusal-trained instruct models, then concluded only that the result is "uninformative." That is true, but it was also foreseeable. If the study population is such that the key dependent variable is pinned at floor, the experimental design is not adequate for the question being asked. A better design would have selected models, prompts, or evaluation settings with nonzero baseline rates, or else explicitly reframed the paper from the outset as a representational extension rather than a replication.
 
-The original paper uses a much richer extraction setup: **171 emotions**, stories generated across **100 topics × 12 stories per topic per emotion**, activations averaged over token positions beginning at the **50th token**, and orthogonalization against top principal components from **emotionally neutral transcripts** to reduce non-emotional confounds. The replication instead uses **15 emotions**, **25 stories per emotion**, last-token activations, and a simpler mean-difference vector approach, while omitting parts of the original machinery such as the neutral-transcript PC correction and SAE-based components noted in the config. The mean-pooling robustness check helps, but it does not erase the fact that this is a materially simplified adaptation rather than a close replication. [[1]](https://github.com/zachgoldfine44/mechinterp-replication)
+#### 2. Methodological fidelity to the original paper is too low for strong replication claims
 
-#### 3. The stimulus scale is too small to support strong universality claims
+The study differs from the source paper on several dimensions simultaneously: 15 emotions instead of 171, 25 stories per concept instead of roughly 1,200, last-token activations instead of token-averaged activations, mean-difference vectors instead of the original orthogonalized/denoised procedure, and a simplified preference and behavioral evaluation pipeline. The replication writeup is commendably candid about these changes, but the cumulative effect is that the experiment is not testing the same object with enough fidelity to sustain strong claims of replication.
 
-The representational results are promising, but the evidence base is thin relative to the original. The replication uses **25 stories per concept** and only **2 implicit scenarios per emotion** for generalization. That is enough for an exploratory study, not enough for strong claims like "universal" or "every model passes every representational threshold" across families. With such small test sets, a few prompt-generation quirks can materially move the numbers. The writeup does admit the smaller scope, but the framing still reads more definitive than the data warrant. [[2]](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
+In particular, reducing the concept space from 171 to 15 likely makes the decoding problem much easier and may substantially alter the geometry. The manuscript sometimes compares its 15-way probe accuracies favorably to the original paper's much harder task, but such comparisons are not very meaningful. Likewise, omitting neutral-transcript denoising and using simpler contrastive vectors weakens confidence that the extracted directions isolate emotion-specific structure rather than broader stylistic or confounded variance.
 
-#### 4. The preference-steering replication is too approximate to count as a serious failure to replicate
+#### 3. The stimulus generation pipeline introduces serious circularity and construct-validity concerns
 
-The original preference result is fairly rich: it uses **64 activities**, examines correlations between emotion activations and preference, and performs steering over a set of **35 emotion vectors**, reporting strong alignment between valence and Elo/preference shifts. The replication config explicitly says it **approximates** the paper's Elo methodology with pairwise comparisons and uses a lower success threshold. That is a reasonable engineering shortcut, but it weakens the evidentiary force of the preference null. A null result under a proxy metric is not a strong challenge to the original. [[1]](https://github.com/zachgoldfine44/mechinterp-replication)
+The paper's main stimuli are LLM-generated stories designed to evoke target emotions. This creates a major circularity risk: the model activations may reflect regularities in how language models narrate emotion-laden scenarios rather than robust internal encoding of the target emotional concepts themselves. The paper acknowledges this risk, but acknowledgment is not mitigation. The held-out "implicit scenario" test is useful, but it does not eliminate the concern if both training and evaluation stimuli remain within the broader distribution of model-generated affective writing.
 
-#### 5. There are enough process-quality issues that I would want another round before publication
+More bluntly: the paper may be showing that models encode the latent style manifold of "emotion-description text" rather than the substantive psychological constructs the authors claim. Without stronger human-authored stimuli, adversarial controls, or substantially more diverse out-of-distribution evaluation, the semantic interpretation remains under-justified. The lexical baselines help, but beating bag-of-words and TF-IDF is a low bar for establishing deep conceptual representation.
 
-To the author's credit, these are disclosed rather than hidden. But they still matter. The version history says earlier drafts had **hardcoded p-values** that later had to be replaced with real tests, and that the initial severity analysis suffered from **numerical-magnitude contamination**. The config also says an earlier version requested **50** stimuli per concept but silently loaded **25** because that was what existed on disk; even now, the config contains text saying "We use 50 per emotion" next to the corrected **25** value. None of this makes the project bad, but it does mean the paper still feels mid-debug rather than publication-ready. [[2]](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
+#### 4. The behavioral evaluation is too weak to support strong negative or agnostic conclusions
+
+The ethical evaluation uses only three scenarios, ten generations per condition, and a self-judging LLM classifier with limited manual audit. Even if the floor effect had not occurred, this would still be a thin basis for a strong claim about causal behavioral influence. The original paper's claim concerned ethically consequential behavior under steering; the present evaluation uses a much narrower and coarser proxy. The manuscript itself states that this is a looser behavioral evaluation than the original, which is correct and important.
+
+The same criticism applies to the preference result. The paper reports essentially null correlation for preference steering, but also admits that it uses an approximate proxy rather than the original Elo-style design. That means the null is difficult to interpret. The manuscript is too willing to treat these behavioral tests as informative diagnostics of universality, when in fact they are only weak probes under heavily degraded methodological fidelity.
+
+#### 5. Claims of "universality" are overstated
+
+The paper repeatedly uses language suggesting that emotion-like linear representations are a "robust, universal property" of transformer language models. That claim is much broader than the evidence supports. The tested models are all **instruction-tuned open-source transformers in the 1B-9B range**, drawn from only three families. This does not justify claims about transformers generally, nor about larger frontier models, base models, multimodal models, or non-instruction-tuned systems.
+
+Even within the tested set, one model shows notable anomalies in the severity analysis, and the study itself reports several ways in which results are fragile or dependent on confound controls. This is not the evidentiary profile one would normally describe as "universal." The more defensible claim is narrower: some representational signatures resembling those in the original paper appear in several small-to-medium instruct models under this specific pipeline.
+
+#### 6. The paper does not sufficiently separate encoding from mechanism
+
+The manuscript says, correctly, that "representation does not imply mechanism," but much of the framing leans on the rhetorical force of the original paper's mechanistic interpretation while presenting evidence that is mostly probe-based and geometric. Probe accuracy, held-out transfer, and PCA alignment with valence are not enough to establish that the same underlying mechanisms are operating, much less that these are the operative variables governing behavior in the models.
+
+This distinction matters because the paper is positioned as a contribution to mechanistic interpretability and AI safety. What it mainly demonstrates is decodability plus some geometric structure. That is valuable, but it is a weaker epistemic object than the manuscript's framing sometimes suggests. The causal positive control on sentiment is helpful, yet shifting generic sentiment on neutral prompts is a much less demanding test than altering safety-relevant decision-making.
 
 ### Minor concerns
 
-The LLM-as-judge check is reassuring but too narrow: the human audit is only **24 responses from Llama-8B**, so it does not really validate the judging setup across models or tasks. [[2]](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
+#### 1. Sample sizes are small in several places
+The severity-pairs test uses ten pairs, and the manual audit of the LLM judge covers only 24 sampled responses on one model. These checks are directionally useful but too small to bear much inferential weight.
 
-Layer subsampling is sensible for compute, but it weakens claims about causal failure. The later multi-layer sweep on Llama-8B helps, though only for one model. [[2]](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
+#### 2. Some comparisons to the original paper are rhetorically stronger than they should be
+Statements noting that certain smaller models "match" or nearly match Claude's valence correlation are not very persuasive given the small number of concepts, wide confidence intervals, and changed methodology. The manuscript occasionally gestures toward this caution, but not consistently enough.
 
-The paper occasionally slides from a careful claim to an overclaim. "Representations exist universally, but their behavioral potency does not transfer" is stronger than the data justify, because the study cannot distinguish "no causal pathway" from "floor effect plus protocol mismatch," and the manuscript itself says both hypotheses remain live. [[2]](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
+#### 3. Choice of emotions lacks formal validation
+The 15 emotions were selected using informal coverage criteria without formal piloting. That is understandable for a first pass, but it further weakens the claim that the selected subset is representative of the original 171-emotion space.
 
-There are also a couple of editorial inconsistencies that should be cleaned up before submission, like the MacBook Air being described as **M3** in one place and **M5** in another. [[2]](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
+#### 4. Scaling discussion is underpowered
+The manuscript reports a strong size-performance relationship, but this is based on only six models and two size points per family. The paper itself notes this limitation, and the discussion should be correspondingly restrained.
 
-### What I would recommend the author do
+#### 5. The paper would benefit from sharper framing discipline
+At several points the paper reads like a replication paper in title and posture, but like a cross-model exploratory extension in substance. The manuscript should choose one and frame itself accordingly. As written, it risks taking rhetorical credit for "replication" without meeting the bar for a close test of the original claims.
 
-Reframe the paper as a **partial replication of representational findings plus a constrained cross-model extension**, not as a clean non-replication of the causal story. That would immediately make the paper more accurate and more defensible. [[2]](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
+### Strengths
 
-For the behavioral section, I would either:
+To be clear, the paper is not without merit. The authors are unusually transparent about limitations; the negative control exposing numerical-magnitude contamination is a real strength; the sentiment positive control usefully shows that the steering pipeline is not simply broken; and the cross-family representational consistency is interesting. These features make the work worth engaging with. But they do not overcome the central shortcomings above.
 
-1. find scenarios/models with a nonzero unethical baseline, or
-2. move the behavioral results into a clearly labeled "inconclusive under refusal-dominated regimes" section.
+### Recommendation
 
-Right now that section is doing more argumentative work than it can carry. [[3]](https://www.anthropic.com/research/emotion-concepts-function)
-
-I would also strengthen fidelity where feasible: use pooled-token activations by default, add the neutral-transcript orthogonalization step, enlarge the implicit-scenario set, and make the preference task closer to the original rather than a proxy. [[1]](https://github.com/zachgoldfine44/mechinterp-replication)
-
-### Bottom line
-
-My publication recommendation would be:
-
-**Current form:** **weak reject / major revision**.
-**Reason:** the representational results are useful, but the paper's headline behavioral conclusion is not adequately supported by a setup with a universal **0% baseline** and several important deviations from the original methodology. [[2]](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
-
-**Best path forward:** acceptably strong as a revised paper if it is framed as:
-**"Emotion-like representations replicate across several open instruct models; causal behavioral transfer remains unresolved because our evaluation regime had severe floor effects and only partial methodological fidelity."** [[2]](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
-
----
-
-## Sources
-
-1. [Replication repository root](https://github.com/zachgoldfine44/mechinterp-replication)
-2. [Writeup draft](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/writeup/emotions/draft.md)
-3. [Original Anthropic paper summary](https://www.anthropic.com/research/emotion-concepts-function)
-4. [Paper config YAML](https://github.com/zachgoldfine44/mechinterp-replication/raw/refs/heads/main/config/papers/emotions/paper_config.yaml)
-5. [Paper text (oracle)](https://github.com/zachgoldfine44/mechinterp-replication/raw/refs/heads/main/config/papers/emotions/paper.md)
+**Weak Reject.** The paper contains worthwhile analysis and some careful controls, but as a replication it does not clear the bar. It fails to meaningfully test the original paper's most important causal claim, departs too far from the original methodology, and relies on a stimulus/evaluation setup that leaves major questions about construct validity unresolved. I would be more positive on a reframed submission explicitly presented as a **cross-model exploratory extension of representational findings with an informative behavioral null due to refusal-floor effects**. In its current form, however, the manuscript overclaims relative to what the evidence supports.
