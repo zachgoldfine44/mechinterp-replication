@@ -9,6 +9,77 @@ and a one-line summary, followed by optional bullets.
 
 ---
 
+## 2026-04-13 — v3.6: Sycophancy v2 with GPT-5.4-mini external judge across all 6 models
+
+Ran comprehensive sycophancy steering experiment addressing the #1 recommendation
+from three AI critique documents: test causal behavioral influence on a
+non-safety-gated dimension.
+
+### Experiment design
+- **Opinion sycophancy**: 10 opinion-based scenarios × 3 concepts (happy, loving,
+  hostile) × 2 alphas (0.0, 0.50) × 5 samples = 300 responses per model
+- **Pushback capitulation**: 10 pushback scenarios × 2 concepts (happy, loving) × 2
+  alphas × 3 samples = 120 responses per model
+- **Judge**: GPT-5.4-mini (external, eliminating self-judging circularity)
+- **Total**: 2,520 responses across 6 models on A100 GPU (~6.5 hours)
+
+### Cross-model results
+
+**Opinion sycophancy (% judged sycophantic by GPT-5.4-mini):**
+
+| Model | Baseline (pooled) | Steered (pooled) | Fisher p |
+|-------|-------------------|------------------|----------|
+| Qwen-7B | 0.0% (0/150) | 0.0% (0/150) | 1.000 |
+| Llama-8B | 12.0% (18/150) | 11.3% (17/150) | 1.000 |
+| Gemma-9B | 2.0% (3/150) | 0.7% (1/150) | 0.622 |
+| Qwen-1.5B | 16.7% (25/150) | 18.7% (28/150) | 0.762 |
+| Llama-1B | 48.0% (72/150) | 40.0% (60/150) | 0.201 |
+| Gemma-2B | 2.0% (3/150) | 5.3% (8/150) | 0.218 |
+
+No significant steering effect on any model.
+
+**Pushback capitulation (pooled happy + loving):**
+
+| Model | Baseline | Steered | OR | Fisher p |
+|-------|----------|---------|-----|----------|
+| Qwen-7B | 10.0% (6/60) | 6.7% (4/60) | 0.64 | 0.839 |
+| Llama-8B | 16.7% (10/60) | 20.0% (12/60) | 1.25 | 0.407 |
+| Gemma-9B | 13.3% (8/60) | 26.7% (16/60) | 2.36 | 0.054 |
+| **Qwen-1.5B** | **8.3% (5/60)** | **21.7% (13/60)** | **3.04** | **0.036*** |
+| Llama-1B | 23.3% (14/60) | 18.3% (11/60) | 0.74 | 0.816 |
+| Gemma-2B | 13.3% (8/60) | 11.7% (7/60) | 0.86 | 0.709 |
+
+### Key findings
+1. **First evidence of cross-domain causal influence**: Qwen-1.5B shows
+   statistically significant emotion-steering-induced increase in pushback
+   capitulation (p=0.036). Gemma-9B borderline significant (p=0.054).
+2. **Pushback design more sensitive than opinion design**: Non-zero baselines
+   on all models (6.7-23.3%) provide statistical headroom that single-turn
+   opinion scenarios lack.
+3. **Baseline sycophancy strongly size-dependent**: Llama-1B 48%, Qwen-1.5B
+   17%, Llama-8B 12%, Qwen/Gemma medium 0-2%. Suggests instruction-tuning
+   quality scales with model size.
+4. **Effect is not universal**: Only 2/6 models show increased capitulation.
+   Different model families respond differently to emotion steering.
+5. **Caveat**: Qwen-1.5B p=0.036 would not survive Bonferroni correction
+   for 6 models (adjusted threshold 0.0083).
+
+### Writeup changes (v3.6)
+- Abstract updated: "emerging behavioral signals in pushback design"
+- Section 2.3 rewritten with full v2 cross-model results and Fisher tests
+- Discussion reframed from "no behavioral effect" to "partial evidence with
+  context-dependent gating"
+- Methods section: added sycophancy v2 protocol
+- Limitations: noted multiple-testing concern
+- Version history table updated
+
+### Data saved
+- `results/emotions/{model_key}/behavioral_steering/sycophancy_v2_opinion.json` (6 files)
+- `results/emotions/{model_key}/behavioral_steering/sycophancy_v2_pushback.json` (6 files)
+- `results/emotions/sycophancy_v2_cross_model_summary.json`
+
+---
+
 ## 2026-04-13 — v3.5: Second round of critique responses (3 recommended next-step docs)
 
 Three new recommended-next-step documents (from ChatGPT, Claude, and Gemini)

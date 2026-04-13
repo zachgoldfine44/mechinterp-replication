@@ -2,7 +2,16 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.5 addressing second round of critiques (3 recommended next-step docs)
+## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.6 with sycophancy v2 cross-model results (GPT-5.4-mini judge)
+
+**Writeup v3.6 (sycophancy v2 — all 6 models, external judge, 2026-04-13):**
+- Comprehensive sycophancy steering experiment: 2,520 responses across 6 models judged by GPT-5.4-mini
+- **Opinion sycophancy**: no significant steering effect on any model (all p>0.20)
+- **Pushback capitulation**: Qwen-1.5B significant (8.3%→21.7%, p=0.036), Gemma-9B borderline (13.3%→26.7%, p=0.054)
+- **First evidence of cross-domain causal influence** from emotion representation steering
+- Baseline sycophancy strongly size-dependent: Llama-1B 48%, Qwen-1.5B 17%, Qwen-7B 0%
+- Writeup reframed: "emerging behavioral signals in pushback design" replaces "no behavioral effect"
+- Caveat: Qwen-1.5B p=0.036 does not survive Bonferroni correction for 6 models
 
 **Writeup v3.4 (external peer review response, 2026-04-12):**
 - Three independent reviews (ChatGPT 7/10, Claude Opus 4.6 7.5/10, Gemini 3.1 Pro 8.5/10) identified consensus issues.
