@@ -1,33 +1,41 @@
 # Peer Reviews: Emotions Concept Replication
 
-This directory contains AI referee reviews of [`writeup/emotions/draft.md`](../draft.md). Three frontier language models were given the same standardized prompts and asked to (a) rate the replication on a 1-10 scale with justification and (b) produce a peer-review-style referee report with major concerns, minor concerns, and an accept/reject recommendation.
+This directory contains AI referee reviews of [`writeup/emotions/draft.md`](../draft.md) (v3.6). Three frontier language models were given the same standardized prompts and asked to (a) rate the replication on a 1-10 scale with justification and (b) produce a peer-review-style referee report with major concerns, minor concerns, and an accept/reject recommendation.
 
 ## Summary of scores
 
 | Reviewer | Score | Recommendation | Full review |
 |---|:---:|:---:|---|
-| ChatGPT (extended thinking) | **7 / 10** | Weak reject | [chatgpt-extended-thinking.md](chatgpt-extended-thinking.md) |
-| Claude Opus 4.6 (extended thinking) | **6 / 10** | Major revisions required | [claude-opus-4-6-extended-thinking.md](claude-opus-4-6-extended-thinking.md) |
-| Gemini 3.1 Pro | **9 / 10** (score) · **Borderline reject** (referee) | Major revision (borderline reject) | [gemini-3-1-pro.md](gemini-3-1-pro.md) |
-| **Mean** | **7.33** | | |
+| ChatGPT (extended thinking) | **7 / 10** | Reject | [chatgpt-extended-thinking.md](chatgpt-extended-thinking.md) |
+| Claude Opus 4.6 (extended thinking) | **7 / 10** | Revise and resubmit (major revisions) | [claude-opus-4-6-extended-thinking.md](claude-opus-4-6-extended-thinking.md) |
+| Gemini 3.1 Pro | **8.5 / 10** (score) · **Reject** (referee) | Reject (encourage resubmission as note/short paper) | [gemini-3-1-pro.md](gemini-3-1-pro.md) |
+| **Mean** | **7.50** | | |
 
-Note: Gemini gave the highest initial score (9/10) but the harshest referee recommendation (borderline reject). This divergence reflects different evaluation stances: the 9/10 credits the experimental design and methodological controls, while the borderline-reject focuses on the gap between the paper's claims and the evidence available to support them.
+## Score evolution across draft versions
+
+| Reviewer | v3.3 | v3.4 | v3.6 | Trend |
+|---|:---:|:---:|:---:|---|
+| ChatGPT | 7 | 7 | 7 | Stable |
+| Claude | 7.5 | 6 | 7 | V-shaped (dropped on framing, recovered with sycophancy data) |
+| Gemini | 8.5 | 9 | 8.5 | Peaked at v3.4 (positive control valued), back to 8.5 with harsher referee |
+| Mean | 7.67 | 7.33 | 7.50 | Stable in the 7-7.5 range |
 
 ## What the reviewers agreed on
 
-All three reviewers independently identified the same core issues:
+All three independently identified the same core issues:
 
-1. **The steering null is a floor effect, not a negative result.** With a 0% baseline unethical rate across all six open-source models, Fisher's exact test has no statistical headroom to detect a steering effect even if one existed. The title and abstract's framing overstates what a 0-vs-0 comparison can demonstrate.
-2. **The scale gap is material.** Tested models (1B-9B parameters) are an order of magnitude smaller than Claude Sonnet 4.5. Claiming the causal behavioral findings "don't replicate" across this gap is weak inference, especially since probe accuracy scales with size (rho = 0.94).
-3. **Method fidelity is looser than a strict replication.** The original used 171 emotions with richer extraction machinery; this replication uses 15 emotions with simpler mean-difference vectors and a narrower generalization test.
-4. **Universality claims are overstated.** Six models across three families in the 1B-9B range, all instruction-tuned, does not justify claims about transformers in general.
+1. **Not a strict replication.** All three say this is better framed as a "cross-model extension" or "generalization study." The methodological simplifications (15/171 emotions, 25 vs. ~1,200 stories, simpler vectors, no denoising) are too substantial for strict replication claims.
+2. **The ethical-steering null is a floor effect, not a finding.** The 0% baseline makes the test uninformative rather than negative. The title and abstract may still overstate what can be concluded.
+3. **The scale gap matters.** 1B-9B vs. Claude Sonnet 4.5 (likely >100B) is a fundamentally different regime. Behavioral potency may have a scale threshold.
+4. **LLM-generated stimuli introduce circularity risk.** Probes may detect how models write about emotions rather than how they represent them.
+5. **The sycophancy pushback result is suggestive but preliminary.** p=0.036 on one model without multiple-comparison correction is not conclusive.
 
 ## What they disagreed on
 
-- **Severity of the issues**: Claude (6/10) was the harshest overall scorer, viewing the behavioral framing as a fundamental flaw. ChatGPT (7/10) was moderate. Gemini gave 9/10 on the initial scoring pass but borderline-reject on the referee report.
-- **The sentiment positive control**: Gemini praised it strongly ("critical methodological safeguard"). Claude acknowledged it but called it "a much less demanding test than altering safety-relevant decision-making." ChatGPT called the pipeline validation "helpful" but not sufficient.
-- **The contamination discovery**: Claude and ChatGPT rated this as a meaningful original contribution. Gemini mentioned it but focused less on it.
-- **Whether the paper should test non-safety behaviors**: Gemini and ChatGPT specifically suggested testing sycophancy, verbosity, or helpfulness instead of ethical refusal. Claude focused more on the framing issue.
+- **Overall severity**: Claude and ChatGPT both give 7/10 with fairly aligned critiques. Gemini gives 8.5/10 on the initial score but the harshest referee report (Reject, calling the work an "exploratory weekend project").
+- **Whether to publish**: ChatGPT says Reject. Claude says Revise and Resubmit. Gemini says Reject but encourages resubmission as a note/short paper. No reviewer recommends acceptance in current form.
+- **The positive controls**: Claude credits the severity-pairs confound discovery as the "most original contribution." ChatGPT credits the sentiment positive control and sycophancy design. Gemini credits the overall experimental design maturity.
+- **Specific statistical concerns**: Gemini specifically calls out the lack of multiple-comparison correction on the sycophancy tests. Claude focuses on the LLM-as-judge circularity. ChatGPT focuses on the framing gap between "replication" and "extension."
 
 ## How these reviews were produced
 
@@ -41,6 +49,4 @@ Followed by:
 
 > Can you turn this into a harsher peer-review-style referee report with major concerns / minor concerns / accept-reject recommendation?
 
-The exact same prompts were given to all three reviewers to ensure comparability. This is the review protocol documented in [CONTRIBUTING.md](../../../CONTRIBUTING.md#ai-review-policy).
-
-Reviews were conducted in April 2026 against the v3.4 draft.
+Reviews conducted in April 2026 against the v3.6 draft. This is the review protocol documented in [CONTRIBUTING.md](../../../CONTRIBUTING.md#ai-review-policy).
