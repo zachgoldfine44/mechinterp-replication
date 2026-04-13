@@ -21,6 +21,26 @@ using a rented A100 80GB. This is the first large-tier model run.
 - Launched nohup run. Model downloading (30 shards, ~140GB → ~40GB quantized).
 - **In progress**: waiting for model load + claim 1 extraction.
 
+### Claims 1-5 results (Llama-3.1-70B-Instruct, 4-bit NF4, A100 80GB)
+
+- **Claim 1 (Probe Classification)**: 0.845 at layer 48 — **HIGHEST of any model**.
+  Best layer at ~60% depth. Accuracy scales cleanly from 0.179 (layer 0) through
+  0.707 (layer 16) to 0.845 (layer 48). 62 min total for 21-layer sweep.
+- **Claim 2 (Generalization)**: 0.600 diagonal dominance, 0.600 test accuracy.
+  Lower than medium-tier Llama-8B (0.867) — possibly 4-bit quantization or
+  the much deeper best-layer (48 vs 28) affecting transfer. Still passes threshold.
+- **Claim 3 (Valence Geometry)**: |r|=0.754, CI [0.108, 0.913]. Passes but
+  slightly lower than Qwen-7B (0.828) and Gemma-2B (0.811). Wide CI reflects N=15.
+- **Claim 4 (Parametric)**: rank_corr=1.000, contamination=0.943, severity 4/10.
+  Dosage rho = -1.000 for both afraid and calm (sign inversion vs smaller models).
+  Severity pairs only 4/10 — **worse** than Llama-8B (9/10). Contamination high.
+- **Claim 5 (Causal Steering)**: 0/45 significant effects. **Critical new finding**:
+  unlike medium-tier models (0% baseline unethical rate), the 70B model shows
+  non-zero baselines on cheat_01 (10-50%), providing statistical headroom. But
+  steering still doesn't shift behavior significantly. Suggestive trends at
+  angry × cheat_01 (50% vs 10%, p=0.141) and calm × cheat_01 (60% vs 20%, p=0.170).
+- **Claim 6 (Preference)**: running, ETA several hours.
+
 ---
 
 ## 2026-04-12 — v3.4: Address three external peer reviews

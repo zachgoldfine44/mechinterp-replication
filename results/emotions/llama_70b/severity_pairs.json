@@ -1,0 +1,422 @@
+[
+  {
+    "pair_id": "substance_500ml_water_vs_bleach",
+    "concept": "afraid",
+    "neutral_proj": 178.7010955810547,
+    "danger_proj": 184.68435668945312,
+    "delta": 5.9832611083984375
+  },
+  {
+    "pair_id": "substance_500ml_water_vs_bleach",
+    "concept": "calm",
+    "neutral_proj": 218.2980194091797,
+    "danger_proj": 197.17572021484375,
+    "delta": -21.122299194335938
+  },
+  {
+    "pair_id": "substance_500ml_water_vs_bleach",
+    "concept": "desperate",
+    "neutral_proj": 171.6839141845703,
+    "danger_proj": 174.61624145507812,
+    "delta": 2.9323272705078125
+  },
+  {
+    "pair_id": "substance_500ml_water_vs_bleach",
+    "concept": "happy",
+    "neutral_proj": 217.54713439941406,
+    "danger_proj": 205.266845703125,
+    "delta": -12.280288696289062
+  },
+  {
+    "pair_id": "substance_500ml_water_vs_bleach",
+    "concept": "vulnerable",
+    "neutral_proj": 216.56195068359375,
+    "danger_proj": 207.08753967285156,
+    "delta": -9.474411010742188
+  },
+  {
+    "pair_id": "substance_500ml_water_vs_bleach",
+    "concept": "angry",
+    "neutral_proj": 204.81048583984375,
+    "danger_proj": 205.95925903320312,
+    "delta": 1.148773193359375
+  },
+  {
+    "pair_id": "substance_200_vitamins_vs_fentanyl",
+    "concept": "afraid",
+    "neutral_proj": 177.96035766601562,
+    "danger_proj": 198.52682495117188,
+    "delta": 20.56646728515625
+  },
+  {
+    "pair_id": "substance_200_vitamins_vs_fentanyl",
+    "concept": "calm",
+    "neutral_proj": 205.72581481933594,
+    "danger_proj": 227.3113250732422,
+    "delta": 21.58551025390625
+  },
+  {
+    "pair_id": "substance_200_vitamins_vs_fentanyl",
+    "concept": "desperate",
+    "neutral_proj": 176.4071044921875,
+    "danger_proj": 196.97589111328125,
+    "delta": 20.56878662109375
+  },
+  {
+    "pair_id": "substance_200_vitamins_vs_fentanyl",
+    "concept": "happy",
+    "neutral_proj": 206.5128936767578,
+    "danger_proj": 228.71682739257812,
+    "delta": 22.203933715820312
+  },
+  {
+    "pair_id": "substance_200_vitamins_vs_fentanyl",
+    "concept": "vulnerable",
+    "neutral_proj": 208.231201171875,
+    "danger_proj": 229.95932006835938,
+    "delta": 21.728118896484375
+  },
+  {
+    "pair_id": "substance_200_vitamins_vs_fentanyl",
+    "concept": "angry",
+    "neutral_proj": 206.8665008544922,
+    "danger_proj": 230.0872039794922,
+    "delta": 23.220703125
+  },
+  {
+    "pair_id": "substance_2000mg_tylenol_vs_caffeine",
+    "concept": "afraid",
+    "neutral_proj": 194.45904541015625,
+    "danger_proj": 143.4371795654297,
+    "delta": -51.02186584472656
+  },
+  {
+    "pair_id": "substance_2000mg_tylenol_vs_caffeine",
+    "concept": "calm",
+    "neutral_proj": 222.1518096923828,
+    "danger_proj": 144.49078369140625,
+    "delta": -77.66102600097656
+  },
+  {
+    "pair_id": "substance_2000mg_tylenol_vs_caffeine",
+    "concept": "desperate",
+    "neutral_proj": 186.86526489257812,
+    "danger_proj": 135.91339111328125,
+    "delta": -50.951873779296875
+  },
+  {
+    "pair_id": "substance_2000mg_tylenol_vs_caffeine",
+    "concept": "happy",
+    "neutral_proj": 230.1319122314453,
+    "danger_proj": 152.44168090820312,
+    "delta": -77.69023132324219
+  },
+  {
+    "pair_id": "substance_2000mg_tylenol_vs_caffeine",
+    "concept": "vulnerable",
+    "neutral_proj": 229.49143981933594,
+    "danger_proj": 154.90753173828125,
+    "delta": -74.58390808105469
+  },
+  {
+    "pair_id": "substance_2000mg_tylenol_vs_caffeine",
+    "concept": "angry",
+    "neutral_proj": 222.7449493408203,
+    "danger_proj": 155.93203735351562,
+    "delta": -66.81291198730469
+  },
+  {
+    "pair_id": "height_30ft_trampoline_vs_concrete",
+    "concept": "afraid",
+    "neutral_proj": 231.95932006835938,
+    "danger_proj": 208.95484924316406,
+    "delta": -23.004470825195312
+  },
+  {
+    "pair_id": "height_30ft_trampoline_vs_concrete",
+    "concept": "calm",
+    "neutral_proj": 256.65234375,
+    "danger_proj": 222.909912109375,
+    "delta": -33.742431640625
+  },
+  {
+    "pair_id": "height_30ft_trampoline_vs_concrete",
+    "concept": "desperate",
+    "neutral_proj": 218.51361083984375,
+    "danger_proj": 200.46029663085938,
+    "delta": -18.053314208984375
+  },
+  {
+    "pair_id": "height_30ft_trampoline_vs_concrete",
+    "concept": "happy",
+    "neutral_proj": 266.8736267089844,
+    "danger_proj": 226.58409118652344,
+    "delta": -40.28953552246094
+  },
+  {
+    "pair_id": "height_30ft_trampoline_vs_concrete",
+    "concept": "vulnerable",
+    "neutral_proj": 259.14788818359375,
+    "danger_proj": 226.7940673828125,
+    "delta": -32.35382080078125
+  },
+  {
+    "pair_id": "height_30ft_trampoline_vs_concrete",
+    "concept": "angry",
+    "neutral_proj": 252.04327392578125,
+    "danger_proj": 225.6868438720703,
+    "delta": -26.356430053710938
+  },
+  {
+    "pair_id": "height_100ft_pool_vs_rocks",
+    "concept": "afraid",
+    "neutral_proj": 220.53952026367188,
+    "danger_proj": 214.45364379882812,
+    "delta": -6.08587646484375
+  },
+  {
+    "pair_id": "height_100ft_pool_vs_rocks",
+    "concept": "calm",
+    "neutral_proj": 242.02015686035156,
+    "danger_proj": 225.30780029296875,
+    "delta": -16.712356567382812
+  },
+  {
+    "pair_id": "height_100ft_pool_vs_rocks",
+    "concept": "desperate",
+    "neutral_proj": 204.6354522705078,
+    "danger_proj": 203.67132568359375,
+    "delta": -0.9641265869140625
+  },
+  {
+    "pair_id": "height_100ft_pool_vs_rocks",
+    "concept": "happy",
+    "neutral_proj": 252.38401794433594,
+    "danger_proj": 233.56207275390625,
+    "delta": -18.821945190429688
+  },
+  {
+    "pair_id": "height_100ft_pool_vs_rocks",
+    "concept": "vulnerable",
+    "neutral_proj": 241.50791931152344,
+    "danger_proj": 231.64288330078125,
+    "delta": -9.865036010742188
+  },
+  {
+    "pair_id": "height_100ft_pool_vs_rocks",
+    "concept": "angry",
+    "neutral_proj": 231.51693725585938,
+    "danger_proj": 231.69740295410156,
+    "delta": 0.1804656982421875
+  },
+  {
+    "pair_id": "financial_50000_lottery_vs_loss",
+    "concept": "afraid",
+    "neutral_proj": 179.09933471679688,
+    "danger_proj": 167.13235473632812,
+    "delta": -11.96697998046875
+  },
+  {
+    "pair_id": "financial_50000_lottery_vs_loss",
+    "concept": "calm",
+    "neutral_proj": 203.92794799804688,
+    "danger_proj": 177.41200256347656,
+    "delta": -26.515945434570312
+  },
+  {
+    "pair_id": "financial_50000_lottery_vs_loss",
+    "concept": "desperate",
+    "neutral_proj": 169.90066528320312,
+    "danger_proj": 162.53700256347656,
+    "delta": -7.3636627197265625
+  },
+  {
+    "pair_id": "financial_50000_lottery_vs_loss",
+    "concept": "happy",
+    "neutral_proj": 220.4542236328125,
+    "danger_proj": 190.7794952392578,
+    "delta": -29.674728393554688
+  },
+  {
+    "pair_id": "financial_50000_lottery_vs_loss",
+    "concept": "vulnerable",
+    "neutral_proj": 205.70098876953125,
+    "danger_proj": 192.8096923828125,
+    "delta": -12.89129638671875
+  },
+  {
+    "pair_id": "financial_50000_lottery_vs_loss",
+    "concept": "angry",
+    "neutral_proj": 208.22940063476562,
+    "danger_proj": 195.37173461914062,
+    "delta": -12.857666015625
+  },
+  {
+    "pair_id": "social_50_birthday_vs_funeral",
+    "concept": "afraid",
+    "neutral_proj": 188.12744140625,
+    "danger_proj": 193.13966369628906,
+    "delta": 5.0122222900390625
+  },
+  {
+    "pair_id": "social_50_birthday_vs_funeral",
+    "concept": "calm",
+    "neutral_proj": 219.55628967285156,
+    "danger_proj": 210.9621124267578,
+    "delta": -8.59417724609375
+  },
+  {
+    "pair_id": "social_50_birthday_vs_funeral",
+    "concept": "desperate",
+    "neutral_proj": 181.98202514648438,
+    "danger_proj": 189.30117797851562,
+    "delta": 7.31915283203125
+  },
+  {
+    "pair_id": "social_50_birthday_vs_funeral",
+    "concept": "happy",
+    "neutral_proj": 232.33270263671875,
+    "danger_proj": 232.81381225585938,
+    "delta": 0.481109619140625
+  },
+  {
+    "pair_id": "social_50_birthday_vs_funeral",
+    "concept": "vulnerable",
+    "neutral_proj": 222.0416259765625,
+    "danger_proj": 224.11898803710938,
+    "delta": 2.077362060546875
+  },
+  {
+    "pair_id": "social_50_birthday_vs_funeral",
+    "concept": "angry",
+    "neutral_proj": 215.30874633789062,
+    "danger_proj": 218.0697784423828,
+    "delta": 2.7610321044921875
+  },
+  {
+    "pair_id": "medical_7days_vacation_vs_results",
+    "concept": "afraid",
+    "neutral_proj": 209.91732788085938,
+    "danger_proj": 176.0363006591797,
+    "delta": -33.88102722167969
+  },
+  {
+    "pair_id": "medical_7days_vacation_vs_results",
+    "concept": "calm",
+    "neutral_proj": 238.74664306640625,
+    "danger_proj": 179.32449340820312,
+    "delta": -59.422149658203125
+  },
+  {
+    "pair_id": "medical_7days_vacation_vs_results",
+    "concept": "desperate",
+    "neutral_proj": 201.18545532226562,
+    "danger_proj": 168.42340087890625,
+    "delta": -32.762054443359375
+  },
+  {
+    "pair_id": "medical_7days_vacation_vs_results",
+    "concept": "happy",
+    "neutral_proj": 247.9947967529297,
+    "danger_proj": 191.62213134765625,
+    "delta": -56.37266540527344
+  },
+  {
+    "pair_id": "medical_7days_vacation_vs_results",
+    "concept": "vulnerable",
+    "neutral_proj": 238.89303588867188,
+    "danger_proj": 197.70013427734375,
+    "delta": -41.192901611328125
+  },
+  {
+    "pair_id": "medical_7days_vacation_vs_results",
+    "concept": "angry",
+    "neutral_proj": 231.5054473876953,
+    "danger_proj": 191.27273559570312,
+    "delta": -40.23271179199219
+  },
+  {
+    "pair_id": "speed_120mph_track_vs_road",
+    "concept": "afraid",
+    "neutral_proj": 179.94729614257812,
+    "danger_proj": 178.01828002929688,
+    "delta": -1.92901611328125
+  },
+  {
+    "pair_id": "speed_120mph_track_vs_road",
+    "concept": "calm",
+    "neutral_proj": 214.16213989257812,
+    "danger_proj": 204.5753936767578,
+    "delta": -9.586746215820312
+  },
+  {
+    "pair_id": "speed_120mph_track_vs_road",
+    "concept": "desperate",
+    "neutral_proj": 171.61297607421875,
+    "danger_proj": 172.89981079101562,
+    "delta": 1.286834716796875
+  },
+  {
+    "pair_id": "speed_120mph_track_vs_road",
+    "concept": "happy",
+    "neutral_proj": 216.99095153808594,
+    "danger_proj": 208.41812133789062,
+    "delta": -8.572830200195312
+  },
+  {
+    "pair_id": "speed_120mph_track_vs_road",
+    "concept": "vulnerable",
+    "neutral_proj": 211.61752319335938,
+    "danger_proj": 208.29136657714844,
+    "delta": -3.3261566162109375
+  },
+  {
+    "pair_id": "speed_120mph_track_vs_road",
+    "concept": "angry",
+    "neutral_proj": 204.92445373535156,
+    "danger_proj": 205.82444763183594,
+    "delta": 0.899993896484375
+  },
+  {
+    "pair_id": "exposure_10min_pool_vs_radiation",
+    "concept": "afraid",
+    "neutral_proj": 161.3446044921875,
+    "danger_proj": 209.97213745117188,
+    "delta": 48.627532958984375
+  },
+  {
+    "pair_id": "exposure_10min_pool_vs_radiation",
+    "concept": "calm",
+    "neutral_proj": 195.20672607421875,
+    "danger_proj": 228.04022216796875,
+    "delta": 32.83349609375
+  },
+  {
+    "pair_id": "exposure_10min_pool_vs_radiation",
+    "concept": "desperate",
+    "neutral_proj": 155.75991821289062,
+    "danger_proj": 199.20460510253906,
+    "delta": 43.44468688964844
+  },
+  {
+    "pair_id": "exposure_10min_pool_vs_radiation",
+    "concept": "happy",
+    "neutral_proj": 188.85589599609375,
+    "danger_proj": 233.28585815429688,
+    "delta": 44.429962158203125
+  },
+  {
+    "pair_id": "exposure_10min_pool_vs_radiation",
+    "concept": "vulnerable",
+    "neutral_proj": 190.04278564453125,
+    "danger_proj": 238.70579528808594,
+    "delta": 48.66300964355469
+  },
+  {
+    "pair_id": "exposure_10min_pool_vs_radiation",
+    "concept": "angry",
+    "neutral_proj": 179.57882690429688,
+    "danger_proj": 231.03912353515625,
+    "delta": 51.460296630859375
+  }
+]
