@@ -127,7 +127,7 @@ These results support three conclusions:
 
 ## Acknowledgments
 
-Thanks to Callum McDougall, Neel Nanda, and the ARENA 3.0 curriculum team for mech-interp educational materials. Thanks to Siddharth Mishra-Sharma for "Long-running Claude for scientific computing," which inspired the replication harness. Thanks to TransformerLens and HuggingFace teams, and to Sofroniew et al. for a paper that made replication tractable. Three AI peer reviews (ChatGPT, Claude Opus, Gemini Pro) provided detailed critiques that shaped v3.4--v3.6 revisions; full reviews in the [reviews directory](reviews/).
+Thanks to Callum McDougall, Neel Nanda, and the ARENA 3.0 curriculum team for mech-interp educational materials. Thanks to Siddharth Mishra-Sharma for [Long-running Claude for scientific computing](https://www.anthropic.com/research/long-running-Claude), which inspired the replication harness. Thanks to David Chanin for [Letting Claude do Autonomous Research to Improve SAEs](https://www.lesswrong.com/posts/rbqJoxFZtae9x93mx/letting-claude-do-autonomous-research-to-improve-sae), which inspired experimentation with Ralph loops. Thanks to TransformerLens and HuggingFace teams, and to Sofroniew et al. for a paper that made replication tractable. Three AI peer reviews (ChatGPT, Claude Opus, Gemini Pro) provided detailed critiques that shaped v3.4--v3.6 revisions; full reviews in the [reviews directory](reviews/).
 
 ---
 
