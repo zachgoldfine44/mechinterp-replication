@@ -27,8 +27,14 @@ converged on these priorities:
   reframed from "5/6 show majority" to "1 model significant, 2 borderline."
 - **Sycophancy + tone steering experiments**: Script
   `scripts/behavioral_steering.py` created with sycophancy (10 scenarios ×
-  LLM-as-judge) and tone (10 neutral questions × 1-5 scale judge). Running
-  on Qwen-7B on A100.
+  LLM-as-judge) and tone (10 neutral questions × 1-5 scale judge).
+  Running on Qwen-7B on A100. Partial results for happy concept:
+  - Baseline: 0% sycophancy (0/100)
+  - α=0.05: 0% (0/100)
+  - α=0.10: 0% (0/100)
+  - α=0.50: 1% (1/100) — first non-zero but not significant
+  - Remaining concepts (loving, enthusiastic, hostile, afraid) + tone
+    experiment still running on A100 (PID running autonomously).
 
 ---
 
