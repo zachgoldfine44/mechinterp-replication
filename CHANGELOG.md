@@ -25,16 +25,23 @@ converged on these priorities:
   models indistinguishable from chance. Saved to
   `results/emotions/severity_pairs_binomial.json`. Writeup severity section
   reframed from "5/6 show majority" to "1 model significant, 2 borderline."
-- **Sycophancy + tone steering experiments**: Script
-  `scripts/behavioral_steering.py` created with sycophancy (10 scenarios ×
-  LLM-as-judge) and tone (10 neutral questions × 1-5 scale judge).
-  Running on Qwen-7B on A100. Partial results for happy concept:
-  - Baseline: 0% sycophancy (0/100)
-  - α=0.05: 0% (0/100)
-  - α=0.10: 0% (0/100)
-  - α=0.50: 1% (1/100) — first non-zero but not significant
-  - Remaining concepts (loving, enthusiastic, hostile, afraid) + tone
-    experiment still running on A100 (PID running autonomously).
+- **Sycophancy steering v1 (Qwen-7B, self-judge)**: 5 concepts × 4 alphas ×
+  10 scenarios × 10 samples = 2,000 responses. Results overwhelmingly null:
+  - happy: 0% baseline, 1% at α=0.50
+  - loving: 1% baseline, 0% at all steered alphas
+  - enthusiastic: 0% baseline, 1% at α=0.50
+  - hostile and afraid: running, expected similar null
+  - Conclusion: sycophancy also shows near-zero rates under emotion
+    steering, extending the behavioral null beyond safety-gated tasks.
+    Self-judging limitation documented.
+- **Sycophancy v2 with external judge**: Script `scripts/sycophancy_v2.py`
+  created with opinion-based scenarios (not factual errors), pushback/
+  capitulation design, and ChatGPT external judge support. Addresses
+  self-judging circularity. Ready to launch.
+- **Writeup §2.3 rewritten**: now titled "Causal steering: selective
+  influence on sentiment but not complex behaviors." Presents sentiment
+  positive control + ethical null + sycophancy null + high-alpha sweep
+  as a coherent story of "selective causal influence."
 
 ---
 
