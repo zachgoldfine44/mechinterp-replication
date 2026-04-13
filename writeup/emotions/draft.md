@@ -103,13 +103,13 @@ These results support three conclusions:
 
 **Representation does not automatically imply mechanism.** Features that decode at 73--84% have zero detectable effect on ethical behavior, variable effects on sycophancy, and clear effects on sentiment. The gap between decoding accuracy and behavioral potency argues for caution in inferring causal function from linear probing success alone.
 
-**Limitations.** This is a cross-model extension, not a strict replication: 15 of 171 emotions, 25 stimuli per concept, LLM-generated stimuli (introducing circularity risk), last-token activations without neutral-transcript denoising. Models span 1B--9B, well below Claude Sonnet 4.5's likely >50B parameters --- behavioral potency may have a higher scale threshold. Emotion selection was by hand inspection without formal piloting. The sycophancy pushback result is p = 0.036 on one model, which should be treated as preliminary until independently replicated. All models are instruction-tuned; base-model variants may behave differently.
+**Limitations.** This is a cross-model extension, not a strict replication: 15 of 171 emotions, 25 stimuli per concept, LLM-generated stimuli (introducing circularity risk), last-token activations without neutral-transcript denoising. Models span 1B--9B, well below Claude Sonnet 4.5's likely >500B parameters --- behavioral potency may have a higher scale threshold. Emotion selection was by hand inspection without formal piloting. The sycophancy pushback result is p = 0.036 on one model, which should be treated as preliminary until independently replicated. All models are instruction-tuned; base-model variants may behave differently.
 
 ---
 
 ## 4. Methods
 
-**Models.** Six instruction-tuned: Llama-3.2-1B, Llama-3.1-8B, Qwen-2.5-1.5B, Qwen-2.5-7B, Gemma-2-2B, Gemma-2-9B. Small tier on MacBook Air M3 (CPU); medium tier on NVIDIA A100 80GB. Total GPU: ~10.5 hours.
+**Models.** Six instruction-tuned: Llama-3.2-1B, Llama-3.1-8B, Qwen-2.5-1.5B, Qwen-2.5-7B, Gemma-2-2B, Gemma-2-9B. Small tier on MacBook Air M5 (CPU); medium tier on NVIDIA A100 80GB. Total GPU: ~10.5 hours.
 
 **Stimuli.** 15 emotions spanning the valence-arousal space (*blissful* +0.9 to *hostile* -0.8). Selection criteria: valence coverage, arousal spread, semantic diversity, no near-synonyms; no formal pilot conducted. 25 LLM-generated first-person stories per emotion (375 total, zero cross-concept word leaks confirmed by audit). **Circularity caveat:** LLM-generated stimuli risk detecting how models write about emotions rather than how they represent them; the generalization test partially mitigates this but a human-authored control set would be stronger.
 
