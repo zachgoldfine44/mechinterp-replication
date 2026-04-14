@@ -1,4 +1,4 @@
-# Emotion Representations Are Universal in Transformer Language Models but Their Causal Influence Is Selective
+# Cross-Model Replication of Emotion Representations in Transformer Language Models: Universal Encoding, Selective Causal Influence
 
 **Zachary Goldfine**
 
@@ -68,7 +68,7 @@ The original study's most striking result was that adding a *desperate* vector t
 
 **Ethical compliance (uninformative floor effect).** All six small and medium models (1B--9B) produce 0% unethical responses at baseline across all eight behavioral scenarios, creating a statistical floor that precludes detection of any steering effect (pooled Clopper-Pearson CI: [0%, 0.8%]; Fisher's exact p = 1.0 by construction). A nine-layer sweep on Llama-8B and a high-alpha sweep up to alpha = 5.0 similarly produce zero unethical responses---at extreme alphas, outputs become incoherent rather than unethical (Figure 3). Llama-3.1-70B partially lifts this floor: baseline unethical rates reach 10--40% on the cheating scenario, providing statistical headroom absent in smaller models. Yet steering still produces no significant shift (0 of 45 model-condition pairs at p < 0.05). At alpha >= 2.0, the 70B model's coherence degrades to 0% unethical---consistent with a pattern in which models lose coherence before their safety training fails.
 
-**Sycophancy (selective behavioral effect).** We tested whether positive-valence steering increases sycophantic behavior using two experimental designs across all six small and medium models, with GPT-5.4-mini as an external judge to eliminate self-evaluation circularity (2,520 total responses). An opinion-agreement design (10 scenarios, 3 concepts, 5 samples per condition) found no significant steering effect on any model (all p > 0.10). A pushback-capitulation design---in which the model is presented with user disagreement and evaluated for whether it reverses its position---revealed a significant increase in capitulation on Qwen-2.5-1.5B (baseline 8.3% to steered 21.7%, Fisher's exact p = 0.036, odds ratio = 3.04) and a borderline-significant increase on Gemma-2-9B (13.3% to 26.7%, p = 0.055, odds ratio = 2.36). The remaining four models show no effect. This is the sole instance in which emotion-vector steering demonstrably shifts a complex behavioral outcome in open-source models, and it occurs through a specific interaction pattern (multi-turn pushback) on a non-safety-gated dimension (Figure 6).
+**Sycophancy (selective behavioral effect).** We tested whether positive-valence steering increases sycophantic behavior using two experimental designs across all six small and medium models, with GPT-5.4-mini as an external judge to eliminate self-evaluation circularity (2,520 total responses). An opinion-agreement design (10 scenarios, 3 concepts, 5 samples per condition) found no significant steering effect on any model (all p > 0.10). A pushback-capitulation design---in which the model is presented with user disagreement and evaluated for whether it reverses its position---revealed a significant increase in capitulation on Qwen-2.5-1.5B (baseline 8.3% to steered 21.7%, Fisher's exact p = 0.036, odds ratio = 3.04) and a borderline-significant increase on Gemma-2-9B (13.3% to 26.7%, p = 0.055, odds ratio = 2.36). The remaining four models show no effect. This is the sole instance in which emotion-vector steering demonstrably shifts a complex behavioral outcome in open-source models, and it occurs through a specific interaction pattern (multi-turn pushback) on a non-safety-gated dimension (Figure 4).
 
 **Preference steering (no signal).** The original study reported a strong correlation between emotion valence and activity preference shifts (r = 0.85, +212 Elo for *blissful*, -303 Elo for *hostile*). We find no detectable preference effect across any model: all six small and medium models produce correlations indistinguishable from zero. Llama-70B produces a correlation of -0.430 (inverted sign, p = 0.11). This finding does not replicate.
 
@@ -76,9 +76,9 @@ The original study's most striking result was that adding a *desperate* vector t
 
 *Figure 3.* **Left:** Original study result---*desperate* vector steering shifts unethical behavior from 22% to 72% on Claude. **Right:** This study---0% unethical responses across all conditions at 1B--9B (Clopper-Pearson CI: [0%, 30.8%] per condition). The null result is uninformative due to floor effects, not evidence against the original claim.
 
-![Figure 6](../../figures/emotions/fig6_sycophancy_pushback.png)
+![Figure 4](../../figures/emotions/fig6_sycophancy_pushback.png)
 
-*Figure 6.* Pushback capitulation rates under emotion steering (happy + loving vectors, alpha = 0.50) across six models, judged by GPT-5.4-mini. Qwen-2.5-1.5B shows a significant increase in capitulation (8.3% to 21.7%, p = 0.036). Gemma-2-9B shows a borderline increase (13.3% to 26.7%, p = 0.055). This is the only behavioral domain where emotion steering produces a detectable effect.
+*Figure 4.* Pushback capitulation rates under emotion steering (happy + loving vectors, alpha = 0.50) across six models, judged by GPT-5.4-mini. Qwen-2.5-1.5B shows a significant increase in capitulation (8.3% to 21.7%, p = 0.036). Gemma-2-9B shows a borderline increase (13.3% to 26.7%, p = 0.055). This is the only behavioral domain where emotion steering produces a detectable effect.
 
 ![Figure 5](../../figures/emotions/fig5_sentiment_positive_control.png)
 
@@ -101,11 +101,11 @@ Table 1 summarizes the replication status of each principal finding. Four of six
 | Ethical steering | 22% to 72% (*desperate*) | 0/45 significant (floor effect) | **Inconclusive** |
 | Preference steering | r = 0.85, +212/-303 Elo | r ~ 0.0 (6 models), -0.43 (70B, n.s.) | **Does not replicate** |
 
-The universality scorecard (Figure 4) provides a per-model, per-claim visualization. Every model passes every representational threshold and fails every behavioral threshold at the original study's criteria. Within the representational claims, probe accuracy scales with model size, but valence geometry does not---it emerges at full strength at 1.5B parameters.
+The universality scorecard (Figure 6) provides a per-model, per-claim visualization. Every model passes every representational threshold and fails every behavioral threshold at the original study's criteria. Within the representational claims, probe accuracy scales with model size, but valence geometry does not---it emerges at full strength at 1.5B parameters.
 
-![Figure 4](../../figures/emotions/fig4_universality_scorecard.png)
+![Figure 6](../../figures/emotions/fig4_universality_scorecard.png)
 
-*Figure 4.* **Top:** Seven-model by six-claim universality scorecard. Green: passes threshold; red: fails. Intensity encodes magnitude. All representational claims pass universally; all behavioral claims fail. **Bottom:** Probe accuracy versus log parameter count (Spearman rho = 0.943, p = 0.005).
+*Figure 6.* **Top:** Seven-model by six-claim universality scorecard. Green: passes threshold; red: fails. Intensity encodes magnitude. All representational claims pass universally; all behavioral claims fail. **Bottom:** Probe accuracy versus log parameter count (Spearman rho = 0.943, p = 0.005).
 
 ---
 
@@ -167,7 +167,7 @@ Three text-only classifiers trained on the same stimulus set: bag-of-words logis
 
 ## Acknowledgments
 
-We thank the TransformerLens and HuggingFace teams for open-source infrastructure, and Sofroniew et al. for a paper whose methodology was detailed enough to make cross-model replication tractable. Three AI peer reviews (ChatGPT, Claude Opus, Gemini Pro) provided critiques that informed experimental design. The replication harness is available at github.com/zachgoldfine44/mechinterp-replication.
+Thanks to Callum McDougall, Neel Nanda, and the ARENA 3.0 curriculum team for mech-interp educational materials. Thanks to Siddharth Mishra-Sharma for [Long-running Claude for scientific computing](https://www.anthropic.com/research/long-running-Claude), which inspired the replication harness. Thanks to David Chanin for [Letting Claude do Autonomous Research to Improve SAEs](https://www.lesswrong.com/posts/rbqJoxFZtae9x93mx/letting-claude-do-autonomous-research-to-improve-sae), which inspired experimentation with Ralph loops. Thanks to TransformerLens and HuggingFace teams, and to Sofroniew et al. for a paper that made replication tractable. Three AI peer reviews (ChatGPT, Claude Opus, Gemini Pro) provided detailed critiques that shaped experimental design; full reviews in the [reviews directory](reviews/).
 
 ---
 

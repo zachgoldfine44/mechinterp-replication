@@ -455,8 +455,8 @@ def fig4_universality_scorecard():
     n_total_rows = 1 + n_models
 
     # Create figure with gridspec for heatmap + inset
-    fig = plt.figure(figsize=(10, 8.5))
-    gs = fig.add_gridspec(2, 1, height_ratios=[3.2, 1.2], hspace=0.35)
+    fig = plt.figure(figsize=(10, 9))
+    gs = fig.add_gridspec(2, 1, height_ratios=[3.4, 1.2], hspace=0.45)
     ax_heat = fig.add_subplot(gs[0])
     ax_scale = fig.add_subplot(gs[1])
 
@@ -500,14 +500,23 @@ def fig4_universality_scorecard():
         col_min_pass = thresh
         span = max(col_max - col_min_pass, 1e-9)
 
+        # Columns 4 (causal steering) and 5 (preference) use gray for
+        # failing cells because these are inconclusive/floor-effect results,
+        # not straightforward failures.
+        is_behavioral_col = j in (4, 5)
+        gray_bg = np.array([0.88, 0.88, 0.88, 1.0])  # neutral gray
+
         for i in range(n_models):
             row = i + 1  # shift down by 1 for reference row
             if pass_matrix[i, j]:
                 normed = np.clip((col_vals[i] - col_min_pass) / span, 0, 1)
                 cell_colors[row, j] = green_cmap(normed)
+            elif is_behavioral_col:
+                # Use gray for behavioral columns — these are inconclusive,
+                # not "red = bad"
+                cell_colors[row, j] = gray_bg
             else:
-                # Failing cells: normalise within [0, threshold].
-                # Lower values -> darker red.
+                # Failing cells in representational columns: red gradient
                 normed = np.clip(1.0 - col_vals[i] / max(thresh, 1e-9), 0, 1)
                 cell_colors[row, j] = red_cmap(normed)
 
@@ -538,7 +547,13 @@ def fig4_universality_scorecard():
             else:
                 text = f"{val:.2f}"
             # Dark text for readability against the gradient backgrounds
-            text_color = "#0d3b0d" if pass_matrix[i, j] else "#5a0000"
+            is_behavioral = j in (4, 5)
+            if pass_matrix[i, j]:
+                text_color = "#0d3b0d"
+            elif is_behavioral:
+                text_color = "#444444"  # dark gray on gray bg
+            else:
+                text_color = "#5a0000"
             ax_heat.text(j, row, text, ha="center", va="center",
                          fontsize=10, fontweight="bold", color=text_color)
 
@@ -553,12 +568,18 @@ def fig4_universality_scorecard():
     ytick_labels[0].set_fontstyle("italic")
     ytick_labels[0].set_color("#1a4a7a")
 
-    # Add threshold row at bottom
+    # Add threshold row at bottom — larger font, bolder, clear label
     ax_heat.set_xlim(-0.5, n_claims - 0.5)
     for j, thresh in enumerate(thresholds):
-        t_str = f"{thresh:.0f}" if thresh == int(thresh) else f"{thresh:.2f}"
-        ax_heat.text(j, n_total_rows + 0.15, f"thresh: {t_str}",
-                     ha="center", va="top", fontsize=7, color="#666666")
+        if j == 4:
+            t_str = f"\u2265{int(thresh)}"  # ≥3
+        else:
+            t_str = f"\u2265{thresh:.2f}"  # ≥0.50
+        ax_heat.text(j, n_total_rows + 0.2, t_str,
+                     ha="center", va="top", fontsize=9, fontweight="bold",
+                     color="#333333",
+                     bbox=dict(boxstyle="round,pad=0.15", facecolor="#f0f0f0",
+                               edgecolor="#cccccc", linewidth=0.5))
 
     # Grid lines between cells
     for i in range(n_total_rows + 1):
@@ -569,9 +590,9 @@ def fig4_universality_scorecard():
 
     # Legend
     legend_patches = [
-        Patch(facecolor="#B4DEB4", edgecolor="#888888", label="Pass (>= threshold)"),
-        Patch(facecolor="#E8B4B4", edgecolor="#888888", label="Fail (< threshold)"),
-        Patch(facecolor="#d9e8f5", edgecolor="#888888", label="Original paper (reference)"),
+        Patch(facecolor="#B4DEB4", edgecolor="#888888", label="Pass"),
+        Patch(facecolor="#E0E0E0", edgecolor="#888888", label="Inconclusive / no effect"),
+        Patch(facecolor="#d9e8f5", edgecolor="#888888", label="Original paper"),
     ]
     ax_heat.legend(handles=legend_patches, loc="upper right",
                    bbox_to_anchor=(1.0, -0.05), ncol=3, frameon=True,
