@@ -39,7 +39,15 @@ using a rented A100 80GB. This is the first large-tier model run.
   non-zero baselines on cheat_01 (10-50%), providing statistical headroom. But
   steering still doesn't shift behavior significantly. Suggestive trends at
   angry × cheat_01 (50% vs 10%, p=0.141) and calm × cheat_01 (60% vs 20%, p=0.170).
-- **Claim 6 (Preference)**: running, ETA several hours.
+- **Claim 6 (Preference)**: r=-0.430, p=0.11. Technically passes |r|≥0.40 but
+  sign inverted (negative-valence emotions produce higher win rates — opposite
+  of paper). All win rates in [0.44, 0.57] — pure noise from crude word-count
+  proxy. Treated as NULL.
+- **Critique followups**: Sentiment positive control and high-alpha sweep also
+  completed. High alpha (≥2.0) destroys coherence to 0% before safety breaks.
+- **Total runtime**: 1660 min (~28 hrs) on A100 80GB.
+- PROGRESS.md updated with 70B row in results table.
+- Writeup v4.0 updated with 70B results across all sections.
 
 ---
 

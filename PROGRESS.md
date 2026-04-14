@@ -2,7 +2,17 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B COMPLETE; writeup v3.4 addressing three external peer reviews
+## Status: 🟢 Phase A + Phase B + Phase C (Llama-70B) COMPLETE; writeup v4.0 with large-tier results
+
+**Phase C: Llama-3.1-70B-Instruct (2026-04-13, writeup v4.0):**
+- First large-tier model run on rented A100 80GB, 4-bit NF4 quantization.
+- **Probe accuracy 0.845** at layer 48 — highest of all 7 models, confirming scaling trend.
+- Generalization 0.600, valence geometry |r|=0.754, parametric rank_corr=1.000 — all PASS.
+- Causal steering 0/45 significant effects even with non-zero baselines (cheat_01: 30-40%).
+- Preference steering r=-0.430 (p=0.11) — sign inverted vs paper, not significant, driven by crude proxy metric. Treated as NULL.
+- **Key finding**: 70B model has non-zero baseline unethical rates on some scenarios (unlike medium models at 0%), but steering still doesn't shift behavior. Floor effect is partially lifted at scale, but RLHF still dominates.
+- Critique followups: high-alpha sweep shows coherence degrades to 0% at alpha >= 2.0 (model breaks before safety training fails).
+- Total compute: ~28 hours A100 time.
 
 **Writeup v3.4 (external peer review response, 2026-04-12):**
 - Three independent reviews (ChatGPT 7/10, Claude Opus 4.6 7.5/10, Gemini 3.1 Pro 8.5/10) identified consensus issues.
@@ -82,10 +92,10 @@
 ## Current test status
 ```
 81 tests passed (pytest tests/ -q --fast)
-6/6 models completed (3 small tier + 3 medium tier)
-4/6 claims REPLICATE universally across all families, both tiers
-2/6 claims NULL (causal + preference steering) — framed as methodology limitation
-Writeup draft complete at writeup/emotions/draft.md, ready for external critique
+7/7 models completed (3 small + 3 medium + 1 large: Llama-70B)
+4/6 claims REPLICATE universally across all 7 models, all 3 tiers
+2/6 claims NULL (causal + preference steering) — floor effect persists even at 70B
+Writeup v4.0 complete at writeup/emotions/draft.md with large-tier results
 ```
 
 ## Final Cross-Model Results
@@ -98,14 +108,18 @@ Writeup draft complete at writeup/emotions/draft.md, ready for external critique
 | Llama-3.1-8B | 0.819 ✅ | 0.867 ✅ | 0.738 ✅ | 0.971 ✅ | 0/45 ❌ | 0.0 ❌ |
 | Qwen2.5-7B | 0.784 ✅ | 0.667 ✅ | 0.828 ✅ | 0.943 ✅ | 0/45 ❌ | 0.0 ❌ |
 | Gemma-2-9B | 0.840 ✅ | 0.800 ✅ | 0.790 ✅ | 0.571 ✅ | 0/45 ❌ | 0.0 ❌ |
+| **Llama-3.1-70B** | **0.845** ✅ | **0.600** ✅ | **0.754** ✅ | **1.000** ✅ | **0/45** ❌ | **-0.430**† ❌ |
 | **Universality** | UNIVERSAL | UNIVERSAL | UNIVERSAL | UNIVERSAL | NULL | NULL |
+
+†Preference r=-0.430 technically passes |r|≥0.40 threshold but sign is inverted (opposite of paper's prediction) and p=0.11 is not significant. Treated as NULL. Driven by crude word-count proxy metric, not a real signal.
 
 *Small-tier steering used noisier protocol; medium tier used definitive 10-sample batched generation with LLM-as-judge.
 
 Key findings:
-- Probe accuracy scales cleanly with parameters (Spearman r=0.943, p=0.005)
+- Probe accuracy scales cleanly with parameters (Spearman r=0.943 across 6 models, p=0.005; 70B achieves 0.845, highest of all)
 - Qwen2.5-7B matches paper's valence geometry exactly (0.828 vs paper's 0.81)
-- Behavioral null driven by 0% baseline unethical rate (RLHF floor effect) — all 3 medium models refuse scenarios at all alphas up to 0.5
+- Behavioral null driven by RLHF floor effect — medium models at 0% baseline, 70B has 10-40% baseline on cheat_01 but steering still doesn't shift behavior significantly
+- At 70B scale, high-alpha steering (α≥2.0) destroys coherence before breaking safety training
 
 ## Task checklist
 
@@ -132,13 +146,10 @@ Key findings:
 - [ ] Debug steering methodology at medium scale
 - [ ] Run cross-model + scaling analysis
 
-#### Phase C: Large-tier scaling — **DEFERRED**
-*Decision 2026-04-09: Stop after medium-tier (7-9B) runs. Write up small+medium
-results and share for external critique first. Revisit large-tier (27B-70B) in
-a future session if the writeup feedback suggests it would add value.*
-- [ ] ~~Run on Llama-3.1-70B-Instruct~~ (deferred)
-- [ ] ~~Run on Qwen-2.5-72B-Instruct~~ (deferred)
-- [ ] ~~Run on Gemma-2-27B-it~~ (deferred)
+#### Phase C: Large-tier scaling — PARTIAL (1/3 models)
+- [x] Run on Llama-3.1-70B-Instruct (4-bit NF4, A100 80GB, 28hrs)
+- [ ] ~~Run on Qwen-2.5-72B-Instruct~~ (deferred — compute budget)
+- [ ] ~~Run on Gemma-2-27B-it~~ (deferred — compute budget)
 
 #### Writeup (next up)
 - [x] Draft `writeup/emotions/draft.md` with Phase A results + placeholders for Phase B
