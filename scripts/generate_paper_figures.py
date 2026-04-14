@@ -107,7 +107,7 @@ def fig1_probe_vs_baseline():
         "gemma_2b": 0.776, "gemma_9b": 0.840,
     }
     probe_std = {
-        "llama_1b": 0.008, "llama_8b": 0.004, "llama_70b": 0.005,
+        "llama_1b": 0.008, "llama_8b": 0.004, "llama_70b": None,
         "qwen_1_5b": 0.012, "qwen_7b": 0.007,
         "gemma_2b": 0.011, "gemma_9b": 0.004,
     }
@@ -119,12 +119,24 @@ def fig1_probe_vs_baseline():
     x = np.arange(len(MODEL_ORDER))
     bar_w = 0.35
 
-    # Probe bars (green)
+    # Probe bars (green) — handle None std (single-seed estimates)
     probe_vals = [probe_acc[m] for m in MODEL_ORDER]
-    probe_errs = [probe_std[m] for m in MODEL_ORDER]
+    probe_errs = [probe_std[m] if probe_std[m] is not None else 0.0
+                  for m in MODEL_ORDER]
     ax.bar(x - bar_w / 2, probe_vals, bar_w, color="#6ACC64", edgecolor="white",
            linewidth=0.5, label="Residual-stream probe", yerr=probe_errs,
            capsize=3, error_kw={"linewidth": 1.0, "color": "#333333"})
+
+    # For models with None std, draw a minimal hairline instead and add dagger
+    for i, m in enumerate(MODEL_ORDER):
+        if probe_std[m] is None:
+            # Minimal hairline (1px) to indicate "no error bar"
+            ax.plot([x[i] - bar_w / 2, x[i] - bar_w / 2],
+                    [probe_vals[i] - 0.002, probe_vals[i] + 0.002],
+                    color="#333333", linewidth=0.5)
+            # Dagger symbol below the x-label
+            ax.text(x[i], -0.04, "\u2020", ha="center", va="top",
+                    fontsize=11, fontweight="bold", color="#555555")
 
     # Lexical baseline bars (gray)
     ax.bar(x + bar_w / 2, [best_lexical] * len(MODEL_ORDER), bar_w,
@@ -150,6 +162,10 @@ def fig1_probe_vs_baseline():
     # Clean up spines
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+
+    # Footnote for dagger symbol
+    fig.text(0.02, -0.02, "\u2020Single-seed estimate (no multi-seed data)",
+             fontsize=7, color="#555555", ha="left", va="top", style="italic")
 
     save_fig(fig, "fig1_probe_vs_baseline")
 
@@ -402,6 +418,14 @@ def fig4_universality_scorecard():
     n_models = len(MODEL_ORDER)
     n_claims = len(claims_ids)
 
+    # ── Reference row: Claude Sonnet 4.5 (original paper values) ──
+    # Values: probe=0.713, generalization=0.760, valence=0.810,
+    #         parametric=N/A, steering="significant", preference=0.850
+    # "significant" for causal_steering maps to threshold-passing;
+    # we use the threshold value (3) as a display stand-in.
+    ref_values = [0.713, 0.760, 0.810, None, 3, 0.850]  # None = N/A
+    ref_label = "Claude Sonnet 4.5"
+
     # Build the data matrix (from cross_model_report if available, else from result.json)
     data_matrix = np.zeros((n_models, n_claims))
     for j, (cid, mk) in enumerate(zip(claims_ids, metric_keys)):
@@ -427,9 +451,12 @@ def fig4_universality_scorecard():
     for j, thresh in enumerate(thresholds):
         pass_matrix[:, j] = data_matrix[:, j] >= thresh
 
+    # Total rows = 1 (reference) + n_models (replication)
+    n_total_rows = 1 + n_models
+
     # Create figure with gridspec for heatmap + inset
-    fig = plt.figure(figsize=(10, 8))
-    gs = fig.add_gridspec(2, 1, height_ratios=[3, 1.2], hspace=0.35)
+    fig = plt.figure(figsize=(10, 8.5))
+    gs = fig.add_gridspec(2, 1, height_ratios=[3.2, 1.2], hspace=0.35)
     ax_heat = fig.add_subplot(gs[0])
     ax_scale = fig.add_subplot(gs[1])
 
@@ -447,8 +474,21 @@ def fig4_universality_scorecard():
         "reds", ["#fce4e4", "#e57373", "#b71c1c"], N=256
     )
 
-    # Build an RGBA image so each cell can use an independent colourmap.
-    cell_colors = np.zeros((n_models, n_claims, 4))
+    # Reference row color: light blue/gray
+    ref_bg = np.array([0.85, 0.91, 0.97, 1.0])    # light blue
+    ref_na_bg = np.array([0.88, 0.88, 0.88, 1.0])  # gray for N/A cells
+
+    # Build an RGBA image: row 0 = reference, rows 1..n_models = replication
+    cell_colors = np.zeros((n_total_rows, n_claims, 4))
+
+    # Fill reference row (row 0)
+    for j in range(n_claims):
+        if ref_values[j] is None:
+            cell_colors[0, j] = ref_na_bg
+        else:
+            cell_colors[0, j] = ref_bg
+
+    # Fill replication rows (rows 1..n_total_rows)
     for j in range(n_claims):
         col_vals = data_matrix[:, j]
         thresh = thresholds[j]
@@ -461,19 +501,36 @@ def fig4_universality_scorecard():
         span = max(col_max - col_min_pass, 1e-9)
 
         for i in range(n_models):
+            row = i + 1  # shift down by 1 for reference row
             if pass_matrix[i, j]:
                 normed = np.clip((col_vals[i] - col_min_pass) / span, 0, 1)
-                cell_colors[i, j] = green_cmap(normed)
+                cell_colors[row, j] = green_cmap(normed)
             else:
                 # Failing cells: normalise within [0, threshold].
                 # Lower values -> darker red.
                 normed = np.clip(1.0 - col_vals[i] / max(thresh, 1e-9), 0, 1)
-                cell_colors[i, j] = red_cmap(normed)
+                cell_colors[row, j] = red_cmap(normed)
 
     ax_heat.imshow(cell_colors, aspect="auto", interpolation="nearest")
 
-    # Annotate cells with values
+    # Annotate reference row (row 0)
+    for j in range(n_claims):
+        if ref_values[j] is None:
+            text = "N/A"
+            text_color = "#666666"
+        elif j == 4:  # causal_steering — show "sig."
+            text = "sig."
+            text_color = "#1a4a7a"
+        else:
+            text = f"{ref_values[j]:.3f}"
+            text_color = "#1a4a7a"
+        ax_heat.text(j, 0, text, ha="center", va="center",
+                     fontsize=10, fontweight="bold", color=text_color,
+                     fontstyle="italic")
+
+    # Annotate replication rows (rows 1..n_total_rows)
     for i in range(n_models):
+        row = i + 1
         for j in range(n_claims):
             val = data_matrix[i, j]
             if j == 4:  # causal_steering_behavior (integer count)
@@ -482,24 +539,31 @@ def fig4_universality_scorecard():
                 text = f"{val:.2f}"
             # Dark text for readability against the gradient backgrounds
             text_color = "#0d3b0d" if pass_matrix[i, j] else "#5a0000"
-            ax_heat.text(j, i, text, ha="center", va="center",
+            ax_heat.text(j, row, text, ha="center", va="center",
                          fontsize=10, fontweight="bold", color=text_color)
 
     ax_heat.set_xticks(np.arange(n_claims))
     ax_heat.set_xticklabels(claim_labels, fontsize=9, ha="center")
-    ax_heat.set_yticks(np.arange(n_models))
-    ax_heat.set_yticklabels([MODEL_LABELS[m] for m in MODEL_ORDER], fontsize=10)
+    ax_heat.set_yticks(np.arange(n_total_rows))
+    y_labels = [ref_label] + [MODEL_LABELS[m] for m in MODEL_ORDER]
+    ax_heat.set_yticklabels(y_labels, fontsize=10)
+
+    # Italicize the reference row label
+    ytick_labels = ax_heat.get_yticklabels()
+    ytick_labels[0].set_fontstyle("italic")
+    ytick_labels[0].set_color("#1a4a7a")
 
     # Add threshold row at bottom
     ax_heat.set_xlim(-0.5, n_claims - 0.5)
     for j, thresh in enumerate(thresholds):
         t_str = f"{thresh:.0f}" if thresh == int(thresh) else f"{thresh:.2f}"
-        ax_heat.text(j, n_models + 0.15, f"thresh: {t_str}",
+        ax_heat.text(j, n_total_rows + 0.15, f"thresh: {t_str}",
                      ha="center", va="top", fontsize=7, color="#666666")
 
     # Grid lines between cells
-    for i in range(n_models + 1):
-        ax_heat.axhline(i - 0.5, color="white", linewidth=2)
+    for i in range(n_total_rows + 1):
+        lw = 3 if i == 1 else 2  # thicker line between reference and replication
+        ax_heat.axhline(i - 0.5, color="white", linewidth=lw)
     for j in range(n_claims + 1):
         ax_heat.axvline(j - 0.5, color="white", linewidth=2)
 
@@ -507,9 +571,10 @@ def fig4_universality_scorecard():
     legend_patches = [
         Patch(facecolor="#B4DEB4", edgecolor="#888888", label="Pass (>= threshold)"),
         Patch(facecolor="#E8B4B4", edgecolor="#888888", label="Fail (< threshold)"),
+        Patch(facecolor="#d9e8f5", edgecolor="#888888", label="Original paper (reference)"),
     ]
     ax_heat.legend(handles=legend_patches, loc="upper right",
-                   bbox_to_anchor=(1.0, -0.05), ncol=2, frameon=True,
+                   bbox_to_anchor=(1.0, -0.05), ncol=3, frameon=True,
                    framealpha=0.9, edgecolor="#cccccc", fontsize=8)
 
     ax_heat.tick_params(top=True, bottom=False, labeltop=True, labelbottom=False)
@@ -688,13 +753,102 @@ def fig5_sentiment_positive_control():
             "Positive control: 'happy' vector\n"
             "at alpha=5.0 shifts sentiment\n"
             "in the expected direction\n"
-            "for all 7 models",
+            "6 of 7 models shift positive\n"
+            "(70B degrades at high alpha)",
             transform=ax.transAxes, ha="right", va="top",
             fontsize=8, color="#555555",
             bbox=dict(boxstyle="round,pad=0.4", facecolor="#e8f5e9",
                       edgecolor="#6ACC64", alpha=0.9))
 
     save_fig(fig, "fig5_sentiment_positive_control")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Figure 6: Sycophancy pushback capitulation rates
+# ═══════════════════════════════════════════════════════════════════════════
+def fig6_sycophancy_pushback():
+    print("Figure 6: Sycophancy pushback capitulation rates ...")
+
+    syc_data = load_json("sycophancy_v2_cross_model_summary.json")
+    pushback = syc_data.get("pushback_fisher_tests", {})
+
+    if not pushback:
+        print("  WARNING: no sycophancy pushback data found, skipping fig6")
+        return
+
+    # 6 models ordered by parameter count (no 70B data for sycophancy)
+    syc_model_order = ["llama_1b", "qwen_1_5b", "gemma_2b", "qwen_7b", "llama_8b", "gemma_9b"]
+    syc_model_labels = {
+        "llama_1b": "Llama 1B", "qwen_1_5b": "Qwen 1.5B", "gemma_2b": "Gemma 2B",
+        "qwen_7b": "Qwen 7B", "llama_8b": "Llama 8B", "gemma_9b": "Gemma 9B",
+    }
+
+    baseline_pcts = []
+    steered_pcts = []
+    p_values = []
+    labels = []
+
+    for mk in syc_model_order:
+        entry = pushback.get(mk, {})
+        baseline_pcts.append(entry.get("baseline_rate", 0) * 100)
+        steered_pcts.append(entry.get("steered_rate", 0) * 100)
+        p_values.append(entry.get("p_value_one_sided", 1.0))
+        labels.append(syc_model_labels[mk])
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    x = np.arange(len(syc_model_order))
+    bar_w = 0.35
+
+    # Baseline bars (light orange)
+    ax.bar(x - bar_w / 2, baseline_pcts, bar_w, color="#FCBF74",
+           edgecolor="white", linewidth=0.5, label="Baseline")
+
+    # Steered bars (dark red)
+    ax.bar(x + bar_w / 2, steered_pcts, bar_w, color="#C44E52",
+           edgecolor="white", linewidth=0.5, label="Steered (+emotion)")
+
+    # Annotate significance markers above steered bars
+    for i, p in enumerate(p_values):
+        steered_y = steered_pcts[i]
+        if p < 0.05:
+            marker = "*"
+        elif p < 0.10:
+            marker = "\u2020"  # dagger for p<0.10
+        else:
+            marker = ""
+        if marker:
+            ax.text(x[i] + bar_w / 2, steered_y + 1.0, marker,
+                    ha="center", va="bottom", fontsize=14, fontweight="bold",
+                    color="#333333")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.set_ylabel("Capitulation Rate (%)")
+    ax.set_ylim(0, max(max(baseline_pcts), max(steered_pcts)) * 1.3 + 5)
+
+    ax.legend(loc="upper right", frameon=True, framealpha=0.9,
+              edgecolor="#cccccc", fontsize=9)
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    # Annotation box
+    ax.text(0.02, 0.95,
+            "Emotion steering increases\n"
+            "pushback capitulation in\n"
+            "1 of 6 models (p<0.05)",
+            transform=ax.transAxes, ha="left", va="top",
+            fontsize=8, color="#555555",
+            bbox=dict(boxstyle="round,pad=0.4", facecolor="#fff3e0",
+                      edgecolor="#FCBF74", alpha=0.9))
+
+    # Significance legend footnote
+    fig.text(0.02, -0.02,
+             "* p<0.05 (Fisher exact, one-sided)    "
+             "\u2020 p<0.10 (Fisher exact, one-sided)",
+             fontsize=7, color="#555555", ha="left", va="top", style="italic")
+
+    save_fig(fig, "fig6_sycophancy_pushback")
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -710,13 +864,14 @@ def main():
     fig3_steering_null()
     fig4_universality_scorecard()
     fig5_sentiment_positive_control()
+    fig6_sycophancy_pushback()
 
     print()
     print("All figures generated. Verifying ...")
     ok = True
     for stem in ("fig1_probe_vs_baseline", "fig2_geometry_and_severity",
                  "fig3_steering_null", "fig4_universality_scorecard",
-                 "fig5_sentiment_positive_control"):
+                 "fig5_sentiment_positive_control", "fig6_sycophancy_pushback"):
         p = FIG_DIR / f"{stem}.png"
         if p.exists():
             size_kb = p.stat().st_size / 1024
@@ -729,7 +884,7 @@ def main():
             ok = False
 
     if ok:
-        print("\nAll 5 figures pass verification.")
+        print("\nAll 6 figures pass verification.")
     else:
         print("\nSome figures failed verification.")
         sys.exit(1)
