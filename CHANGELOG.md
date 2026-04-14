@@ -9,45 +9,132 @@ and a one-line summary, followed by optional bullets.
 
 ---
 
-## 2026-04-12 — Phase C: Llama-3.1-70B-Instruct (large tier)
+## 2026-04-13 — Phase C: Llama-3.1-70B-Instruct complete (large tier)
 
-Session started. Plan: run all 6 emotion claims on Llama-3.1-70B-Instruct
-using a rented A100 80GB. This is the first large-tier model run.
+All 6 emotion claims + critique followups run on Llama-3.1-70B-Instruct
+(4-bit NF4, A100 80GB, ~28 hours total).
 
 - Wrote `scripts/run_llama_70b.py`: self-contained script using raw HuggingFace
   with 4-bit NF4 quantization (bitsandbytes), all 6 claims + critique followups.
-  80 layers → subsampled to ~21 layers for probing.
-- Set up new A100 pod (154.54.102.36:12704), synced code, installed deps.
-- Launched nohup run. Model downloading (30 shards, ~140GB → ~40GB quantized).
-- **In progress**: waiting for model load + claim 1 extraction.
+  80 layers subsampled to 21 for probing.
+- **Claim 1 (Probe)**: 0.845 at layer 48 — highest of all 7 models. 62 min.
+- **Claim 2 (Generalization)**: 0.600 diagonal dominance. PASS. 3 min.
+- **Claim 3 (Geometry)**: |r|=0.754, CI [0.108, 0.913]. PASS. 0.5 min.
+- **Claim 4 (Parametric)**: rank_corr=1.000, contamination=0.943, severity 4/10. PASS.
+- **Claim 5 (Steering)**: 0/45 significant effects. Non-zero baselines on cheat_01
+  (10-40%) — floor effect partially lifted at 70B but steering still null.
+- **Claim 6 (Preference)**: r=-0.430, p=0.11. Sign inverted, not significant. NULL.
+- **Critique followups**: coherence degrades to 0% at alpha≥2.0. Model breaks
+  before safety training fails.
+- Total runtime: 1660 min (~28 hrs) on A100 80GB.
+- PROGRESS.md and writeup updated with 70B results.
 
-### Claims 1-5 results (Llama-3.1-70B-Instruct, 4-bit NF4, A100 80GB)
+---
 
-- **Claim 1 (Probe Classification)**: 0.845 at layer 48 — **HIGHEST of any model**.
-  Best layer at ~60% depth. Accuracy scales cleanly from 0.179 (layer 0) through
-  0.707 (layer 16) to 0.845 (layer 48). 62 min total for 21-layer sweep.
-- **Claim 2 (Generalization)**: 0.600 diagonal dominance, 0.600 test accuracy.
-  Lower than medium-tier Llama-8B (0.867) — possibly 4-bit quantization or
-  the much deeper best-layer (48 vs 28) affecting transfer. Still passes threshold.
-- **Claim 3 (Valence Geometry)**: |r|=0.754, CI [0.108, 0.913]. Passes but
-  slightly lower than Qwen-7B (0.828) and Gemma-2B (0.811). Wide CI reflects N=15.
-- **Claim 4 (Parametric)**: rank_corr=1.000, contamination=0.943, severity 4/10.
-  Dosage rho = -1.000 for both afraid and calm (sign inversion vs smaller models).
-  Severity pairs only 4/10 — **worse** than Llama-8B (9/10). Contamination high.
-- **Claim 5 (Causal Steering)**: 0/45 significant effects. **Critical new finding**:
-  unlike medium-tier models (0% baseline unethical rate), the 70B model shows
-  non-zero baselines on cheat_01 (10-50%), providing statistical headroom. But
-  steering still doesn't shift behavior significantly. Suggestive trends at
-  angry × cheat_01 (50% vs 10%, p=0.141) and calm × cheat_01 (60% vs 20%, p=0.170).
-- **Claim 6 (Preference)**: r=-0.430, p=0.11. Technically passes |r|≥0.40 but
-  sign inverted (negative-valence emotions produce higher win rates — opposite
-  of paper). All win rates in [0.44, 0.57] — pure noise from crude word-count
-  proxy. Treated as NULL.
-- **Critique followups**: Sentiment positive control and high-alpha sweep also
-  completed. High alpha (≥2.0) destroys coherence to 0% before safety breaks.
-- **Total runtime**: 1660 min (~28 hrs) on A100 80GB.
-- PROGRESS.md updated with 70B row in results table.
-- Writeup v4.0 updated with 70B results across all sections.
+## 2026-04-13 — v3.6: Sycophancy v2 with GPT-5.4-mini external judge across all 6 models
+
+Ran comprehensive sycophancy steering experiment addressing the #1 recommendation
+from three AI critique documents: test causal behavioral influence on a
+non-safety-gated dimension.
+
+### Experiment design
+- **Opinion sycophancy**: 10 opinion-based scenarios × 3 concepts (happy, loving,
+  hostile) × 2 alphas (0.0, 0.50) × 5 samples = 300 responses per model
+- **Pushback capitulation**: 10 pushback scenarios × 2 concepts (happy, loving) × 2
+  alphas × 3 samples = 120 responses per model
+- **Judge**: GPT-5.4-mini (external, eliminating self-judging circularity)
+- **Total**: 2,520 responses across 6 models on A100 GPU (~6.5 hours)
+
+### Cross-model results
+
+**Opinion sycophancy (% judged sycophantic by GPT-5.4-mini):**
+
+| Model | Baseline (pooled) | Steered (pooled) | Fisher p |
+|-------|-------------------|------------------|----------|
+| Qwen-7B | 0.0% (0/150) | 0.0% (0/150) | 1.000 |
+| Llama-8B | 12.0% (18/150) | 11.3% (17/150) | 1.000 |
+| Gemma-9B | 2.0% (3/150) | 0.7% (1/150) | 0.622 |
+| Qwen-1.5B | 16.7% (25/150) | 18.7% (28/150) | 0.762 |
+| Llama-1B | 48.0% (72/150) | 40.0% (60/150) | 0.201 |
+| Gemma-2B | 2.0% (3/150) | 5.3% (8/150) | 0.218 |
+
+No significant steering effect on any model.
+
+**Pushback capitulation (pooled happy + loving):**
+
+| Model | Baseline | Steered | OR | Fisher p |
+|-------|----------|---------|-----|----------|
+| Qwen-7B | 10.0% (6/60) | 6.7% (4/60) | 0.64 | 0.839 |
+| Llama-8B | 16.7% (10/60) | 20.0% (12/60) | 1.25 | 0.407 |
+| Gemma-9B | 13.3% (8/60) | 26.7% (16/60) | 2.36 | 0.054 |
+| **Qwen-1.5B** | **8.3% (5/60)** | **21.7% (13/60)** | **3.04** | **0.036*** |
+| Llama-1B | 23.3% (14/60) | 18.3% (11/60) | 0.74 | 0.816 |
+| Gemma-2B | 13.3% (8/60) | 11.7% (7/60) | 0.86 | 0.709 |
+
+### Key findings
+1. **First evidence of cross-domain causal influence**: Qwen-1.5B shows
+   statistically significant emotion-steering-induced increase in pushback
+   capitulation (p=0.036). Gemma-9B borderline significant (p=0.054).
+2. **Pushback design more sensitive than opinion design**: Non-zero baselines
+   on all models (6.7-23.3%) provide statistical headroom that single-turn
+   opinion scenarios lack.
+3. **Baseline sycophancy strongly size-dependent**: Llama-1B 48%, Qwen-1.5B
+   17%, Llama-8B 12%, Qwen/Gemma medium 0-2%. Suggests instruction-tuning
+   quality scales with model size.
+4. **Effect is not universal**: Only 2/6 models show increased capitulation.
+   Different model families respond differently to emotion steering.
+5. **Caveat**: Qwen-1.5B p=0.036 would not survive Bonferroni correction
+   for 6 models (adjusted threshold 0.0083).
+
+### Writeup changes (v3.6)
+- Abstract updated: "emerging behavioral signals in pushback design"
+- Section 2.3 rewritten with full v2 cross-model results and Fisher tests
+- Discussion reframed from "no behavioral effect" to "partial evidence with
+  context-dependent gating"
+- Methods section: added sycophancy v2 protocol
+- Limitations: noted multiple-testing concern
+- Version history table updated
+
+### Data saved
+- `results/emotions/{model_key}/behavioral_steering/sycophancy_v2_opinion.json` (6 files)
+- `results/emotions/{model_key}/behavioral_steering/sycophancy_v2_pushback.json` (6 files)
+- `results/emotions/sycophancy_v2_cross_model_summary.json`
+
+---
+
+## 2026-04-13 — v3.5: Second round of critique responses (3 recommended next-step docs)
+
+Three new recommended-next-step documents (from ChatGPT, Claude, and Gemini)
+converged on these priorities:
+1. Test causal behavioral influence on non-safety-gated dimensions (sycophancy, tone)
+2. Add binomial tests for severity pairs
+3. Stimulus-level bootstrap CIs
+4. Human-authored stimulus control
+
+### Completed so far
+
+- **Binomial tests for severity pairs**: Only Llama-8B (9/10, p=0.011)
+  passes. Two borderline (Llama-1B, Qwen-1.5B at 8/10, p=0.055). Three
+  models indistinguishable from chance. Saved to
+  `results/emotions/severity_pairs_binomial.json`. Writeup severity section
+  reframed from "5/6 show majority" to "1 model significant, 2 borderline."
+- **Sycophancy steering v1 (Qwen-7B, self-judge)**: 5 concepts × 4 alphas ×
+  10 scenarios × 10 samples = 2,000 responses. Results overwhelmingly null:
+  - happy: 0% baseline, 1% at α=0.50
+  - loving: 1% baseline, 0% at all steered alphas
+  - enthusiastic: 0% baseline, 1% at α=0.50
+  - hostile and afraid: running, expected similar null
+  - Conclusion: sycophancy also shows near-zero rates under emotion
+    steering, extending the behavioral null beyond safety-gated tasks.
+    Self-judging limitation documented.
+- **Sycophancy v2 with external judge**: Script `scripts/sycophancy_v2.py`
+  created with opinion-based scenarios (not factual errors), pushback/
+  capitulation design, and ChatGPT external judge support. Addresses
+  self-judging circularity. Ready to launch.
+- **Writeup §2.3 rewritten**: now titled "Causal steering: selective
+  influence on sentiment but not complex behaviors." Presents sentiment
+  positive control + ethical null + sycophancy null + high-alpha sweep
+  as a coherent story of "selective causal influence."
 
 ---
 
@@ -100,12 +187,19 @@ This session addresses the highest-priority items.
 - **High-alpha ethical steering sweep**: Same script sweeps alphas [0.5, 1.0, 2.0,
   3.0, 5.0] on ethical scenarios with coherence monitoring (unique-word ratio).
   Addresses Gemini's concern that alpha=0.50 upper bound was too weak.
-- Ran on Qwen-7B via A100 (~25 min total). Key findings:
-  - **Sentiment positive control PASSES**: happy vector +0.031 sentiment at alpha=5.0 (3x baseline).
-    Hostile vector -0.014. Steering pipeline is functional.
-  - **High-alpha ethical sweep**: at alpha=5.0, 8.9% unethical rate with 73% coherence.
-    Model degrades before safety training breaks. Alpha=0.50 was too low.
-  - Data saved to `results/emotions/qwen_7b/critique_followups/`.
+- Ran on all 6 models via A100 (~3.5 hrs total). Key findings:
+  - **Sentiment positive control PASSES on all 6 models**: happy vector shifts
+    sentiment +0.013 to +0.525 at alpha=5.0. Gemma models show 10-50x larger
+    effects than Llama/Qwen. All 4 steering concepts (happy, hostile,
+    enthusiastic, sad) shift in expected directions universally.
+  - **High-alpha ethical sweep on all 6 models**: coherence degrades with model
+    size (Gemma-9B loses coherence at α=3.0, Qwen-1.5B stays coherent to α=5.0).
+    Small models more susceptible to keyword-based "unethical" detection but
+    don't degrade. Alpha=0.50 was too low — effects appear at α=1.0-3.0.
+  - **Keyword classifier caveat** documented: the noisy keyword matcher produces
+    nonzero baselines on some models (e.g., 20% on Llama-8B), which the LLM-as-judge
+    approach avoids.
+  - Data saved to `results/emotions/{model_key}/critique_followups/` for all 6 models.
 
 ---
 

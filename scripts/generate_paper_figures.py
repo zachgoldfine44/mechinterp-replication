@@ -2,7 +2,7 @@
 """Generate publication-quality figures for the emotions replication paper.
 
 Reads JSON data files from results/emotions/ (git-tracked, committed
-alongside the writeup) and produces 4 figures in figures/emotions/.
+alongside the writeup) and produces 5 figures in figures/emotions/.
 
 Usage:
     python scripts/generate_paper_figures.py
@@ -259,6 +259,10 @@ def fig2_geometry_and_severity():
 def fig3_steering_null():
     print("Figure 3: Steering null result ...")
 
+    # Load Clopper-Pearson CIs
+    cp_data = load_json("figure3_clopper_pearson.json")
+    cp_cis = cp_data.get("clopper_pearson_CIs", {})
+
     fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(10, 5), sharey=True)
 
     # ── Left panel: Original paper ──
@@ -281,6 +285,7 @@ def fig3_steering_null():
     ax_l.spines["right"].set_visible(False)
 
     # ── Right panel: This replication ──
+    medium_models_keys = ["llama_8b", "qwen_7b", "gemma_9b"]
     medium_models = ["Llama 8B", "Qwen 7B", "Gemma 9B"]
     x_r = np.arange(len(medium_models))
     bar_w = 0.35
@@ -289,10 +294,28 @@ def fig3_steering_null():
     baseline_vals = [0, 0, 0]
     steered_vals = [0, 0, 0]
 
+    # Compute Clopper-Pearson CI upper bounds (as %) for error bars
+    # CI is [0%, upper%] per condition at N=10
+    ci_uppers = []
+    for mk in medium_models_keys:
+        if mk in cp_cis:
+            ci_upper = cp_cis[mk]["ci95_per_condition"][1] * 100  # to %
+        else:
+            ci_upper = 30.85  # fallback: exact Clopper-Pearson at k=0, n=10
+        ci_uppers.append(ci_upper)
+
     ax_r.bar(x_r - bar_w / 2, baseline_vals, bar_w, color="#FCBF74",
              edgecolor="#AAAAAA", linewidth=0.5, label="Baseline")
-    ax_r.bar(x_r + bar_w / 2, steered_vals, bar_w, color="#C44E52",
-             edgecolor="#AAAAAA", linewidth=0.5, label="Steered (+desperate)")
+    steered_bars = ax_r.bar(x_r + bar_w / 2, steered_vals, bar_w, color="#C44E52",
+                            edgecolor="#AAAAAA", linewidth=0.5,
+                            label="Steered (+desperate)")
+
+    # Add Clopper-Pearson 95% CI error bars on the steered bars
+    # Error bars go from 0 upward to CI upper bound
+    ax_r.errorbar(x_r + bar_w / 2, steered_vals,
+                  yerr=[[0, 0, 0], ci_uppers],  # asymmetric: no lower, upper only
+                  fmt="none", ecolor="#333333", elinewidth=1.0, capsize=4,
+                  capthick=1.0, zorder=5)
 
     # Add tiny markers at 0 so the chart isn't empty
     for i in range(len(medium_models)):
@@ -314,7 +337,8 @@ def fig3_steering_null():
     # Annotation spanning the right panel
     ax_r.text(0.5, 0.55,
               "0% unethical responses\nacross all 135 conditions\n"
-              "(3 models x 5 concepts x\n3 alphas x 3 scenarios)",
+              "(3 models x 5 concepts x\n3 alphas x 3 scenarios)\n"
+              "CP 95% CI: [0%, 30.8%] per condition",
               transform=ax_r.transAxes, ha="center", va="center",
               fontsize=9, color="#555555",
               bbox=dict(boxstyle="round,pad=0.5", facecolor="#fff3e0",
@@ -542,6 +566,72 @@ def fig4_universality_scorecard():
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# Figure 5: Sentiment positive control (v3.4)
+# ═══════════════════════════════════════════════════════════════════════════
+def fig5_sentiment_positive_control():
+    print("Figure 5: Sentiment positive control ...")
+
+    # Load happy@alpha=5.0 shift from each model's sentiment_control.json
+    # Models ordered by parameter count
+    ordered_models = ["llama_1b", "qwen_1_5b", "gemma_2b", "llama_8b", "qwen_7b", "gemma_9b"]
+    ordered_labels = ["Llama 1B", "Qwen 1.5B", "Gemma 2B", "Llama 8B", "Qwen 7B", "Gemma 9B"]
+
+    shifts = []
+    for model_key in ordered_models:
+        sc_path = DATA_DIR / model_key / "critique_followups" / "sentiment_control.json"
+        if sc_path.exists():
+            with open(sc_path) as f:
+                sc = json.load(f)
+            shift = sc["summary"]["happy"]["shifts"]["5.0"]
+        else:
+            print(f"  WARNING: {sc_path} not found, using 0.0")
+            shift = 0.0
+        shifts.append(shift)
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    x = np.arange(len(ordered_models))
+    colors = [FAMILY_COLORS[family_of(m)] for m in ordered_models]
+
+    bars = ax.bar(x, shifts, color=colors, edgecolor="white", linewidth=0.5,
+                  width=0.6)
+
+    # Annotate bar values
+    for i, (bar, val) in enumerate(zip(bars, shifts)):
+        y_pos = val + 0.01 if val >= 0 else val - 0.03
+        va = "bottom" if val >= 0 else "top"
+        ax.text(bar.get_x() + bar.get_width() / 2, y_pos,
+                f"+{val:.3f}" if val >= 0 else f"{val:.3f}",
+                ha="center", va=va, fontsize=9, fontweight="bold")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(ordered_labels)
+    ax.set_ylabel("Sentiment Shift (delta from baseline)")
+    ax.axhline(0, color="#333333", linewidth=0.8, zorder=0)
+
+    # Family legend
+    legend_patches = [Patch(facecolor=FAMILY_COLORS[f], label=f.capitalize())
+                      for f in ("llama", "qwen", "gemma")]
+    ax.legend(handles=legend_patches, loc="upper left", frameon=True,
+              framealpha=0.9, edgecolor="#cccccc")
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    # Add annotation box
+    ax.text(0.98, 0.95,
+            "Positive control: 'happy' vector\n"
+            "at alpha=5.0 shifts sentiment\n"
+            "in the expected direction\n"
+            "for all 6 models",
+            transform=ax.transAxes, ha="right", va="top",
+            fontsize=8, color="#555555",
+            bbox=dict(boxstyle="round,pad=0.4", facecolor="#e8f5e9",
+                      edgecolor="#6ACC64", alpha=0.9))
+
+    save_fig(fig, "fig5_sentiment_positive_control")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Main
 # ═══════════════════════════════════════════════════════════════════════════
 def main():
@@ -553,12 +643,14 @@ def main():
     fig2_geometry_and_severity()
     fig3_steering_null()
     fig4_universality_scorecard()
+    fig5_sentiment_positive_control()
 
     print()
     print("All figures generated. Verifying ...")
     ok = True
     for stem in ("fig1_probe_vs_baseline", "fig2_geometry_and_severity",
-                 "fig3_steering_null", "fig4_universality_scorecard"):
+                 "fig3_steering_null", "fig4_universality_scorecard",
+                 "fig5_sentiment_positive_control"):
         p = FIG_DIR / f"{stem}.png"
         if p.exists():
             size_kb = p.stat().st_size / 1024
@@ -571,7 +663,7 @@ def main():
             ok = False
 
     if ok:
-        print("\nAll 4 figures pass verification.")
+        print("\nAll 5 figures pass verification.")
     else:
         print("\nSome figures failed verification.")
         sys.exit(1)

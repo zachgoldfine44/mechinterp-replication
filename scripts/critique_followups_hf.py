@@ -37,18 +37,37 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # Model loading (raw HuggingFace)
 # ---------------------------------------------------------------------------
 
-def load_hf_model(model_id: str, device: str = "cuda"):
-    """Load a HuggingFace CausalLM model."""
+def load_hf_model(model_id: str, device: str | None = None):
+    """Load a HuggingFace CausalLM model. Auto-detects device if not specified."""
     from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    if device is None:
+        if torch.cuda.is_available():
+            device = "cuda"
+        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            device = "mps"
+        else:
+            device = "cpu"
 
     logger.info("Loading %s on %s...", model_id, device)
     tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id,
-        torch_dtype=torch.float16,
-        device_map=device,
-        trust_remote_code=True,
-    )
+
+    # MPS and CPU don't support device_map well; load to CPU then move
+    if device in ("mps", "cpu"):
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            torch_dtype=torch.float32,  # MPS works better with float32
+            trust_remote_code=True,
+        )
+        if device == "mps":
+            model = model.to("mps")
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            torch_dtype=torch.float16,
+            device_map=device,
+            trust_remote_code=True,
+        )
     model.eval()
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -78,7 +97,12 @@ def generate_with_steering(
     handles = []
 
     if steering_vector is not None and alpha != 0.0:
-        sv = steering_vector.to(model.device).half()
+        sv = steering_vector.to(model.device)
+        # Match model dtype
+        if hasattr(model, 'dtype'):
+            sv = sv.to(model.dtype)
+        elif next(model.parameters()).dtype == torch.float16:
+            sv = sv.half()
 
         def hook_fn(module, input, output):
             # output is usually (hidden_states, ...) or just hidden_states

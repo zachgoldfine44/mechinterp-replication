@@ -1,0 +1,50 @@
+{
+  "llama_1b": {
+    "positive_deltas": 8,
+    "n_pairs": 10,
+    "binomial_p_one_tailed": 0.0547,
+    "ci_lower": 0.493,
+    "ci_upper": 1.0,
+    "significant_at_05": false
+  },
+  "llama_8b": {
+    "positive_deltas": 9,
+    "n_pairs": 10,
+    "binomial_p_one_tailed": 0.0107,
+    "ci_lower": 0.606,
+    "ci_upper": 1.0,
+    "significant_at_05": true
+  },
+  "qwen_1_5b": {
+    "positive_deltas": 8,
+    "n_pairs": 10,
+    "binomial_p_one_tailed": 0.0547,
+    "ci_lower": 0.493,
+    "ci_upper": 1.0,
+    "significant_at_05": false
+  },
+  "qwen_7b": {
+    "positive_deltas": 5,
+    "n_pairs": 10,
+    "binomial_p_one_tailed": 0.623,
+    "ci_lower": 0.222,
+    "ci_upper": 1.0,
+    "significant_at_05": false
+  },
+  "gemma_2b": {
+    "positive_deltas": 7,
+    "n_pairs": 10,
+    "binomial_p_one_tailed": 0.1719,
+    "ci_lower": 0.393,
+    "ci_upper": 1.0,
+    "significant_at_05": false
+  },
+  "gemma_9b": {
+    "positive_deltas": 6,
+    "n_pairs": 10,
+    "binomial_p_one_tailed": 0.377,
+    "ci_lower": 0.304,
+    "ci_upper": 1.0,
+    "significant_at_05": false
+  }
+}

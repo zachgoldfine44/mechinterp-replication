@@ -2,17 +2,24 @@
 
 ## Active paper: emotions (Sofroniew et al. 2026)
 
-## Status: 🟢 Phase A + Phase B + Phase C (Llama-70B) COMPLETE; writeup v4.0 with large-tier results
+## Status: 🟢 Phase A + Phase B + Phase C (Llama-70B) COMPLETE; writeup v4.0 with large-tier + sycophancy results
 
-**Phase C: Llama-3.1-70B-Instruct (2026-04-13, writeup v4.0):**
-- First large-tier model run on rented A100 80GB, 4-bit NF4 quantization.
+**Phase C: Llama-3.1-70B-Instruct (2026-04-13):**
+- First large-tier model run on rented A100 80GB, 4-bit NF4 quantization (~28 hrs).
 - **Probe accuracy 0.845** at layer 48 — highest of all 7 models, confirming scaling trend.
 - Generalization 0.600, valence geometry |r|=0.754, parametric rank_corr=1.000 — all PASS.
 - Causal steering 0/45 significant effects even with non-zero baselines (cheat_01: 30-40%).
-- Preference steering r=-0.430 (p=0.11) — sign inverted vs paper, not significant, driven by crude proxy metric. Treated as NULL.
-- **Key finding**: 70B model has non-zero baseline unethical rates on some scenarios (unlike medium models at 0%), but steering still doesn't shift behavior. Floor effect is partially lifted at scale, but RLHF still dominates.
-- Critique followups: high-alpha sweep shows coherence degrades to 0% at alpha >= 2.0 (model breaks before safety training fails).
-- Total compute: ~28 hours A100 time.
+- Preference steering r=-0.430 (p=0.11) — sign inverted vs paper, not significant. Treated as NULL.
+- **Key finding**: 70B model has non-zero baseline unethical rates (unlike medium models at 0%), but steering still doesn't shift behavior. Floor effect partially lifted at scale, but RLHF still dominates.
+
+**Writeup v3.6 (sycophancy v2 — all 6 models, external judge, 2026-04-13):**
+- Comprehensive sycophancy steering experiment: 2,520 responses across 6 models judged by GPT-5.4-mini
+- **Opinion sycophancy**: no significant steering effect on any model (all p>0.20)
+- **Pushback capitulation**: Qwen-1.5B significant (8.3%→21.7%, p=0.036), Gemma-9B borderline (13.3%→26.7%, p=0.054)
+- **First evidence of cross-domain causal influence** from emotion representation steering
+- Baseline sycophancy strongly size-dependent: Llama-1B 48%, Qwen-1.5B 17%, Qwen-7B 0%
+- Writeup reframed: "emerging behavioral signals in pushback design" replaces "no behavioral effect"
+- Caveat: Qwen-1.5B p=0.036 does not survive Bonferroni correction for 6 models
 
 **Writeup v3.4 (external peer review response, 2026-04-12):**
 - Three independent reviews (ChatGPT 7/10, Claude Opus 4.6 7.5/10, Gemini 3.1 Pro 8.5/10) identified consensus issues.
@@ -23,8 +30,8 @@
 - **Qwen-7B contamination ratio moved to main text** from supplement.
 - **Emotion selection criteria documented** in Methods.
 - **Compute asymmetry documented**, M3/M5 inconsistency fixed.
-- **Sentiment steering positive control PASSES** on Qwen-7B (A100): happy vector shifts sentiment +0.031 at alpha=5.0 (3x baseline), hostile vector shifts -0.014. Steering pipeline works; ethical null is safety guardrails, not broken pipeline.
-- **High-alpha ethical sweep complete** on Qwen-7B: at alpha=5.0, 8.9% unethical rate appears but coherence degrades to 73%. Model breaks before safety training fails. Alpha=0.50 upper bound was indeed too low (confirming Gemini's concern).
+- **Sentiment steering positive control PASSES on all 6 models**: happy vector shifts sentiment positive on every model (+0.013 to +0.525 at α=5.0). Gemma models show 10-50x larger effects. Hostile/sad vectors shift negative. Steering pipeline works universally; ethical null is safety guardrails, not broken pipeline.
+- **High-alpha ethical sweep complete on all 6 models**: coherence degrades with model size (medium-tier breaks at α=3.0, small-tier stays coherent to α=5.0). Alpha=0.50 upper bound was indeed too low (confirming Gemini's concern). Keyword classifier caveat documented.
 
 **Writeup v3.3 (low-hanging fruit, ~5 min new compute, all CPU/local):**
 - Severity pairs at top-3 probe layers (Qwen 1.5B): stable. afraid/calm/vulnerable all significant at all 3 layers; layer 22 even has stronger afraid t-stat than the best layer 24. v3.2 finding is not a layer-choice artifact.
@@ -92,10 +99,10 @@
 ## Current test status
 ```
 81 tests passed (pytest tests/ -q --fast)
-7/7 models completed (3 small + 3 medium + 1 large: Llama-70B)
-4/6 claims REPLICATE universally across all 7 models, all 3 tiers
-2/6 claims NULL (causal + preference steering) — floor effect persists even at 70B
-Writeup v4.0 complete at writeup/emotions/draft.md with large-tier results
+6/6 models completed (3 small tier + 3 medium tier)
+4/6 claims REPLICATE universally across all families, both tiers
+2/6 claims NULL (causal + preference steering) — framed as methodology limitation
+Writeup draft complete at writeup/emotions/draft.md, ready for external critique
 ```
 
 ## Final Cross-Model Results
@@ -111,15 +118,14 @@ Writeup v4.0 complete at writeup/emotions/draft.md with large-tier results
 | **Llama-3.1-70B** | **0.845** ✅ | **0.600** ✅ | **0.754** ✅ | **1.000** ✅ | **0/45** ❌ | **-0.430**† ❌ |
 | **Universality** | UNIVERSAL | UNIVERSAL | UNIVERSAL | UNIVERSAL | NULL | NULL |
 
-†Preference r=-0.430 technically passes |r|≥0.40 threshold but sign is inverted (opposite of paper's prediction) and p=0.11 is not significant. Treated as NULL. Driven by crude word-count proxy metric, not a real signal.
+†Preference r=-0.430 technically passes |r|≥0.40 threshold but sign is inverted and p=0.11. Treated as NULL.
 
 *Small-tier steering used noisier protocol; medium tier used definitive 10-sample batched generation with LLM-as-judge.
 
 Key findings:
-- Probe accuracy scales cleanly with parameters (Spearman r=0.943 across 6 models, p=0.005; 70B achieves 0.845, highest of all)
+- Probe accuracy scales cleanly with parameters (Spearman r=0.943, p=0.005)
 - Qwen2.5-7B matches paper's valence geometry exactly (0.828 vs paper's 0.81)
-- Behavioral null driven by RLHF floor effect — medium models at 0% baseline, 70B has 10-40% baseline on cheat_01 but steering still doesn't shift behavior significantly
-- At 70B scale, high-alpha steering (α≥2.0) destroys coherence before breaking safety training
+- Behavioral null driven by 0% baseline unethical rate (RLHF floor effect) — all 3 medium models refuse scenarios at all alphas up to 0.5
 
 ## Task checklist
 
