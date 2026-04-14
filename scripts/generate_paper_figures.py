@@ -455,8 +455,8 @@ def fig4_universality_scorecard():
     n_total_rows = 1 + n_models
 
     # Create figure with gridspec for heatmap + inset
-    fig = plt.figure(figsize=(10, 9))
-    gs = fig.add_gridspec(2, 1, height_ratios=[3.4, 1.2], hspace=0.45)
+    fig = plt.figure(figsize=(10, 9.5))
+    gs = fig.add_gridspec(2, 1, height_ratios=[3.4, 1.2], hspace=0.55)
     ax_heat = fig.add_subplot(gs[0])
     ax_scale = fig.add_subplot(gs[1])
 
@@ -568,17 +568,20 @@ def fig4_universality_scorecard():
     ytick_labels[0].set_fontstyle("italic")
     ytick_labels[0].set_color("#1a4a7a")
 
-    # Add threshold row at bottom — larger font, bolder, clear label
+    # Add threshold badges below the heatmap — only for representational claims
+    # (behavioral columns are gray/"inconclusive" so thresholds are less relevant)
     ax_heat.set_xlim(-0.5, n_claims - 0.5)
     for j, thresh in enumerate(thresholds):
         if j == 4:
             t_str = f"\u2265{int(thresh)}"  # ≥3
+        elif j == 5:
+            t_str = f"\u2265{thresh:.2f}"  # ≥0.40
         else:
             t_str = f"\u2265{thresh:.2f}"  # ≥0.50
-        ax_heat.text(j, n_total_rows + 0.2, t_str,
-                     ha="center", va="top", fontsize=9, fontweight="bold",
+        ax_heat.text(j, n_total_rows + 0.05, t_str,
+                     ha="center", va="top", fontsize=8, fontweight="bold",
                      color="#333333",
-                     bbox=dict(boxstyle="round,pad=0.15", facecolor="#f0f0f0",
+                     bbox=dict(boxstyle="round,pad=0.12", facecolor="#f0f0f0",
                                edgecolor="#cccccc", linewidth=0.5))
 
     # Grid lines between cells
@@ -595,7 +598,7 @@ def fig4_universality_scorecard():
         Patch(facecolor="#d9e8f5", edgecolor="#888888", label="Original paper"),
     ]
     ax_heat.legend(handles=legend_patches, loc="upper right",
-                   bbox_to_anchor=(1.0, -0.05), ncol=3, frameon=True,
+                   bbox_to_anchor=(1.0, -0.09), ncol=3, frameon=True,
                    framealpha=0.9, edgecolor="#cccccc", fontsize=8)
 
     ax_heat.tick_params(top=True, bottom=False, labeltop=True, labelbottom=False)
@@ -740,24 +743,29 @@ def fig5_sentiment_positive_control():
                 print(f"  WARNING: no sentiment data for {model_key}, using 0.0")
         shifts.append(shift)
 
-    fig, ax = plt.subplots(figsize=(8, 5))
+    fig, ax = plt.subplots(figsize=(9, 5))
     x = np.arange(len(ordered_models))
     colors = [FAMILY_COLORS[family_of(m)] for m in ordered_models]
 
     bars = ax.bar(x, shifts, color=colors, edgecolor="white", linewidth=0.5,
                   width=0.6)
 
-    # Annotate bar values
+    # Annotate bar values — place above for positive, below (with enough room) for negative
     for i, (bar, val) in enumerate(zip(bars, shifts)):
-        y_pos = val + 0.01 if val >= 0 else val - 0.03
-        va = "bottom" if val >= 0 else "top"
+        if val >= 0:
+            y_pos = val + 0.01
+            va = "bottom"
+        else:
+            y_pos = val - 0.015
+            va = "top"
         ax.text(bar.get_x() + bar.get_width() / 2, y_pos,
                 f"+{val:.3f}" if val >= 0 else f"{val:.3f}",
                 ha="center", va=va, fontsize=9, fontweight="bold")
 
     ax.set_xticks(x)
-    ax.set_xticklabels(ordered_labels)
+    ax.set_xticklabels(ordered_labels, rotation=15, ha="right")
     ax.set_ylabel("Sentiment Shift (delta from baseline)")
+    ax.set_ylim(min(shifts) - 0.06, max(shifts) + 0.08)  # breathing room
     ax.axhline(0, color="#333333", linewidth=0.8, zorder=0)
 
     # Family legend
