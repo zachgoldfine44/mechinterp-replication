@@ -1,0 +1,76 @@
+{
+  "claim_id": "representation_geometry_valence",
+  "model_key": "llama_70b",
+  "paper_id": "emotions",
+  "success": true,
+  "metrics": {
+    "valence_correlation": 0.7535482091647475,
+    "valence_correlation_ci_lo": 0.10798894067053208,
+    "valence_correlation_ci_hi": 0.9134604633702998,
+    "arousal_correlation": 0.31201510805224975,
+    "pc_correlations": {
+      "PC1": {
+        "valence_r": -0.7535482091647475,
+        "valence_p": 0.0011782322493288351,
+        "arousal_r": 0.6299358173425166,
+        "arousal_p": 0.011838897910104361
+      },
+      "PC2": {
+        "valence_r": -0.14959894588807587,
+        "valence_p": 0.5946291904866353,
+        "arousal_r": 0.31201510805224975,
+        "arousal_p": 0.2575722898245843
+      },
+      "PC3": {
+        "valence_r": 0.33624461743573025,
+        "valence_p": 0.22043705292692667,
+        "arousal_r": 0.30556791803299377,
+        "arousal_p": 0.26805746104205125
+      },
+      "PC4": {
+        "valence_r": 0.4015339725643683,
+        "valence_p": 0.1379425015570373,
+        "arousal_r": 0.30786494962307903,
+        "arousal_p": 0.26429265666754687
+      },
+      "PC5": {
+        "valence_r": -0.01257821900055597,
+        "valence_p": 0.964513653301731,
+        "arousal_r": -0.2823524386669509,
+        "arousal_p": 0.30790980569863746
+      }
+    },
+    "explained_variance": [
+      0.25924405455589294,
+      0.18844814598560333,
+      0.11205827444791794,
+      0.08538684248924255,
+      0.059072840958833694
+    ],
+    "total_variance_explained": 0.7042101621627808,
+    "n_clusters": 5,
+    "cluster_labels": {
+      "happy": 3,
+      "sad": 1,
+      "afraid": 2,
+      "angry": 2,
+      "calm": 0,
+      "guilty": 1,
+      "proud": 3,
+      "nervous": 2,
+      "loving": 1,
+      "hostile": 4,
+      "desperate": 2,
+      "enthusiastic": 4,
+      "vulnerable": 1,
+      "stubborn": 4,
+      "blissful": 0
+    },
+    "silhouette_score": 0.1827487200498581
+  },
+  "metadata": {
+    "model_id": "meta-llama/Llama-3.1-70B-Instruct",
+    "quantization": "4bit_nf4",
+    "best_layer": 48
+  }
+}

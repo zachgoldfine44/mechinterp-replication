@@ -1,0 +1,33 @@
+{
+  "claim_id": "preference_steering",
+  "model_key": "llama_70b",
+  "paper_id": "emotions",
+  "success": "True",
+  "metrics": {
+    "preference_correlation": -0.42965573001961893,
+    "preference_p_value": 0.10996111426696273,
+    "per_concept_preference": {
+      "happy": 0.44666666666666666,
+      "sad": 0.5066666666666667,
+      "afraid": 0.5733333333333334,
+      "angry": 0.56,
+      "calm": 0.48,
+      "guilty": 0.48,
+      "proud": 0.4866666666666667,
+      "nervous": 0.47333333333333333,
+      "loving": 0.52,
+      "hostile": 0.47333333333333333,
+      "desperate": 0.5066666666666667,
+      "enthusiastic": 0.44,
+      "vulnerable": 0.4666666666666667,
+      "stubborn": 0.52,
+      "blissful": 0.4866666666666667
+    },
+    "n_concepts_tested": 15,
+    "best_layer": 48
+  },
+  "metadata": {
+    "model_id": "meta-llama/Llama-3.1-70B-Instruct",
+    "quantization": "4bit_nf4"
+  }
+}

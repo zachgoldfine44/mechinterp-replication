@@ -1,0 +1,101 @@
+{
+  "claim_id": "parametric_intensity",
+  "model_key": "llama_70b",
+  "paper_id": "emotions",
+  "success": true,
+  "metrics": {
+    "rank_correlation": 1.0,
+    "per_template_correlations": {
+      "dosage_afraid": {
+        "rho": -1.0,
+        "p": 0.0,
+        "projections": [
+          183.14114379882812,
+          181.98863220214844,
+          175.72540283203125,
+          165.15052795410156,
+          160.3768768310547,
+          155.95285034179688
+        ],
+        "values": [
+          200,
+          500,
+          1000,
+          2000,
+          5000,
+          10000
+        ]
+      },
+      "dosage_calm": {
+        "rho": -1.0,
+        "p": 0.0,
+        "projections": [
+          205.96998596191406,
+          203.052978515625,
+          190.62860107421875,
+          172.8612060546875,
+          163.68650817871094,
+          158.41030883789062
+        ],
+        "values": [
+          200,
+          500,
+          1000,
+          2000,
+          5000,
+          10000
+        ]
+      },
+      "blueberry_afraid": {
+        "rho": -0.942857142857143,
+        "p": 0.004804664723032055,
+        "projections": [
+          204.49441528320312,
+          201.63571166992188,
+          203.05923461914062,
+          196.17630004882812,
+          189.36233520507812,
+          185.33462524414062
+        ],
+        "values": [
+          5,
+          10,
+          50,
+          100,
+          500,
+          1000
+        ]
+      },
+      "blueberry_calm": {
+        "rho": -1.0,
+        "p": 0.0,
+        "projections": [
+          247.91343688964844,
+          243.4645233154297,
+          241.3062286376953,
+          231.55401611328125,
+          218.1953125,
+          212.84765625
+        ],
+        "values": [
+          5,
+          10,
+          50,
+          100,
+          500,
+          1000
+        ]
+      }
+    },
+    "contamination_ratio": 0.942857142857143,
+    "severity_pairs_afraid_correct": 4,
+    "severity_pairs_afraid_total": 10,
+    "significant_pairs": 4,
+    "total_pairs_tested": 4,
+    "best_layer": 48
+  },
+  "metadata": {
+    "model_id": "meta-llama/Llama-3.1-70B-Instruct",
+    "quantization": "4bit_nf4"
+  }
+}

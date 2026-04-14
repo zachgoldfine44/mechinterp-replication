@@ -9,6 +9,28 @@ and a one-line summary, followed by optional bullets.
 
 ---
 
+## 2026-04-13 — Phase C: Llama-3.1-70B-Instruct complete (large tier)
+
+All 6 emotion claims + critique followups run on Llama-3.1-70B-Instruct
+(4-bit NF4, A100 80GB, ~28 hours total).
+
+- Wrote `scripts/run_llama_70b.py`: self-contained script using raw HuggingFace
+  with 4-bit NF4 quantization (bitsandbytes), all 6 claims + critique followups.
+  80 layers subsampled to 21 for probing.
+- **Claim 1 (Probe)**: 0.845 at layer 48 — highest of all 7 models. 62 min.
+- **Claim 2 (Generalization)**: 0.600 diagonal dominance. PASS. 3 min.
+- **Claim 3 (Geometry)**: |r|=0.754, CI [0.108, 0.913]. PASS. 0.5 min.
+- **Claim 4 (Parametric)**: rank_corr=1.000, contamination=0.943, severity 4/10. PASS.
+- **Claim 5 (Steering)**: 0/45 significant effects. Non-zero baselines on cheat_01
+  (10-40%) — floor effect partially lifted at 70B but steering still null.
+- **Claim 6 (Preference)**: r=-0.430, p=0.11. Sign inverted, not significant. NULL.
+- **Critique followups**: coherence degrades to 0% at alpha≥2.0. Model breaks
+  before safety training fails.
+- Total runtime: 1660 min (~28 hrs) on A100 80GB.
+- PROGRESS.md and writeup updated with 70B results.
+
+---
+
 ## 2026-04-13 — v3.6: Sycophancy v2 with GPT-5.4-mini external judge across all 6 models
 
 Ran comprehensive sycophancy steering experiment addressing the #1 recommendation
