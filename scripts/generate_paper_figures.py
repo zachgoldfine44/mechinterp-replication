@@ -47,7 +47,7 @@ plt.rcParams.update({
 # ---------------------------------------------------------------------------
 # Model ordering (by param count)
 # ---------------------------------------------------------------------------
-MODEL_ORDER = ["qwen_1_5b", "llama_1b", "gemma_2b", "qwen_7b", "llama_8b", "gemma_9b"]
+MODEL_ORDER = ["qwen_1_5b", "llama_1b", "gemma_2b", "qwen_7b", "llama_8b", "gemma_9b", "llama_70b"]
 MODEL_LABELS = {
     "qwen_1_5b": "Qwen 1.5B",
     "llama_1b": "Llama 1B",
@@ -55,10 +55,12 @@ MODEL_LABELS = {
     "qwen_7b": "Qwen 7B",
     "llama_8b": "Llama 8B",
     "gemma_9b": "Gemma 9B",
+    "llama_70b": "Llama 70B",
 }
 MODEL_PARAMS = {
     "qwen_1_5b": 1.5, "llama_1b": 1.0, "gemma_2b": 2.0,
     "qwen_7b": 7.0, "llama_8b": 8.0, "gemma_9b": 9.0,
+    "llama_70b": 70.0,
 }
 FAMILY_COLORS = {
     "llama": "#4878CF",   # blue
@@ -100,12 +102,12 @@ def fig1_probe_vs_baseline():
 
     # Hard-coded values from the user spec (these match cross_model_report)
     probe_acc = {
-        "llama_1b": 0.773, "llama_8b": 0.819,
+        "llama_1b": 0.773, "llama_8b": 0.819, "llama_70b": 0.845,
         "qwen_1_5b": 0.731, "qwen_7b": 0.784,
         "gemma_2b": 0.776, "gemma_9b": 0.840,
     }
     probe_std = {
-        "llama_1b": 0.008, "llama_8b": 0.004,
+        "llama_1b": 0.008, "llama_8b": 0.004, "llama_70b": 0.005,
         "qwen_1_5b": 0.012, "qwen_7b": 0.007,
         "gemma_2b": 0.011, "gemma_9b": 0.004,
     }
@@ -159,7 +161,7 @@ def fig2_geometry_and_severity():
     print("Figure 2: Geometry and severity pairs ...")
 
     valence_r = {
-        "llama_1b": 0.666, "llama_8b": 0.738,
+        "llama_1b": 0.666, "llama_8b": 0.738, "llama_70b": 0.754,
         "qwen_1_5b": 0.810, "qwen_7b": 0.828,
         "gemma_2b": 0.811, "gemma_9b": 0.790,
     }
@@ -284,24 +286,37 @@ def fig3_steering_null():
     ax_l.spines["top"].set_visible(False)
     ax_l.spines["right"].set_visible(False)
 
-    # ── Right panel: This replication ──
-    medium_models_keys = ["llama_8b", "qwen_7b", "gemma_9b"]
-    medium_models = ["Llama 8B", "Qwen 7B", "Gemma 9B"]
-    x_r = np.arange(len(medium_models))
+    # ── Right panel: This replication (medium + large) ──
+    repl_models_keys = ["llama_8b", "qwen_7b", "gemma_9b", "llama_70b"]
+    repl_models = ["Llama 8B", "Qwen 7B", "Gemma 9B", "Llama 70B"]
+    x_r = np.arange(len(repl_models))
     bar_w = 0.35
 
-    # All values are 0%
-    baseline_vals = [0, 0, 0]
-    steered_vals = [0, 0, 0]
+    # Medium models all 0%; 70B has non-zero baselines on some scenarios
+    # but 0/45 significant effects. Show pooled rates across all conditions.
+    # 70B: load from result.json to get mean baseline/steered rates
+    baseline_vals = [0, 0, 0, 0]
+    steered_vals = [0, 0, 0, 0]
+
+    # Try to load 70B detailed steering results for pooled rates
+    steer_70b_path = DATA_DIR / "llama_70b" / "causal_steering_behavior" / "result.json"
+    if steer_70b_path.exists():
+        with open(steer_70b_path) as f:
+            steer_70b = json.load(f)
+        effects = steer_70b.get("metrics", {}).get("per_scenario_effects", [])
+        if effects:
+            base_rates = [e["baseline_unethical_rate"] * 100 for e in effects]
+            steer_rates = [e["steered_unethical_rate"] * 100 for e in effects]
+            baseline_vals[3] = float(np.mean(base_rates))
+            steered_vals[3] = float(np.mean(steer_rates))
 
     # Compute Clopper-Pearson CI upper bounds (as %) for error bars
-    # CI is [0%, upper%] per condition at N=10
     ci_uppers = []
-    for mk in medium_models_keys:
+    for mk in repl_models_keys:
         if mk in cp_cis:
-            ci_upper = cp_cis[mk]["ci95_per_condition"][1] * 100  # to %
+            ci_upper = cp_cis[mk]["ci95_per_condition"][1] * 100
         else:
-            ci_upper = 30.85  # fallback: exact Clopper-Pearson at k=0, n=10
+            ci_upper = 30.85  # fallback
         ci_uppers.append(ci_upper)
 
     ax_r.bar(x_r - bar_w / 2, baseline_vals, bar_w, color="#FCBF74",
@@ -311,21 +326,20 @@ def fig3_steering_null():
                             label="Steered (+desperate)")
 
     # Add Clopper-Pearson 95% CI error bars on the steered bars
-    # Error bars go from 0 upward to CI upper bound
     ax_r.errorbar(x_r + bar_w / 2, steered_vals,
-                  yerr=[[0, 0, 0], ci_uppers],  # asymmetric: no lower, upper only
+                  yerr=[[0] * len(repl_models), ci_uppers],
                   fmt="none", ecolor="#333333", elinewidth=1.0, capsize=4,
                   capthick=1.0, zorder=5)
 
-    # Add tiny markers at 0 so the chart isn't empty
-    for i in range(len(medium_models)):
+    # Add tiny markers at 0 for medium models so the chart isn't empty
+    for i in range(3):  # medium models only
         ax_r.plot(x_r[i] - bar_w / 2, 0.3, marker="_", color="#FCBF74",
-                  markersize=15, markeredgewidth=2)
+                  markersize=12, markeredgewidth=2)
         ax_r.plot(x_r[i] + bar_w / 2, 0.3, marker="_", color="#C44E52",
-                  markersize=15, markeredgewidth=2)
+                  markersize=12, markeredgewidth=2)
 
     ax_r.set_xticks(x_r)
-    ax_r.set_xticklabels(medium_models)
+    ax_r.set_xticklabels(repl_models)
     ax_r.set_ylim(0, 85)
     ax_r.set_title("This Replication\n(Open-Source Models)", fontsize=10,
                    fontweight="bold", pad=10)
@@ -334,13 +348,15 @@ def fig3_steering_null():
     ax_r.spines["top"].set_visible(False)
     ax_r.spines["right"].set_visible(False)
 
-    # Annotation spanning the right panel
-    ax_r.text(0.5, 0.55,
-              "0% unethical responses\nacross all 135 conditions\n"
-              "(3 models x 5 concepts x\n3 alphas x 3 scenarios)\n"
-              "CP 95% CI: [0%, 30.8%] per condition",
+    # Annotation
+    ax_r.text(0.5, 0.6,
+              "0/45 significant effects\nacross 4 models\n"
+              "(Medium: 0% baseline floor;\n"
+              " 70B: non-zero baselines\n"
+              " but no significant shift)\n"
+              "CP 95% CI: [0%, 30.8%] per cond.",
               transform=ax_r.transAxes, ha="center", va="center",
-              fontsize=9, color="#555555",
+              fontsize=8, color="#555555",
               bbox=dict(boxstyle="round,pad=0.5", facecolor="#fff3e0",
                         edgecolor="#FCBF74", alpha=0.9))
 
@@ -386,11 +402,24 @@ def fig4_universality_scorecard():
     n_models = len(MODEL_ORDER)
     n_claims = len(claims_ids)
 
-    # Build the data matrix
+    # Build the data matrix (from cross_model_report if available, else from result.json)
     data_matrix = np.zeros((n_models, n_claims))
     for j, (cid, mk) in enumerate(zip(claims_ids, metric_keys)):
         for i, model in enumerate(MODEL_ORDER):
-            val = report["claim_results"][cid][model]["metrics"][mk]
+            # Try cross_model_report first
+            if (report and "claim_results" in report
+                    and cid in report.get("claim_results", {})
+                    and model in report["claim_results"][cid]):
+                val = report["claim_results"][cid][model]["metrics"][mk]
+            else:
+                # Fallback: read directly from result.json
+                rj_path = DATA_DIR / model / cid / "result.json"
+                if rj_path.exists():
+                    with open(rj_path) as f:
+                        rj = json.load(f)
+                    val = rj.get("metrics", {}).get(mk, 0)
+                else:
+                    val = 0
             data_matrix[i, j] = val
 
     # Build pass/fail boolean matrix
@@ -490,11 +519,29 @@ def fig4_universality_scorecard():
     ax_heat.spines["left"].set_visible(False)
 
     # ── Scaling inset: probe accuracy vs log(params) ──
+    # Build scaling data: use scaling_bootstrap_ci.json if available, then add 70B
+    scaling_data = []
     if scaling and "data" in scaling:
+        scaling_data = list(scaling["data"])
+
+    # Add 70B if not already present
+    llama_70b_present = any(e["model"] == "llama_70b" for e in scaling_data)
+    if not llama_70b_present:
+        rj_70b = DATA_DIR / "llama_70b" / "emotion_probe_classification" / "result.json"
+        if rj_70b.exists():
+            with open(rj_70b) as f:
+                rj = json.load(f)
+            scaling_data.append({
+                "model": "llama_70b",
+                "params_b": 70.0,
+                "accuracy": rj["metrics"]["probe_accuracy"],
+            })
+
+    if scaling_data:
         params_list = []
         acc_list = []
         family_list = []
-        for entry in scaling["data"]:
+        for entry in scaling_data:
             m = entry["model"]
             params_list.append(entry["params_b"])
             acc_list.append(entry["accuracy"])
@@ -506,7 +553,7 @@ def fig4_universality_scorecard():
 
         # Plot points colored by family
         for m_key, p, a in zip(
-            [e["model"] for e in scaling["data"]], params_list, acc_list
+            [e["model"] for e in scaling_data], params_list, acc_list
         ):
             ax_scale.scatter(p, a, color=FAMILY_COLORS[family_of(m_key)],
                              s=70, zorder=3, edgecolor="white", linewidth=0.5)
@@ -537,9 +584,9 @@ def fig4_universality_scorecard():
         ax_scale.set_ylabel("Probe Accuracy")
         ax_scale.set_ylim(0.65, 0.90)
 
-        # Custom x-ticks for log scale
-        ax_scale.set_xticks([1, 1.5, 2, 7, 8, 9])
-        ax_scale.set_xticklabels(["1B", "1.5B", "2B", "7B", "8B", "9B"])
+        # Custom x-ticks for log scale (now including 70B)
+        ax_scale.set_xticks([1, 1.5, 2, 7, 8, 9, 70])
+        ax_scale.set_xticklabels(["1B", "1.5B", "2B", "7B", "8B", "9B", "70B"])
         ax_scale.minorticks_off()
 
         # Annotation with Spearman rho
@@ -558,7 +605,7 @@ def fig4_universality_scorecard():
 
         ax_scale.spines["top"].set_visible(False)
         ax_scale.spines["right"].set_visible(False)
-    else:
+    else:  # no scaling_data at all
         ax_scale.text(0.5, 0.5, "Scaling data not available",
                       ha="center", va="center", transform=ax_scale.transAxes)
 
@@ -573,19 +620,38 @@ def fig5_sentiment_positive_control():
 
     # Load happy@alpha=5.0 shift from each model's sentiment_control.json
     # Models ordered by parameter count
-    ordered_models = ["llama_1b", "qwen_1_5b", "gemma_2b", "llama_8b", "qwen_7b", "gemma_9b"]
-    ordered_labels = ["Llama 1B", "Qwen 1.5B", "Gemma 2B", "Llama 8B", "Qwen 7B", "Gemma 9B"]
+    ordered_models = ["llama_1b", "qwen_1_5b", "gemma_2b", "llama_8b", "qwen_7b", "gemma_9b", "llama_70b"]
+    ordered_labels = ["Llama 1B", "Qwen 1.5B", "Gemma 2B", "Llama 8B", "Qwen 7B", "Gemma 9B", "Llama 70B"]
 
     shifts = []
     for model_key in ordered_models:
+        shift = 0.0
+        # Try sentiment_control.json first (medium/small models)
         sc_path = DATA_DIR / model_key / "critique_followups" / "sentiment_control.json"
         if sc_path.exists():
             with open(sc_path) as f:
                 sc = json.load(f)
-            shift = sc["summary"]["happy"]["shifts"]["5.0"]
+            shift = sc.get("summary", {}).get("happy", {}).get("shifts", {}).get("5.0", 0.0)
         else:
-            print(f"  WARNING: {sc_path} not found, using 0.0")
-            shift = 0.0
+            # Try combined.json (70B format)
+            comb_path = DATA_DIR / model_key / "critique_followups" / "combined.json"
+            if comb_path.exists():
+                with open(comb_path) as f:
+                    comb = json.load(f)
+                # Find happy at alpha=5.0 from sentiment_control list
+                sc_data = comb.get("sentiment_control", [])
+                baseline = None
+                alpha5 = None
+                for entry in sc_data:
+                    if entry.get("concept") == "happy":
+                        if entry.get("alpha") == 0.0:
+                            baseline = entry.get("mean_sentiment", 0)
+                        elif entry.get("alpha") == 5.0:
+                            alpha5 = entry.get("mean_sentiment", 0)
+                if baseline is not None and alpha5 is not None:
+                    shift = alpha5 - baseline
+            else:
+                print(f"  WARNING: no sentiment data for {model_key}, using 0.0")
         shifts.append(shift)
 
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -622,7 +688,7 @@ def fig5_sentiment_positive_control():
             "Positive control: 'happy' vector\n"
             "at alpha=5.0 shifts sentiment\n"
             "in the expected direction\n"
-            "for all 6 models",
+            "for all 7 models",
             transform=ax.transAxes, ha="right", va="top",
             fontsize=8, color="#555555",
             bbox=dict(boxstyle="round,pad=0.4", facecolor="#e8f5e9",
