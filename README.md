@@ -2,11 +2,13 @@
 
 To quick-start a replication of a mechinterp paper, copy and paste the following into Claude Code or Codex:
 
-"Please replicate the [name of paper] using the zachgoldfine44/mechinterp-replication harness on the Qwen-2.5-1.5B-Instruct model locally, and then open a pull request to that repo with the results as a replication attempt when done." 
+"Please replicate the Geometry of Truth paper using the zachgoldfine44/mechinterp-replication harness on the Qwen-2.5-1.5B-Instruct model locally, and then open a pull request to that repo with the results as a replication attempt when done." 
 
-It should take ~30 minutes to complete. 
+It will likely take ~30-60 minutes to complete.
 
-From there, you can evaluate the results, ask Claude Code or Codex to make revisions, extend the replication to more models, or submit the pull request as-is. 
+You can substitue the "Geometry of Truth" paper with any mechinterp paper you'd like to replicate. 
+
+From there, you can evaluate the results, ask Claude Code or Codex to make revisions, ask Claude Code or Codex to extend the replication to more models or different configurations, or submit the pull request as-is. 
 
 We're excited to see what papers and experiments you replicate!
 
