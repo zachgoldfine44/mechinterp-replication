@@ -1,0 +1,109 @@
+{
+  "claim_id": "truth_probe_classification",
+  "model_key": "qwen_1_5b",
+  "paper_id": "geometry_of_truth",
+  "n_warnings": 0,
+  "n_errors": 0,
+  "summary": "all checks passed",
+  "checks": [
+    {
+      "name": "confusion_matrix_resolution_artifact",
+      "severity": "info",
+      "passed": true,
+      "message": "ok",
+      "details": {
+        "n_concepts": 2,
+        "total_samples": 100,
+        "per_class_samples": 50.0,
+        "metric_value": 0.9700000000000001
+      }
+    },
+    {
+      "name": "chance_level_accuracy",
+      "severity": "info",
+      "passed": true,
+      "message": "probe_accuracy=0.970 above chance",
+      "details": {
+        "accuracy_key": "probe_accuracy",
+        "accuracy_value": 0.9700000000000001,
+        "n_concepts": 2,
+        "chance_level": 0.5
+      }
+    },
+    {
+      "name": "round_number_suspicion",
+      "severity": "info",
+      "passed": true,
+      "message": "no round-number match",
+      "details": {
+        "metric_value": 0.9700000000000001
+      }
+    },
+    {
+      "name": "per_concept_uniformity",
+      "severity": "info",
+      "passed": true,
+      "message": "per-concept std=0.0300",
+      "details": {
+        "mean": 0.97,
+        "std": 0.030000000000000027,
+        "n": 2
+      }
+    },
+    {
+      "name": "metric_in_range",
+      "severity": "info",
+      "passed": true,
+      "message": "probe_accuracy=0.9700000000000001 in range",
+      "details": {
+        "metric_value": 0.9700000000000001
+      }
+    },
+    {
+      "name": "success_threshold_consistency",
+      "severity": "info",
+      "passed": true,
+      "message": "threshold consistent with success flag",
+      "details": {
+        "metric_value": 0.9700000000000001,
+        "threshold": 0.7,
+        "success_flag": true
+      }
+    },
+    {
+      "name": "n_stimuli_matches_config",
+      "severity": "info",
+      "passed": true,
+      "message": "n_stimuli matches config (drift 0.0%)",
+      "details": {
+        "actual": 100,
+        "expected": 100,
+        "drift": 0.0
+      }
+    },
+    {
+      "name": "negative_control_contamination",
+      "severity": "info",
+      "passed": true,
+      "message": "no contamination metric",
+      "details": {}
+    },
+    {
+      "name": "finite_metrics",
+      "severity": "info",
+      "passed": true,
+      "message": "all metrics finite",
+      "details": {}
+    },
+    {
+      "name": "layer_in_valid_range",
+      "severity": "info",
+      "passed": true,
+      "message": "best_layer=27",
+      "details": {
+        "best_layer": 27,
+        "n_layers": null
+      }
+    }
+  ]
+}
