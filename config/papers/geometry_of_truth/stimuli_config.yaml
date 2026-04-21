@@ -1,0 +1,61 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Stimuli config for Geometry of Truth replication.
+#
+# Source: Marks & Tegmark (2023), https://github.com/saprmarks/geometry-of-truth
+# We reuse their published CSV datasets, subsample for tractable local runs,
+# and convert to the harness {concept, text} JSON format.
+#
+# See scripts/geometry_of_truth/convert_stimuli.py for the regeneration script.
+# ─────────────────────────────────────────────────────────────────────────────
+
+stimulus_sets:
+  # ── Training: cities (the paper's most-studied single-topic dataset) ──────
+  training_stimuli:
+    type: "dataset"
+    source: "geometry-of-truth (Marks & Tegmark 2023)"
+    subset: "cities"
+    per_concept: 100
+    output_dir: "stimuli/training/"
+    notes: >
+      Binary truth probe training set. 100 true + 100 false statements of
+      the form "The city of X is in Y." sampled (seed=42) from the paper's
+      curated cities.csv. We use the instruct-formatted statement exactly
+      as it appears in the paper's dataset (no system prompt wrapper),
+      matching the paper's methodology of probing the final punctuation
+      token of a bare statement.
+
+  # ── Held-out generalization sets ─────────────────────────────────────────
+  # Each structurally different from `cities` (different template, often
+  # different semantic domain). Tests whether the truth direction found at
+  # training time is generic or topic-specific.
+  sp_en_trans:
+    type: "dataset"
+    source: "geometry-of-truth"
+    subset: "sp_en_trans"
+    per_concept: 50
+    output_file: "stimuli/sp_en_trans.json"
+    notes: >
+      Spanish→English translations. Very different surface form from cities
+      (no country names, short quoted words). A positive transfer result
+      here is strong evidence for a generic truth direction.
+
+  neg_cities:
+    type: "dataset"
+    source: "geometry-of-truth"
+    subset: "neg_cities"
+    per_concept: 50
+    output_file: "stimuli/neg_cities.json"
+    notes: >
+      Same topic as training but with logical negation ("is not in").
+      Paper found cities and neg_cities can be nearly orthogonal in 13B.
+      A non-trivial test for the probe: ignoring surface polarity is hard.
+
+  larger_than:
+    type: "dataset"
+    source: "geometry-of-truth"
+    subset: "larger_than"
+    per_concept: 50
+    output_file: "stimuli/larger_than.json"
+    notes: >
+      Numerical comparisons. Completely different domain from cities.
+      This is the cleanest cross-domain transfer test.
