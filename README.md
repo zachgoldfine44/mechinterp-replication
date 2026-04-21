@@ -20,7 +20,7 @@ Most mechanistic interpretability papers study a single model (often a proprieta
 - Cross-model comparison requires handling multiple architectures
 - There's no standard framework for "run the same experiment on six models and compare"
 
-This harness exists to make that tractable. You feed it a paper config — which claims to test, what stimuli to use, what success looks like — and it runs the experiments across a matrix of open-source models, catches common pitfalls, and produces a writeup.
+This harness exists to make that tractable. You feed it a link to a mechinterp paper, and it determines what claims to test, what stimuli to use, and what success looks like. And then it runs the experiments across a matrix of open-source models, catches common pitfalls, and produces a writeup.
 
 The goal: **lower the barrier so that more papers get replicated more often, by more people, across more models.** The field benefits when findings are tested independently, null results are reported, and the community accumulates evidence about what's robust and what isn't.
 
@@ -30,12 +30,11 @@ The goal: **lower the barrier so that more papers get replicated more often, by 
 
 ### Framework
 
-- **6 generic experiment types** that cover most mechinterp papers: probe classification, generalization testing, parametric scaling, causal steering, circuit identification, representation geometry
-- **8 reusable technique modules**: linear probes, contrastive activation extraction (CAA), activation steering, activation patching, attention analysis, SAE feature extraction, logit lens, and circuit discovery
+- **6 generic experiment types** that cover many mechinterp papers: probe classification, generalization testing, parametric scaling, causal steering, circuit identification, representation geometry
+- **8 reusable technique modules**: linear probes, contrastive activation addition (CAA), activation steering, activation patching, attention analysis, SAE feature extraction, logit lens, and circuit discovery
 - **3 model families x 3 scales**: Llama 3.1/3.2 (1B, 8B, 70B), Qwen 2.5 (1.5B, 7B, 72B), Gemma 2 (2B, 9B, 27B) — instruct and base variants
-- **Automated sanity checks** that catch common artifacts (resolution traps, chance-level probes, confounded metrics) after every experiment
-- **Automated critique agents** (Claude + optional ChatGPT) that review results against the original paper at the end of each model's run
-- **Mechinterp guardrails** ([GOTCHAS.md](GOTCHAS.md)) — a preflight and post-result checklist to avoid fooling yourself
+- **Automated sanity checks and guardrails** that catch common issues (resolution traps, chance-level probes, confounded metrics) after every experiment
+- **Critique agents** (Claude + ChatGPT (optional)) that review results against the original paper after each experiment and provides a critique
 
 ### Completed replications
 
@@ -50,7 +49,7 @@ Every replication submitted to this repo is reviewed by three frontier LLM refer
 
 ---
 
-## Quick start
+## Quick start (for humans)
 
 ### 1. Clone and install
 
@@ -100,7 +99,7 @@ pytest tests/ -q --fast   # ~211 tests pass, ~20 skipped (integration), <5s
 
 ---
 
-## How to replicate a new paper
+## How to replicate a new paper (for agents)
 
 The full workflow is documented in [CLAUDE.md](CLAUDE.md) (the operational guide) and [DESIGN.md](DESIGN.md) (the architecture doc). Here's the summary:
 
@@ -223,10 +222,10 @@ Small-tier models run locally on a laptop for pipeline validation. Medium-tier i
 
 The harness runs [10 automated checks](src/core/sanity_checks.py) after each experiment and writes a `sanity.json` report. Examples:
 
-- **Resolution artifact detection**: catches when a metric like `diagonal_dominance = 0.800` is actually `12/15` because there are only 2 test samples per concept (this happened during the emotions replication and took hours to debug manually — now caught instantly)
+- **Resolution artifact detection**: catches when a metric like `diagonal_dominance = 0.800` is actually `12/15` because there are only 2 test samples per concept (this happened during the emotions replication and took a while to debug manually, but is now caught instantly)
 - **Chance-level probe warning**: flags when probe accuracy is within 0.05 of random guessing
 - **Negative-control contamination**: errors if a control condition shows an effect as large as the real condition
-- **Stimulus count mismatch**: warns when the config says 50 stimuli per concept but only 25 loaded
+- **Stimulus count mismatch**: e.g., warns when the config says 50 stimuli per concept but only 25 loaded
 
 ### Critique agents (after each model)
 
@@ -240,7 +239,7 @@ This automates the "paste results into ChatGPT and ask what's wrong" loop that r
 
 ### Mechinterp guardrails
 
-[GOTCHAS.md](GOTCHAS.md) is a comprehensive checklist of ways to fool yourself in mechinterp research — tokenization traps, metric saturation, cherry-picking, probe confounds, steering illusions, and more. The harness references it during experiment design and the critique agents use it to ground their reviews.
+[GOTCHAS.md](GOTCHAS.md) is a comprehensive checklist of ways to fool yourself in mechinterp research: tokenization traps, metric saturation, cherry-picking, probe confounds, steering illusions, and more. The harness references it during experiment design and the critique agents use it to ground their reviews.
 
 ---
 
@@ -248,8 +247,8 @@ This automates the "paste results into ChatGPT and ask what's wrong" loop that r
 
 We want this to become a hub for independent mechinterp replications. See [CONTRIBUTING.md](CONTRIBUTING.md) for details. The two main ways to contribute:
 
-1. **Replicate a paper** — add a config, run the pipeline, write up your findings, open a PR
-2. **Improve the harness** — new experiment types, new model families, better sanity checks, documentation, tests
+1. **Replicate a paper** — point an LLM at this repo and include a paper you want to replicate, then open a PR when it's done
+2. **Improve the harness** — please open a PR or create an issue to create or request new experiment types, new model families, better sanity checks, improved documentation, new tests, etc.
 
 Every replication that lands here — whether it confirms, partially confirms, or refutes the original findings — adds to the community's understanding of what's robust in mechanistic interpretability.
 
