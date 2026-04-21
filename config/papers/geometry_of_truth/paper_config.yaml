@@ -112,3 +112,50 @@ claims:
       cities-specific artifact?  Chance = 0.50 for binary. A
       diagonal dominance of 1.0 means both `true` and `false` held-out
       sentences are correctly majority-classified.
+
+  # ── Claim 2b: Generalization to neg_cities (same-topic, negated) ──────────
+  # Paper finding (Figure 3c): cities and neg_cities directions are
+  # "approximately orthogonal" in LLaMA-2-13B and become more aligned in 70B.
+  # This claim is informational — not gating. We report it for completeness
+  # because the negated-topic transfer is a known failure mode in the paper.
+  - id: "truth_probe_generalization_neg_cities"
+    description: >
+      Probes trained on cities generalize to the negated form of the same
+      statements ("The city of X is not in Y."). Paper reports near-
+      orthogonal directions in LLaMA-2-13B — we expect weak transfer.
+    experiment_type: "generalization_test"
+    paper_section: "Figure 3c, Appendix D"
+    depends_on: "truth_probe_cities"
+    params:
+      training_stimulus_set: "training_stimuli"
+      test_stimulus_set: "neg_cities"
+      evaluation_method: "confusion_matrix"
+    success_metric: "diagonal_dominance"
+    success_threshold: 0.50
+    notes: >
+      Expected to be the HARDEST transfer target because the probe direction
+      may have absorbed "affirmative city statement" rather than "true".
+      A failure here replicates a known paper finding about 13B.
+
+  # ── Claim 2c: Generalization to larger_than (numeric comparison) ──────────
+  # Paper finding: larger_than is structurally different from cities but
+  # still exhibits a linear truth direction; cross-training helps for 70B.
+  - id: "truth_probe_generalization_larger_than"
+    description: >
+      Probes trained on cities generalize to numeric comparison statements
+      ("x is larger than y."). Completely different semantic domain —
+      cleanest test for a "domain-general" truth direction.
+    experiment_type: "generalization_test"
+    paper_section: "Figure 5, Appendix D"
+    depends_on: "truth_probe_cities"
+    params:
+      training_stimulus_set: "training_stimuli"
+      test_stimulus_set: "larger_than"
+      evaluation_method: "confusion_matrix"
+    success_metric: "diagonal_dominance"
+    success_threshold: 0.50
+    notes: >
+      Totally different domain (numbers vs. geography). If the probe still
+      transfers, that's evidence for an abstract truth feature even at 1.5B
+      scale. Paper reports >95% transfer in 70B (trained on
+      larger_than+smaller_than, tested on sp_en_trans).
