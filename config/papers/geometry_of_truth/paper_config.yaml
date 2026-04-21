@@ -1,0 +1,49 @@
+paper:
+  id: "geometry_of_truth"
+  title: "The Geometry of Truth: Emergent Linear Structure in Large Language Model Representations of True/False Datasets"
+  authors: "Samuel Marks and Max Tegmark"
+  url: "https://arxiv.org/abs/2310.06824"
+  original_model: "LLaMA-13B"
+  model_variant: "base"
+
+techniques_required:
+  - probes
+  - contrastive
+  - steering
+
+claims:
+  - id: "truth_probe_classification"
+    description: "Linear probes trained to classify truth on one dataset achieve high accuracy."
+    experiment_type: "probe_classification"
+    paper_section: "4 Probing and generalization experiments"
+    params:
+      concept_set: ["true", "false"]
+      n_stimuli_per_concept: 50
+      probe_type: "logistic_regression"
+    success_metric: "probe_accuracy"
+    success_threshold: 0.70
+
+  - id: "truth_generalization"
+    description: "Linear probes trained to classify truth on one dataset generalize well to other datasets."
+    experiment_type: "generalization_test"
+    depends_on: "truth_probe_classification"
+    paper_section: "4 Probing and generalization experiments"
+    params:
+      test_stimulus_set: "test_stimuli"
+    success_metric: "diagonal_dominance"
+    success_threshold: 0.70
+
+  - id: "truth_causal_steering"
+    description: "Truth directions identified by probes causally mediate model outputs in highly localized model components."
+    experiment_type: "causal_steering"
+    depends_on: "truth_probe_classification"
+    paper_section: "5 Causal interventions"
+    params:
+      stimulus_set: "preference_activities"
+      steering_alpha: 1.0
+      behavior_metric: "preference_rating"
+      valence_labels:
+        true: 1.0
+        false: -1.0
+    success_metric: "preference_correlation"
+    success_threshold: -1.0
