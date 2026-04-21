@@ -1,0 +1,49 @@
+{
+  "claim_id": "truth_causal_steering",
+  "model_key": "qwen_1_5b",
+  "paper_id": "geometry_of_truth",
+  "metrics": {
+    "preference_correlation": 0.0,
+    "per_concept_preference": {},
+    "n_concepts_tested": 0,
+    "best_layer": 27
+  },
+  "success": true,
+  "metadata": {
+    "behavior_metric": "preference_rating",
+    "steering_alpha": 1.0,
+    "n_samples_per_condition": 5,
+    "evaluation_method": "keyword_classification",
+    "dependency_claim": "truth_probe_classification",
+    "run_manifest": {
+      "timestamp_utc": "2026-04-21T02:31:07.451478+00:00",
+      "git": {
+        "short_sha": "b4f0265",
+        "full_sha": "b4f0265891779dec6f8bfb278b0392159a055ab7",
+        "dirty": true
+      },
+      "python": {
+        "version": "3.11.14",
+        "executable": "/Users/adamgoldfine/Desktop/mechinterp-replication/.venv/bin/python"
+      },
+      "platform": {
+        "system": "Darwin",
+        "machine": "arm64",
+        "processor": "arm"
+      },
+      "torch": {
+        "torch_version": "2.11.0",
+        "cuda_available": false,
+        "mps_available": true
+      },
+      "libs": {
+        "transformer_lens": "3.0.0",
+        "transformers": "4.57.6",
+        "scikit-learn": "1.8.0",
+        "scipy": "1.17.1",
+        "numpy": "2.4.4",
+        "huggingface_hub": "0.36.2"
+      }
+    }
+  }
+}
