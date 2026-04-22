@@ -1,0 +1,73 @@
+# =============================================================================
+# TEMPLATE paper_config.yaml — copy this file into
+# config/papers/{paper_id}/replications/{replication_id}/ and fill in.
+# =============================================================================
+#
+# Quick instructions:
+#   1. Set the paper.* fields to match the paper you're replicating.
+#   2. Set replication.* to identify yourself and your run.
+#   3. Replace the example claims with 3-7 falsifiable claims from the
+#      paper, each with a quantitative success criterion. Cite the paper
+#      section each claim comes from in the `paper_section` field.
+#   4. Adjust success thresholds for the model scale you're testing at.
+#      If the paper claims ">90% on a 13B model," picking 0.70 on a 1.5B
+#      model is reasonable — just justify it in your writeup.
+# =============================================================================
+
+paper:
+  id: "PAPER_ID_HERE"           # e.g. "emotions", "ioi", "geometry_of_truth"
+  title: "FULL PAPER TITLE"
+  authors: "Author et al."
+  url: "https://arxiv.org/abs/XXXX.XXXXX"
+  original_model: "What model the paper studied"
+  model_variant: "instruct"     # or "base"
+  paper_text_path: "../../paper.md"  # relative to this dir; shared oracle
+
+# --- REPLICATION identity ----------------------------------------------------
+# This section identifies ONE specific replication attempt of the above paper.
+# The id must match your directory name. See CONTRIBUTING.md for the naming
+# convention: {paper_id}-{github_handle}-{model_scope}.
+replication:
+  id: "PAPER_ID-YOUR_HANDLE-MODEL_SCOPE"
+  replicator: "Your Name"
+  github_handle: "your_github_handle"
+  date: "2026-MM-DD"
+  models_tested:
+    - "qwen_1_5b"
+  status: "v0.1"
+  summary: >
+    One-line hook for the README table. What did you find? Prefer
+    a concrete quantitative statement over vague language.
+  writeup_path: "writeup/PAPER_ID/REPLICATION_ID/draft.md"
+
+# --- Mechinterp techniques your claims depend on -----------------------------
+techniques_required:
+  - probes
+  # Options: probes, contrastive, steering, patching, attention, sae,
+  # logit_lens, circuit_discovery
+
+# --- Claims ------------------------------------------------------------------
+# Each claim is one falsifiable hypothesis with a measurable success
+# threshold. The pipeline runs one experiment per claim, in the dependency
+# order implied by `depends_on`.
+claims:
+  - id: "claim_1_example"
+    description: >
+      Human-readable statement of the claim. A linear probe trained on
+      residual-stream activations classifies X above chance.
+    experiment_type: "probe_classification"
+    paper_section: "Section 3.1, Figure 2"
+    params:
+      concept_set: ["concept_a", "concept_b"]
+      n_stimuli_per_concept: 50
+      probe_type: "logistic_regression"
+      aggregation: "last_token"
+      layer_selection: "scan_all_or_subsample"
+      cross_validation_folds: 5
+      seed: 42
+    success_metric: "probe_accuracy"
+    success_threshold: 0.70
+    notes: >
+      Paper reported 0.95 on a 13B model. We relax to 0.70 because we're
+      testing at ~10x smaller scale. Justify any deviation from the
+      paper's methodology here.
