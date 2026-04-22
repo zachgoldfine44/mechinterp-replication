@@ -1,33 +1,40 @@
-"""Emit an AI-review prompt (or artifact bundle) for a replication.
+"""Emit an AI-review prompt (or artifact bundle) for a replication PR.
 
-Two modes, both keyed off the replication_id:
+Two modes:
 
-  1. **Prompt mode** (default) — prints a ready-to-paste prompt containing
-     the standardized review protocol from CONTRIBUTING.md#ai-review-policy
-     plus the paper URL and the GitHub blob/tree URLs for this specific
-     replication's writeup, config, results, and (if present) figures.
-     Good for any AI reviewer that can fetch URLs.
+  1. **Prompt mode** (default) — prints the standardized review prompt
+     with just two links: the paper URL and the PR URL. Ready to paste
+     into claude.ai, gemini.google.com, chatgpt.com, etc. The PR page
+     itself is the canonical view of everything the replicator
+     submitted, which is what the AI reviewer should read.
 
   2. **Bundle mode** (``--bundle``) — concatenates every text artifact
      (paper.md, writeup/draft.md, paper_config.yaml, stimuli_config.yaml,
      metadata.yaml, each claim's result.json + sanity.json, and any
      harness critiques) into a single markdown document with section
      headers. Binaries (*.pt) and per-layer probe dumps are skipped.
-     Good for pasting into a web chat that can't fetch URLs, or for
-     uploading as a single file.
+     Fallback for reviewers that can't fetch URLs, or for upload as a
+     single file.
 
 Usage:
-    python scripts/review_prompt.py --paper emotions
+    # Paste-ready prompt for a PR (the maintainer's common case)
+    python scripts/review_prompt.py --paper geometry_of_truth --pr 2
+
+    # Same, with an explicit replication_id in the header
+    python scripts/review_prompt.py \\
+        --paper geometry_of_truth --pr 2 \\
+        --replication geometry_of_truth-tulaneadam-qwen_1_5b
+
+    # Offline bundle (requires --replication; no auto-select)
     python scripts/review_prompt.py \\
         --paper geometry_of_truth \\
-        --replication geometry_of_truth-tulaneadam-qwen_1_5b
-    python scripts/review_prompt.py \\
-        --paper geometry_of_truth --bundle -o /tmp/review.md
-    python scripts/review_prompt.py \\
-        --paper geometry_of_truth --ref refactor/per-replication-namespacing
+        --replication geometry_of_truth-tulaneadam-qwen_1_5b \\
+        --bundle -o /tmp/review.md
 
-When --replication is omitted and the paper has exactly one replication,
-it's auto-selected (same rule as the pipeline).
+Replication IDs are never auto-selected — when bundle mode needs one
+and you haven't provided it, the script lists the available options
+and exits. The maintainer is expected to know which replication they're
+reviewing; guessing would risk bundling the wrong one.
 """
 
 from __future__ import annotations
@@ -77,20 +84,53 @@ def _list_replications(paper_id: str) -> list[str]:
     return sorted(p.name for p in reps_dir.iterdir() if p.is_dir())
 
 
-def _resolve_replication(paper_id: str, replication_id: str | None) -> str:
+def _require_replication(paper_id: str, replication_id: str | None) -> str:
+    """Return the replication_id, or exit with a helpful error.
+
+    No auto-selection: even if a paper has exactly one replication, the
+    maintainer must pass --replication explicitly. Reviews are high-stakes
+    enough (they get pinned to the submitter's PR) that silent defaulting
+    could quietly target the wrong replication.
+    """
     if replication_id:
         return replication_id
     reps = _list_replications(paper_id)
-    if len(reps) == 1:
-        return reps[0]
     if not reps:
         raise SystemExit(
             f"Paper {paper_id!r} has no replications under "
             f"config/papers/{paper_id}/replications/."
         )
+    opts = ", ".join(reps)
     raise SystemExit(
-        f"Paper {paper_id!r} has {len(reps)} replications; pass --replication "
-        f"to pick one.\nOptions: {reps}"
+        f"--replication is required for this mode. "
+        f"Paper {paper_id!r} has {len(reps)} replication(s): {opts}"
+    )
+
+
+def _paper_url_only(paper_id: str) -> str:
+    """Read the paper URL from any replication's paper_config.yaml, or
+    the paper-level config.yaml if present.
+
+    All replications of a paper share the same paper URL, so any
+    paper_config.yaml is authoritative.
+    """
+    candidates: list[Path] = []
+    reps_dir = REPO_ROOT / "config" / "papers" / paper_id / "replications"
+    if reps_dir.is_dir():
+        for rep in sorted(reps_dir.iterdir()):
+            if rep.is_dir():
+                candidates.append(rep / "paper_config.yaml")
+    candidates.append(
+        REPO_ROOT / "config" / "papers" / paper_id / "paper_config.yaml"
+    )
+    for cfg in candidates:
+        if cfg.exists():
+            url = _load_yaml(cfg).get("paper", {}).get("url", "")
+            if url:
+                return url
+    raise SystemExit(
+        f"Could not find a paper URL for {paper_id!r}. Check that at least "
+        f"one paper_config.yaml exists with a paper.url field."
     )
 
 
@@ -126,86 +166,58 @@ def _rel(p: Path) -> str:
 # Prompt mode
 # ---------------------------------------------------------------------------
 
-def build_prompt(paper_id: str, replication_id: str, ref: str) -> str:
-    paths = _paths(paper_id, replication_id)
-    if not paths["paper_config"].exists():
-        raise SystemExit(f"No paper_config.yaml at {paths['paper_config']}")
-    cfg = _load_yaml(paths["paper_config"])
-    meta = (
-        _load_yaml(paths["metadata"]) if paths["metadata"].exists() else {}
-    )
-    paper = cfg.get("paper", {})
-    paper_url = paper.get("url", "")
-    paper_title = paper.get("title", paper_id)
+def build_prompt(
+    paper_id: str,
+    pr_number: int,
+    replication_id: str | None,
+) -> str:
+    """Emit the standardized review prompt for a PR.
 
-    # Assemble GitHub URLs for everything that exists.
-    links: list[str] = []
-    if paths["writeup"].exists():
-        links.append(f"- Writeup: {_gh_blob(_rel(paths['writeup']), ref)}")
-    links.append(
-        f"- Replication config: {_gh_blob(_rel(paths['paper_config']), ref)}"
-    )
-    if paths["metadata"].exists():
-        links.append(
-            f"- Metadata: {_gh_blob(_rel(paths['metadata']), ref)}"
-        )
-    if paths["stimuli_config"].exists():
-        links.append(
-            f"- Stimuli config: {_gh_blob(_rel(paths['stimuli_config']), ref)}"
-        )
-    if paths["results_dir"].is_dir():
-        links.append(
-            f"- Results (all claims): {_gh_tree(_rel(paths['results_dir']), ref)}"
-        )
-    if paths["figures_dir"].is_dir():
-        links.append(
-            f"- Figures: {_gh_tree(_rel(paths['figures_dir']), ref)}"
-        )
-    if paths["paper_md"].exists():
-        links.append(
-            f"- Full paper text (oracle): {_gh_blob(_rel(paths['paper_md']), ref)}"
-        )
+    Output is plain text, matching the exact format in CONTRIBUTING.md#ai-review-policy —
+    one paragraph + two labeled URL lines. Copy-paste into claude.ai,
+    gemini.google.com, chatgpt.com. Prompt 2 (the follow-up referee
+    request) is appended below with a short header so the maintainer
+    can send it after the model's first response.
 
-    replicator = meta.get("replicator") or cfg.get("replication", {}).get("replicator", "Unknown")
-    handle = meta.get("github_handle") or cfg.get("replication", {}).get("github_handle", "")
-    models = meta.get("models_tested") or cfg.get("replication", {}).get("models_tested", [])
-    status = meta.get("status") or cfg.get("replication", {}).get("status", "")
+    replication_id is optional here: the prompt body only contains the
+    paper URL + PR URL (the PR is the canonical view of the submission).
+    When given, it's used for a discreet "Review request: {id}" header
+    so the maintainer can tell instances apart if running several.
+    """
+    paper_url = _paper_url_only(paper_id)
+    pr_url = f"{REPO_URL}/pull/{pr_number}"
 
-    handle_str = f"@{handle}" if handle else ""
-    models_str = ", ".join(models) if models else "(unspecified)"
-
-    # Two-prompt protocol, matching CONTRIBUTING.md#ai-review-policy.
     out = StringIO()
-    out.write(f"# Review request: `{replication_id}`\n\n")
-    out.write(
-        f"**Paper:** {paper_title}"
-        + (f" — <{paper_url}>" if paper_url else "")
-        + "\n"
-    )
-    out.write(
-        f"**Replicator:** {replicator} {handle_str}\n"
-        f"**Models tested:** {models_str}\n"
-        f"**Status:** {status or '—'}\n\n"
-    )
+    if replication_id:
+        out.write(f"# Review request: `{replication_id}` (PR #{pr_number})\n\n")
+    else:
+        out.write(f"# Review request: {paper_id} (PR #{pr_number})\n\n")
+    out.write("Paste the following into claude.ai, gemini.google.com, "
+              "chatgpt.com. Prompt 2 is a follow-up — send it after the "
+              "model responds to Prompt 1.\n\n")
     out.write("---\n\n")
-    out.write("## Prompt 1 — 1-to-10 scoring\n\n")
-    out.write("> " + PROMPT_1.replace("\n", "\n> ") + "\n")
-    if paper_url:
-        out.write(f"> - Paper: {paper_url}\n")
-    out.write("> - Replication artifacts:\n")
-    for ln in links:
-        # indent under the "Replication artifacts:" bullet
-        out.write("> " + ln.replace("- ", "  - ", 1) + "\n")
-    out.write("\n")
-    out.write("## Prompt 2 — harsher referee report (send after Prompt 1)\n\n")
-    out.write("> " + PROMPT_2 + "\n\n")
+    out.write("## Prompt 1\n\n")
+    out.write(PROMPT_1 + "\n\n")
+    out.write(f"Paper: {paper_url}\n")
+    out.write(f"Replication: {pr_url}\n\n")
     out.write("---\n\n")
-    out.write(
-        f"Save responses under "
-        f"`writeup/{paper_id}/{replication_id}/reviews/{{reviewer}}.md` "
-        f"and regenerate the README table with "
-        f"`python scripts/generate_replications_table.py`.\n"
-    )
+    out.write("## Prompt 2 (send after Prompt 1)\n\n")
+    out.write(PROMPT_2 + "\n\n")
+    out.write("---\n\n")
+    if replication_id:
+        out.write(
+            "Save responses under "
+            f"`writeup/{paper_id}/{replication_id}/reviews/{{reviewer}}.md` "
+            "and regenerate the README table with "
+            "`python scripts/generate_replications_table.py`.\n"
+        )
+    else:
+        out.write(
+            "Save responses under "
+            f"`writeup/{paper_id}/{{replication_id}}/reviews/{{reviewer}}.md` "
+            "and regenerate the README table with "
+            "`python scripts/generate_replications_table.py`.\n"
+        )
     return out.getvalue()
 
 
@@ -393,21 +405,30 @@ def main() -> int:
         help="Paper ID (folder under config/papers/).",
     )
     parser.add_argument(
+        "--pr", type=int, default=None,
+        help=(
+            "PR number. Required for prompt mode — the PR URL goes into "
+            "the prompt as 'Replication: https://github.com/.../pull/N', "
+            "which is what the AI reviewer reads to see the full "
+            "submission (files changed, diff, discussion). Not used in "
+            "bundle mode."
+        ),
+    )
+    parser.add_argument(
         "--replication", default=None,
         help=(
-            "Replication ID (folder under config/papers/{paper}/replications/)."
-            " Auto-detected when the paper has exactly one."
+            "Replication ID (folder under "
+            "config/papers/{paper}/replications/). Optional in prompt "
+            "mode (used only for the header label). Required in "
+            "--bundle mode. Never auto-selected, even when a paper has "
+            "only one replication — the maintainer should know which "
+            "one they're reviewing."
         ),
     )
     parser.add_argument(
         "--bundle", action="store_true",
         help="Emit a concatenated markdown bundle of all text artifacts "
-             "instead of the clickable prompt.",
-    )
-    parser.add_argument(
-        "--ref", default="main",
-        help="Git ref for GitHub URLs in prompt mode (branch, tag, or SHA). "
-             "Default: main.",
+             "instead of the paste-ready prompt. Requires --replication.",
     )
     parser.add_argument(
         "-o", "--output", default=None,
@@ -415,12 +436,17 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    replication_id = _resolve_replication(args.paper, args.replication)
-
     if args.bundle:
+        replication_id = _require_replication(args.paper, args.replication)
         text = build_bundle(args.paper, replication_id)
     else:
-        text = build_prompt(args.paper, replication_id, args.ref)
+        if args.pr is None:
+            raise SystemExit(
+                "--pr is required for prompt mode "
+                "(e.g. --pr 2). Use --bundle for the offline "
+                "concatenated-markdown mode, which doesn't need --pr."
+            )
+        text = build_prompt(args.paper, args.pr, args.replication)
 
     if args.output:
         out_path = Path(args.output)
