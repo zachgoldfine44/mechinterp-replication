@@ -39,9 +39,8 @@ commit SHA so entries are greppable against `git log`.
   `README.md` (regenerated), `CONTRIBUTING.md`, `src/core/pipeline.py`,
   `src/core/config_loader.py`, and the surviving
   `geometry_of_truth-zachgoldfine44-qwen_1_5b` writeup + paper_config.
-- **Why:** contributor (the replicator's sibling) requested withdrawal.
-  The attempt used a weaker AI assistant and the author did not consider
-  it review-worthy.
+- **Why:** The attempt used a weaker AI assistant and the maintainer did not consider
+  it review-worthy. It was primarily a test run for the harness.
 - **What:** hard delete of the three namespaces, plus pruning of the
   two real cross-references in `zachgoldfine44`'s artifacts, plus
   swapping the now-dead handle for `zachgoldfine44` in docstring/CLI
