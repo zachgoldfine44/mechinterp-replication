@@ -1,0 +1,64 @@
+{
+  "claim_id": "truth_probe_generalization_sp_en_trans",
+  "model_key": "qwen_1_5b",
+  "paper_id": "geometry_of_truth",
+  "metrics": {
+    "diagonal_dominance": 1.0,
+    "test_accuracy": 0.78,
+    "per_concept_accuracy": {
+      "false": 0.56,
+      "true": 1.0
+    },
+    "confusion_matrix": [
+      [
+        28,
+        22
+      ],
+      [
+        0,
+        50
+      ]
+    ],
+    "generalization_gap": 0.20500000000000007,
+    "training_accuracy": 0.9850000000000001,
+    "best_layer": 18,
+    "n_test_stimuli": 100
+  },
+  "success": true,
+  "metadata": {
+    "training_claim_id": "truth_probe_cities",
+    "test_stimulus_set": "sp_en_trans",
+    "n_probe_folds": 5,
+    "run_manifest": {
+      "timestamp_utc": "2026-04-22T02:10:12.792423+00:00",
+      "git": {
+        "short_sha": "b7f216e",
+        "full_sha": "b7f216ec7e6c9e60d1169176f6a3f3345ed17e24",
+        "dirty": true
+      },
+      "python": {
+        "version": "3.9.6",
+        "executable": "/Users/zacharygoldfine/Documents/Codex/2026-04-21-please-replicate-the-geometry-of-truth-2/.venv/bin/python"
+      },
+      "platform": {
+        "system": "Darwin",
+        "machine": "arm64",
+        "processor": "arm"
+      },
+      "torch": {
+        "torch_version": "2.8.0",
+        "cuda_available": false,
+        "mps_available": true
+      },
+      "libs": {
+        "transformer_lens": "2.18.0",
+        "transformers": "4.57.6",
+        "scikit-learn": "1.6.1",
+        "scipy": "1.13.1",
+        "numpy": "1.26.4",
+        "huggingface_hub": "0.36.2"
+      }
+    }
+  },
+  "replication_id": "geometry_of_truth-zachgoldfine44-qwen_1_5b_local"
+}
