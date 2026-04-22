@@ -45,7 +45,7 @@ from src.core.config_loader import (
     load_paper_config,
     load_stimuli_config,
 )
-from src.core.experiment import Experiment
+from src.core.experiment import Experiment, results_root_for
 from src.models.loader import load_model, unload_model
 from src.models.registry import ModelInfo, ModelRegistry
 from src.utils.activation_cache import ActivationCache
@@ -321,10 +321,18 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
     """
     data_root = get_data_root()
 
-    # Load configs
-    paper_config = load_paper_config(args.paper)
-    stimuli_config = load_stimuli_config(args.paper)
+    # Load configs. --replication, if given, wins over any replication.id
+    # embedded in the yaml; load_paper_config reconciles these.
+    replication_id = getattr(args, "replication", None)
+    paper_config = load_paper_config(args.paper, replication_id=replication_id)
+    resolved_replication_id = paper_config.replication_id
+    stimuli_config = load_stimuli_config(
+        args.paper, replication_id=resolved_replication_id,
+    )
     registry = ModelRegistry()
+
+    if resolved_replication_id:
+        logger.info("Replication: %s", resolved_replication_id)
 
     # Resolve models
     models = _resolve_models(args, registry)
@@ -367,6 +375,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
                 success_threshold=c.success_threshold,
                 depends_on=c.depends_on,
                 notes=c.notes,
+                paper_section=c.paper_section,
+                replication_id=c.replication_id,
             ))
         sorted_claims = fast_claims
 
@@ -432,6 +442,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
                             metrics={},
                             success=False,
                             metadata={"skipped_reason": f"dependency '{claim.depends_on}' was not run"},
+                            replication_id=resolved_replication_id,
                         )
                         model_results[claim.claim_id] = skipped_result
                         claim_results_cache[claim.claim_id] = skipped_result
@@ -448,6 +459,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
                             metrics={},
                             success=False,
                             metadata={"skipped_reason": f"dependency '{claim.depends_on}' failed"},
+                            replication_id=resolved_replication_id,
                         )
                         model_results[claim.claim_id] = skipped_result
                         claim_results_cache[claim.claim_id] = skipped_result
@@ -487,6 +499,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
                         metrics={},
                         success=False,
                         metadata={"error": str(exc)},
+                        replication_id=resolved_replication_id,
                     )
                 elapsed = time.time() - t0
 
@@ -547,7 +560,10 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
                     critique_dir = last_experiment_results_dir.parent / "critiques"
                 else:
                     critique_dir = (
-                        data_root / "results" / args.paper / model_key / "critiques"
+                        results_root_for(
+                            data_root, args.paper, resolved_replication_id,
+                        )
+                        / model_key / "critiques"
                     )
                 critique_dir.mkdir(parents=True, exist_ok=True)
 
@@ -601,8 +617,11 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
     # Print summary
     _print_summary(paper_config, all_results)
 
-    # Save summary JSON
-    summary_path = data_root / "results" / args.paper / "pipeline_summary.json"
+    # Save summary JSON (scoped to the replication, if any)
+    summary_path = (
+        results_root_for(data_root, args.paper, resolved_replication_id)
+        / "pipeline_summary.json"
+    )
     _save_summary(summary_path, paper_config, all_results)
 
     return all_results
@@ -747,6 +766,21 @@ Examples:
         "--paper",
         required=True,
         help="Paper ID to replicate (must match a folder under config/papers/).",
+    )
+
+    parser.add_argument(
+        "--replication",
+        default=None,
+        help=(
+            "Replication attempt identifier, e.g. "
+            "'geometry_of_truth-tulaneadam-qwen_1_5b'. When given, the "
+            "pipeline loads config from "
+            "config/papers/{paper}/replications/{replication}/ and writes "
+            "results/writeups/figures under the same namespace, so multiple "
+            "independent replications of the same paper can coexist. If "
+            "omitted, the pipeline falls back to the yaml's replication.id "
+            "field (if present) or the legacy un-namespaced layout."
+        ),
     )
 
     # Model selection (mutually exclusive)

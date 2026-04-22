@@ -152,24 +152,35 @@ def _classify_universality(
     return "scale_dependent"
 
 
-def compare_across_models(paper_id: str, data_root: Path) -> CrossModelReport:
+def compare_across_models(
+    paper_id: str,
+    data_root: Path,
+    replication_id: str | None = None,
+) -> CrossModelReport:
     """Build a cross-model comparison report for a paper.
 
-    Scans results/{paper_id}/{model_key}/ for all available model results,
-    collects metric values for each claim, and classifies replication patterns.
+    Scans ``results/{paper_id}/{model_key}/`` (or
+    ``results/{paper_id}/{replication_id}/{model_key}/`` when a
+    replication is given) for all available model results, collects
+    metric values for each claim, and classifies replication patterns.
 
     Args:
         paper_id: Paper identifier (e.g., 'emotions').
         data_root: Root data directory (from get_data_root()).
+        replication_id: Optional replication identifier. When set, only
+            results under that replication's namespace are included.
 
     Returns:
         CrossModelReport with all available results and summary.
     """
-    paper_config = load_paper_config(paper_id)
+    paper_config = load_paper_config(paper_id, replication_id=replication_id)
     model_config = load_model_config()
     models = model_config.get("models", {})
 
-    results_root = data_root / "results" / paper_id
+    from src.core.experiment import results_root_for
+    results_root = results_root_for(
+        data_root, paper_id, paper_config.replication_id,
+    )
 
     # Build model metadata lookup
     model_meta: dict[str, dict[str, Any]] = {}
@@ -368,16 +379,27 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description="Cross-model comparison")
     parser.add_argument("--paper", required=True, help="Paper ID")
+    parser.add_argument(
+        "--replication", default=None,
+        help="Replication identifier (e.g. emotions-zachgoldfine44-6models). "
+             "When set, only that replication's results are compared.",
+    )
     parser.add_argument("--output", default=None, help="Output directory override")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
     data_root = get_data_root()
-    report = compare_across_models(args.paper, data_root)
+    report = compare_across_models(
+        args.paper, data_root, replication_id=args.replication,
+    )
     print(print_comparison_table(report))
 
-    out = Path(args.output) if args.output else data_root / "results" / args.paper
+    from src.core.experiment import results_root_for
+    out = (
+        Path(args.output) if args.output
+        else results_root_for(data_root, args.paper, args.replication)
+    )
     save_comparison(report, out)
 
 

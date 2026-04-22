@@ -33,6 +33,44 @@ from src.core.claim import ClaimConfig, ExperimentResult
 logger = logging.getLogger(__name__)
 
 
+def _results_dir_for(
+    data_root: Path,
+    paper_id: str,
+    replication_id: str | None,
+    model_key: str,
+    claim_id: str,
+) -> Path:
+    """Build the per-claim results directory.
+
+    When ``replication_id`` is set, paths are namespaced as:
+        {data_root}/results/{paper_id}/{replication_id}/{model_key}/{claim_id}
+
+    Otherwise (legacy) paths stay flat:
+        {data_root}/results/{paper_id}/{model_key}/{claim_id}
+
+    Centralizing this here means the whole harness gets namespaced by
+    editing one function — callers in pipeline.py, critique.py, and
+    analysis modules all use helpers that route through here.
+    """
+    base = data_root / "results" / paper_id
+    if replication_id:
+        base = base / replication_id
+    return base / model_key / claim_id
+
+
+def results_root_for(
+    data_root: Path, paper_id: str, replication_id: str | None,
+) -> Path:
+    """Return the root directory for all results of a (paper, replication).
+
+    Used by the pipeline summary, critique dirs, and cross-model analysis.
+    """
+    base = data_root / "results" / paper_id
+    if replication_id:
+        base = base / replication_id
+    return base
+
+
 class Experiment(ABC):
     """Base class for all replication experiments.
 
@@ -47,8 +85,12 @@ class Experiment(ABC):
         self.config = config
         self.model_key = model_key
         self.data_root = data_root
-        self.results_dir = (
-            data_root / "results" / config.paper_id / model_key / config.claim_id
+        self.results_dir = _results_dir_for(
+            data_root=data_root,
+            paper_id=config.paper_id,
+            replication_id=config.replication_id,
+            model_key=model_key,
+            claim_id=config.claim_id,
         )
 
     @abstractmethod

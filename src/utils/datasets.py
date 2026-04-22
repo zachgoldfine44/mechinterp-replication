@@ -35,41 +35,65 @@ logger = logging.getLogger(__name__)
 # Stimulus path resolution
 # ---------------------------------------------------------------------------
 
-def resolve_stimulus_dir(paper_id: str, data_root: Path) -> Path:
+def resolve_stimulus_dir(
+    paper_id: str,
+    data_root: Path,
+    replication_id: str | None = None,
+) -> Path:
     """Return the directory where a paper's stimuli live.
 
     Resolution order (first that exists wins):
 
-      1. ``{data_root}/data/{paper_id}/``  — the user's local override.
-         Allows users to point at a private/regenerated stimulus set
-         without modifying the repo.
-      2. ``{project_root}/config/papers/{paper_id}/stimuli/`` — the
-         in-repo published stimuli, tracked in git, that ship with the
-         harness for reproducibility (added in v3.3 in response to
-         critique #1-I about public reproducibility being weaker than
-         claimed).
-      3. Fall back to (1) even if it doesn't exist, so callers get a
-         clear FileNotFoundError pointing at the expected path.
+      1. ``{data_root}/data/{paper_id}/{replication_id}/`` — the user's
+         local override scoped to a specific replication attempt. Only
+         checked when ``replication_id`` is provided.
+      2. ``{data_root}/data/{paper_id}/`` — the user's paper-level
+         local override (legacy location).
+      3. ``{project_root}/config/papers/{paper_id}/replications/{replication_id}/stimuli/``
+         — in-repo per-replication stimuli. Only checked when
+         ``replication_id`` is provided.
+      4. ``{project_root}/config/papers/{paper_id}/stimuli/`` — the
+         paper-level in-repo stimuli (legacy location, still supported
+         for papers that haven't migrated to the per-replication layout).
+      5. Fall back to (1) or (2) even if it doesn't exist, so callers
+         get a clear FileNotFoundError pointing at a writable path.
 
     Args:
         paper_id: e.g. "emotions"
         data_root: From ``get_data_root()``.
+        replication_id: Optional replication identifier. When provided,
+            per-replication locations are preferred.
 
     Returns:
         A Path. May not exist; callers should still check.
     """
-    user_dir = data_root / "data" / paper_id
-    if user_dir.exists() and any(user_dir.iterdir()):
-        return user_dir
+    candidates: list[Path] = []
+    if replication_id:
+        candidates.append(data_root / "data" / paper_id / replication_id)
+    candidates.append(data_root / "data" / paper_id)
+
+    for c in candidates:
+        if c.exists() and any(c.iterdir()):
+            return c
 
     project_root = get_project_root()
-    in_repo_dir = project_root / "config" / "papers" / paper_id / "stimuli"
-    if in_repo_dir.exists() and any(in_repo_dir.iterdir()):
-        return in_repo_dir
+    in_repo_candidates: list[Path] = []
+    if replication_id:
+        in_repo_candidates.append(
+            project_root / "config" / "papers" / paper_id
+            / "replications" / replication_id / "stimuli"
+        )
+    in_repo_candidates.append(
+        project_root / "config" / "papers" / paper_id / "stimuli"
+    )
 
-    # Neither exists — return the user_dir path so the error message
-    # points at the writable location.
-    return user_dir
+    for c in in_repo_candidates:
+        if c.exists() and any(c.iterdir()):
+            return c
+
+    # Nothing exists — return the first writable candidate so the caller's
+    # error message points at a useful path.
+    return candidates[0]
 
 
 # ---------------------------------------------------------------------------

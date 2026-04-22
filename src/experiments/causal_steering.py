@@ -668,7 +668,10 @@ class CausalSteeringExperiment(Experiment):
         Returns list of scenario dicts.
         """
         from src.utils.datasets import resolve_stimulus_dir
-        data_dir = resolve_stimulus_dir(self.config.paper_id, self.data_root)
+        data_dir = resolve_stimulus_dir(
+            self.config.paper_id, self.data_root,
+            replication_id=self.config.replication_id,
+        )
         all_scenarios: list[dict[str, Any]] = []
 
         # Try direct file
