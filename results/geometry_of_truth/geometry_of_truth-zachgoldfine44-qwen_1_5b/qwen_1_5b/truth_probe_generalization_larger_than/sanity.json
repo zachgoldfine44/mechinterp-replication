@@ -1,0 +1,107 @@
+{
+  "claim_id": "truth_probe_generalization_larger_than",
+  "model_key": "qwen_1_5b",
+  "paper_id": "geometry_of_truth",
+  "n_warnings": 1,
+  "n_errors": 0,
+  "summary": "[WARN] chance_level_accuracy: test_accuracy=0.500 is within 0.05 of chance (0.500) for 2 concepts; probe may be at chance",
+  "checks": [
+    {
+      "name": "confusion_matrix_resolution_artifact",
+      "severity": "info",
+      "passed": true,
+      "message": "ok",
+      "details": {
+        "n_concepts": 2,
+        "total_samples": 100,
+        "per_class_samples": 50.0,
+        "metric_value": 0.5,
+        "matched_fraction": "1/2"
+      }
+    },
+    {
+      "name": "chance_level_accuracy",
+      "severity": "warn",
+      "passed": false,
+      "message": "test_accuracy=0.500 is within 0.05 of chance (0.500) for 2 concepts; probe may be at chance",
+      "details": {
+        "accuracy_key": "test_accuracy",
+        "accuracy_value": 0.5,
+        "n_concepts": 2,
+        "chance_level": 0.5
+      }
+    },
+    {
+      "name": "round_number_suspicion",
+      "severity": "info",
+      "passed": true,
+      "message": "metric is exactly 0.5",
+      "details": {
+        "metric_value": 0.5,
+        "matched": "0.5"
+      }
+    },
+    {
+      "name": "per_concept_uniformity",
+      "severity": "info",
+      "passed": true,
+      "message": "per-concept std=0.5000",
+      "details": {
+        "mean": 0.5,
+        "std": 0.5,
+        "n": 2
+      }
+    },
+    {
+      "name": "metric_in_range",
+      "severity": "info",
+      "passed": true,
+      "message": "diagonal_dominance=0.5 in range",
+      "details": {
+        "metric_value": 0.5
+      }
+    },
+    {
+      "name": "success_threshold_consistency",
+      "severity": "info",
+      "passed": true,
+      "message": "threshold consistent with success flag",
+      "details": {
+        "metric_value": 0.5,
+        "threshold": 0.5,
+        "success_flag": true
+      }
+    },
+    {
+      "name": "n_stimuli_matches_config",
+      "severity": "info",
+      "passed": true,
+      "message": "missing n_stimuli or params",
+      "details": {}
+    },
+    {
+      "name": "negative_control_contamination",
+      "severity": "info",
+      "passed": true,
+      "message": "no contamination metric",
+      "details": {}
+    },
+    {
+      "name": "finite_metrics",
+      "severity": "info",
+      "passed": true,
+      "message": "all metrics finite",
+      "details": {}
+    },
+    {
+      "name": "layer_in_valid_range",
+      "severity": "info",
+      "passed": true,
+      "message": "best_layer=12",
+      "details": {
+        "best_layer": 12,
+        "n_layers": null
+      }
+    }
+  ]
+}

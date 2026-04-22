@@ -1,0 +1,602 @@
+[
+  {
+    "id": "cities_false_00851",
+    "concept": "false",
+    "text": "The city of Mumbai is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00219",
+    "concept": "false",
+    "text": "The city of Xuzhou is in Mexico.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01299",
+    "concept": "false",
+    "text": "The city of Shangluo is in Honduras.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00701",
+    "concept": "false",
+    "text": "The city of Comilla is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00267",
+    "concept": "false",
+    "text": "The city of Santo Domingo Este is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00087",
+    "concept": "false",
+    "text": "The city of Sokoto is in South Korea.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01187",
+    "concept": "false",
+    "text": "The city of Fes is in Mali.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01149",
+    "concept": "false",
+    "text": "The city of Bokaro is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01391",
+    "concept": "false",
+    "text": "The city of Jakarta is in Colombia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00127",
+    "concept": "false",
+    "text": "The city of Suwon is in Russia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01339",
+    "concept": "false",
+    "text": "The city of Amritsar is in Moldova.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00595",
+    "concept": "false",
+    "text": "The city of Kashgar is in Turkey.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00611",
+    "concept": "false",
+    "text": "The city of Zagreb is in Japan.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00751",
+    "concept": "false",
+    "text": "The city of Onitsha is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00847",
+    "concept": "false",
+    "text": "The city of Maracaibo is in Russia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00693",
+    "concept": "false",
+    "text": "The city of Minsk is in South Korea.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01461",
+    "concept": "false",
+    "text": "The city of Reynosa is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00357",
+    "concept": "false",
+    "text": "The city of Nanchang is in Malaysia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01453",
+    "concept": "false",
+    "text": "The city of Maiduguri is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00823",
+    "concept": "false",
+    "text": "The city of Yichang is in Japan.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00911",
+    "concept": "false",
+    "text": "The city of Zarqa is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01435",
+    "concept": "false",
+    "text": "The city of Tijuana is in the United Arab Emirates.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01259",
+    "concept": "false",
+    "text": "The city of Winnipeg is in Mexico.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00815",
+    "concept": "false",
+    "text": "The city of Aracaju is in Russia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01041",
+    "concept": "false",
+    "text": "The city of Asansol is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00795",
+    "concept": "false",
+    "text": "The city of Yinchuan is in Bangladesh.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01113",
+    "concept": "false",
+    "text": "The city of Yibin is in Brazil.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00459",
+    "concept": "false",
+    "text": "The city of Xiangtan is in Brazil.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00415",
+    "concept": "false",
+    "text": "The city of Hamamatsu is in Russia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01159",
+    "concept": "false",
+    "text": "The city of Nairobi is in Mexico.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01283",
+    "concept": "false",
+    "text": "The city of Dushanbe is in Nigeria.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01135",
+    "concept": "false",
+    "text": "The city of Davao is in Brazil.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01471",
+    "concept": "false",
+    "text": "The city of Weinan is in Colombia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01161",
+    "concept": "false",
+    "text": "The city of Taguig is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01231",
+    "concept": "false",
+    "text": "The city of New York City is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01353",
+    "concept": "false",
+    "text": "The city of Zhaoqing is in Brazil.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00797",
+    "concept": "false",
+    "text": "The city of Zhangjiagang is in Brazil.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00909",
+    "concept": "false",
+    "text": "The city of Nuernberg is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01021",
+    "concept": "false",
+    "text": "The city of Wuwei is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01049",
+    "concept": "false",
+    "text": "The city of Huaibei is in Brazil.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01479",
+    "concept": "false",
+    "text": "The city of Hengyang is in Turkey.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00827",
+    "concept": "false",
+    "text": "The city of Guang'an is in Germany.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00537",
+    "concept": "false",
+    "text": "The city of Yaroslavl is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01427",
+    "concept": "false",
+    "text": "The city of Cankaya is in the United States.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00207",
+    "concept": "false",
+    "text": "The city of Istanbul is in Ghana.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00789",
+    "concept": "false",
+    "text": "The city of Port Said is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00363",
+    "concept": "false",
+    "text": "The city of Guangyuan is in Mexico.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01067",
+    "concept": "false",
+    "text": "The city of Port Harcourt is in Eritrea.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00957",
+    "concept": "false",
+    "text": "The city of Bhilai is in Venezuela.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00873",
+    "concept": "false",
+    "text": "The city of Bengaluru is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00523",
+    "concept": "false",
+    "text": "The city of Navi Mumbai is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00533",
+    "concept": "false",
+    "text": "The city of Mbuji-Mayi is in Pakistan.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00181",
+    "concept": "false",
+    "text": "The city of Anshan is in Cameroon.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00913",
+    "concept": "false",
+    "text": "The city of Riga is in Japan.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00365",
+    "concept": "false",
+    "text": "The city of Bijie is in Indonesia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00831",
+    "concept": "false",
+    "text": "The city of Dongying is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00447",
+    "concept": "false",
+    "text": "The city of Tucson is in Canada.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00137",
+    "concept": "false",
+    "text": "The city of Acapulco de Juarez is in Morocco.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00731",
+    "concept": "false",
+    "text": "The city of Cimahi is in Germany.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01429",
+    "concept": "false",
+    "text": "The city of Ufa is in South Korea.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00089",
+    "concept": "false",
+    "text": "The city of Abuja is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01481",
+    "concept": "false",
+    "text": "The city of Changchun is in Germany.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01119",
+    "concept": "false",
+    "text": "The city of Ningbo is in South Korea.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00269",
+    "concept": "false",
+    "text": "The city of Al Fayyum is in Chile.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01437",
+    "concept": "false",
+    "text": "The city of Jos is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01265",
+    "concept": "false",
+    "text": "The city of Bishkek is in Germany.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00761",
+    "concept": "false",
+    "text": "The city of Nouakchott is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00753",
+    "concept": "false",
+    "text": "The city of Anyang-si is in Iraq.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00621",
+    "concept": "false",
+    "text": "The city of Shizuoka is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01395",
+    "concept": "false",
+    "text": "The city of Batam is in Turkey.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01495",
+    "concept": "false",
+    "text": "The city of Tangerang is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00229",
+    "concept": "false",
+    "text": "The city of Linfen is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00695",
+    "concept": "false",
+    "text": "The city of Lubumbashi is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00223",
+    "concept": "false",
+    "text": "The city of Santo Domingo Oeste is in Zambia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01383",
+    "concept": "false",
+    "text": "The city of Ulhasnagar is in Senegal.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00369",
+    "concept": "false",
+    "text": "The city of Hegang is in Russia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00581",
+    "concept": "false",
+    "text": "The city of Cixi is in Indonesia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01349",
+    "concept": "false",
+    "text": "The city of Gujranwala is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01251",
+    "concept": "false",
+    "text": "The city of Guigang is in Japan.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00399",
+    "concept": "false",
+    "text": "The city of Kemerovo is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00987",
+    "concept": "false",
+    "text": "The city of Chengdu is in South Korea.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01109",
+    "concept": "false",
+    "text": "The city of Izhevsk is in Nigeria.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01277",
+    "concept": "false",
+    "text": "The city of Makassar is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00617",
+    "concept": "false",
+    "text": "The city of Matola is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01083",
+    "concept": "false",
+    "text": "The city of Milwaukee is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01057",
+    "concept": "false",
+    "text": "The city of Antwerpen is in Japan.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00729",
+    "concept": "false",
+    "text": "The city of Zaria is in India.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01225",
+    "concept": "false",
+    "text": "The city of Shangyu is in the United Arab Emirates.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00575",
+    "concept": "false",
+    "text": "The city of Wenzhou is in Moldova.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00945",
+    "concept": "false",
+    "text": "The city of Goyang-si is in Russia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00895",
+    "concept": "false",
+    "text": "The city of Sharjah is in China.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00659",
+    "concept": "false",
+    "text": "The city of Vadodara is in Russia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00757",
+    "concept": "false",
+    "text": "The city of Chiclayo is in Venezuela.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00197",
+    "concept": "false",
+    "text": "The city of Naberezhnyye Chelny is in Brazil.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00027",
+    "concept": "false",
+    "text": "The city of Yingkou is in the Philippines.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00707",
+    "concept": "false",
+    "text": "The city of Porto Alegre is in Belarus.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00939",
+    "concept": "false",
+    "text": "The city of Amman is in Malaysia.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00525",
+    "concept": "false",
+    "text": "The city of Novosibirsk is in the Philippines.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_01407",
+    "concept": "false",
+    "text": "The city of Huainan is in Egypt.",
+    "source": "cities"
+  },
+  {
+    "id": "cities_false_00769",
+    "concept": "false",
+    "text": "The city of Quetta is in Kenya.",
+    "source": "cities"
+  }
+]

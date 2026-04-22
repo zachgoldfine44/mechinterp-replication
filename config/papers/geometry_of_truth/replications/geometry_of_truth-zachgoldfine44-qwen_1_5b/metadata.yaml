@@ -1,0 +1,22 @@
+# Replication metadata — read by scripts/generate_replications_table.py
+id: "geometry_of_truth-zachgoldfine44-qwen_1_5b"
+paper_id: "geometry_of_truth"
+replicator: "Zach Goldfine"
+github_handle: "zachgoldfine44"
+date: "2026-04-21"
+status: "v0.1 partial"
+
+models_tested:
+  - "qwen_1_5b"
+
+summary: >
+  Within-distribution probe replicates cleanly (0.99 on cities, layer 12 —
+  matches paper 13B/70B despite being 10x smaller). Cross-dataset
+  generalization does NOT replicate at 1.5B: probe collapses to trivial
+  predictions on sp_en_trans (92/100 "true"), flips sign on neg_cities
+  (replicates paper's Fig 3c orthogonal-directions finding), collapses to
+  all-false on larger_than. Consistent with paper's "at sufficient scale"
+  framing.
+
+writeup_path: "writeup/geometry_of_truth/geometry_of_truth-zachgoldfine44-qwen_1_5b/draft.md"
+config_path: "config/papers/geometry_of_truth/replications/geometry_of_truth-zachgoldfine44-qwen_1_5b/"
