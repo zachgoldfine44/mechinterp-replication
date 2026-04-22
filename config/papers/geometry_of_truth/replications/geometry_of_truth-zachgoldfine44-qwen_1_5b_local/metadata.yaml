@@ -1,0 +1,21 @@
+# Replication metadata — read by scripts/generate_replications_table.py
+id: "geometry_of_truth-zachgoldfine44-qwen_1_5b_local"
+paper_id: "geometry_of_truth"
+replicator: "Zach Goldfine"
+github_handle: "zachgoldfine44"
+date: "2026-04-21"
+status: "v1 partial"
+
+models_tested:
+  - "qwen_1_5b"
+
+summary: >
+  Fresh local rerun with a clean per-replication namespace. The cities
+  probe again replicates strongly (0.985, best layer 18). Transfer now
+  partially replicates: sp_en_trans generalizes cleanly (0.78 acc, DD 1.0),
+  neg_cities fails outright (0.43 acc, DD 0.0), and larger_than only
+  nominally passes the lenient DD threshold (0.53 acc, 0.06 true recall),
+  consistent with a fragile, non-unified truth direction at 1.5B scale.
+
+writeup_path: "writeup/geometry_of_truth/geometry_of_truth-zachgoldfine44-qwen_1_5b_local/draft.md"
+config_path: "config/papers/geometry_of_truth/replications/geometry_of_truth-zachgoldfine44-qwen_1_5b_local/"
