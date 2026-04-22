@@ -75,13 +75,21 @@ Every replication submitted to this repo is reviewed by three frontier LLM refer
 
 ### 1. Clone and install
 
+Python 3.10+ is required (some dependencies like `sae-lens` don't publish
+wheels for older versions). On macOS, `python3` usually points at the
+stock 3.9 — use an explicit `python3.11` or `python3.12` when creating
+the venv.
+
 ```bash
 git clone https://github.com/zachgoldfine44/mechinterp-replication.git
 cd mechinterp-replication
 
-python -m venv .venv && source .venv/bin/activate
+python3.11 -m venv .venv && source .venv/bin/activate  # or python3.12
 pip install -r requirements.txt
 ```
+
+If you don't have a recent enough Python: `brew install python@3.11` on
+macOS, `sudo apt install python3.11 python3.11-venv` on Debian/Ubuntu.
 
 ### 2. Run the smoke test
 

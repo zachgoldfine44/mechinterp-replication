@@ -347,7 +347,7 @@ class ProbeClassificationExperiment(Experiment):
             texts=stimuli,
             layers=layers,
             aggregation=self.aggregation,
-            cache_dir=self.results_dir / "activations",
+            cache_dir=self.cache_dir / "activations",
             activations_cache=activations_cache,
         )
 
