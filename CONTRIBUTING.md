@@ -16,59 +16,113 @@ attempted to replicate) a mechinterp paper using this harness, and you want
 to add your replication to the repo so others can see the results and build
 on your work.
 
+### Replication IDs and the per-replication layout
+
+The repo is organized so that **multiple independent replications of the
+same paper coexist** — so ten people can each submit their own attempt at
+Geometry of Truth without colliding on configs, stimuli, results, or the
+README row. Every replicator picks a **replication ID** and everything
+they own lives under that namespace.
+
+**Replication ID convention:** `{paper_id}-{github_handle}-{model_scope}`
+
+Examples:
+- `emotions-zachgoldfine44-6models` — all 7 models in the matrix
+- `geometry_of_truth-tulaneadam-qwen_1_5b` — one model
+- `geometry_of_truth-alice-llama-70b` — hypothetical second replication
+  by a different person on a larger model
+
+`{model_scope}` can be a specific model key (`qwen_1_5b`) or a compact
+label when you run several (`6models`, `small-tier`, `llama-family`).
+Including the paper_id in the ID keeps them globally unique so you can
+replicate many papers on the same model without ambiguity.
+
 ### What to include in your PR
 
 ```
 config/papers/{paper_id}/
-    paper_config.yaml       # Claims, experiments, success criteria
-    paper.md                # Full paper text (markdown) for oracle reference
-    stimuli_config.yaml     # Stimulus definitions
-    stimuli/                # JSON stimulus files (keep small; generated
-                            #   data can be regenerated from the config)
+    paper.md                # Full paper text — shared across all replications
+                            #   of this paper (the "oracle"). Already exists
+                            #   if someone's replicated this paper before;
+                            #   don't overwrite it if so.
+    replications/{replication_id}/
+        paper_config.yaml   # YOUR claims, thresholds, experiment params
+        metadata.yaml       # YOUR replicator info (used by the README generator)
+        stimuli_config.yaml # YOUR stimulus definitions (OK to share the
+                            #   canonical dataset with other replicators;
+                            #   but your file lives under your namespace)
+        stimuli/            # Small JSON stimulus files (generated data
+                            #   can be regenerated from the config)
 
-writeup/{paper_id}/
+writeup/{paper_id}/{replication_id}/
     draft.md                # Your writeup (methods, results, discussion)
 
-results/{paper_id}/         # Only the small documenting artifacts:
+results/{paper_id}/{replication_id}/
     {model_key}/
         {claim_id}/
             result.json     # Metric outputs
             sanity.json     # Sanity-check report
-        critiques/
-            evaluator.json  # Critique agent outputs (if you ran them)
+        critiques/          # Critique agent outputs (if you ran them)
+
+figures/{paper_id}/{replication_id}/
+    *.png, *.pdf            # Your figures
 ```
 
 **Do not include** large files (activation caches, probe weights, `.pt`
-files). The `.gitignore` blocks them, but double-check `git status` before
-committing.
+files). The `.gitignore` blocks them, but double-check `git status`
+before committing.
+
+**Do not modify** anything at the paper level (`paper.md`, or files
+under another replicator's `replications/{their_id}/`). Those belong to
+other people's replications or the shared paper oracle.
 
 ### Step-by-step
 
-1. **Fork** the repo and create a branch: `git checkout -b replicate/{paper_id}`
-2. **Read the paper** and save it as `config/papers/{paper_id}/paper.md`
-3. **Extract 3-7 claims** and create `paper_config.yaml` (see the
-   [emotions config](config/papers/emotions/paper_config.yaml) as a template)
-4. **Create stimuli** — either hand-written JSONs or a `stimuli_config.yaml`
-   that generates them
-5. **Run the pipeline** on at least one small model locally:
+1. **Fork** the repo and create a branch named after your replication:
    ```bash
-   python -m src.core.pipeline --paper {paper_id} --model qwen_1_5b
+   git checkout -b replication/{replication_id}
    ```
-6. **Run on medium models** if you have GPU access:
+2. **Pick your replication ID** (see "Replication IDs" above).
+3. **Read the paper.** If the paper has never been replicated before,
+   save the full text as `config/papers/{paper_id}/paper.md`. If it has
+   been, leave that file alone — your replication shares it as an oracle.
+4. **Scaffold your replication directory** by copying the template:
    ```bash
-   python -m src.core.pipeline --paper {paper_id} --tier medium
+   cp -r config/replication_template \
+     config/papers/{paper_id}/replications/{replication_id}
    ```
-7. **Write up your findings** in `writeup/{paper_id}/draft.md`. Include:
+   Then edit `paper_config.yaml`, `stimuli_config.yaml`, and
+   `metadata.yaml` with your claims, thresholds, and replicator info.
+5. **Create stimuli** — either hand-written JSONs in
+   `config/papers/{paper_id}/replications/{replication_id}/stimuli/` or
+   a `stimuli_config.yaml` that generates them.
+6. **Run the pipeline** on at least one small model locally:
+   ```bash
+   python -m src.core.pipeline \
+     --paper {paper_id} --replication {replication_id} --model qwen_1_5b
+   ```
+7. **Run on medium models** if you have GPU access:
+   ```bash
+   python -m src.core.pipeline \
+     --paper {paper_id} --replication {replication_id} --tier medium
+   ```
+8. **Write up your findings** in `writeup/{paper_id}/{replication_id}/draft.md`.
+   Include:
    - Which claims replicated and which didn't
    - Cross-model comparison (what generalizes, what's model-specific)
    - Limitations of your replication
    - Anything surprising
-8. **Add yourself to the Completed replications table** in [README.md](README.md#completed-replications). Create a new row with:
-   - Paper title and link
-   - Your GitHub handle as `[@yourusername](https://github.com/yourusername)` — this is how you get visible credit
-   - Models tested, writeup link, config link
-   - Leave the AI peer review scores cell blank; the maintainer fills it in after merge
-9. **Open a PR** with a clear title like: `Replication: {Paper Title} ({Author} {Year})`
+9. **Regenerate the README table** (don't hand-edit it):
+   ```bash
+   python scripts/generate_replications_table.py
+   ```
+   This scans every `metadata.yaml` and rewrites the table between its
+   sentinels. It adds your row automatically from the metadata you
+   wrote in step 4.
+10. **Open a PR** with a clear title like:
+    `Replication: {replication_id}`
+    (e.g., `Replication: geometry_of_truth-alice-llama-70b`). The PR
+    shouldn't touch paths under anyone else's `replications/{their_id}/`.
 
 ### What makes a good replication
 
@@ -83,6 +137,26 @@ committing.
 Partial replications are welcome. If you only tested claims 1-3 out of 6,
 that's still valuable — note what's left undone and someone else may pick
 it up.
+
+### What a "fresh and clean" replication looks like
+
+The point of the per-replication layout is that each submission stands
+on its own. When in doubt:
+
+- **Don't copy another replicator's results**, probe weights, or
+  concept vectors. Rerun the pipeline on your own machine / hosted GPU,
+  from your own stimuli.
+- **It's fine to share the paper's original datasets** (e.g., the
+  Marks–Tegmark truth CSVs). The novelty of your replication is in
+  *where you run them, with what model, with what choices*.
+- **It's fine to read existing replications for inspiration.** The
+  point of the per-replication namespace isn't to prevent you from
+  learning what thresholds others picked — it's to prevent your results
+  from silently overwriting theirs.
+- **If you deviate from another replicator's methodology deliberately**
+  (e.g., you pick different thresholds or a different probe type),
+  explain why in your writeup. Deliberate methodological choices are
+  exactly what independent replications are for.
 
 ### AI review policy
 

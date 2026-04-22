@@ -1,5 +1,10 @@
 # Replication Report: Geometry of Truth
 
+**Paper:** Marks & Tegmark (2023), [arXiv:2310.06824](https://arxiv.org/abs/2310.06824)
+**Replicator:** [@tulaneadam](https://github.com/tulaneadam)
+**Model:** Qwen-2.5-1.5B-Instruct
+**Replication ID:** `geometry_of_truth-tulaneadam-qwen_1_5b`
+
 ## Summary
 Replication of "The Geometry of Truth: Emergent Linear Structure in Large Language Model Representations of True/False Datasets" (Marks & Tegmark) using the Qwen-2.5-1.5B-Instruct model.
 

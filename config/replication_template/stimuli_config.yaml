@@ -1,0 +1,28 @@
+# =============================================================================
+# TEMPLATE stimuli_config.yaml — copy into
+# config/papers/{paper_id}/replications/{replication_id}/ and edit.
+# =============================================================================
+#
+# Each entry under `stimulus_sets` defines one named collection of stimuli.
+# Claims in paper_config.yaml reference these by name via params like
+# `training_stimulus_set`, `test_stimulus_set`, or `stimulus_set`.
+#
+# Supported types:
+#   - hardcoded:    Load from a JSON file you commit under stimuli/
+#   - dataset:      Load from HuggingFace Datasets (configurable subset)
+#   - generated:    Use an LLM to create stimuli (resume-aware, per-item saves)
+#   - programmatic: Generate from templates with variable substitution
+# =============================================================================
+
+stimulus_sets:
+  training_stimuli:
+    type: "hardcoded"
+    file: "stimuli/training.json"
+    notes: >
+      Training set for Claim 1. Each entry is
+      {"concept": "X", "text": "..."}.
+
+  # Add additional named sets here. Reference them in paper_config.yaml:
+  #   params:
+  #     training_stimulus_set: "training_stimuli"
+  #     test_stimulus_set: "held_out"

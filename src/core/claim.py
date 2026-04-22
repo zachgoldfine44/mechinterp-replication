@@ -59,6 +59,12 @@ class ClaimConfig:
             Used by the critique agents to verify replicated methodology
             against the paper. STRONGLY ENCOURAGED — every claim should
             cite where in the paper it came from.
+        replication_id: Optional identifier for a specific replication
+            attempt of this paper (e.g., 'emotions-zachgoldfine44-6models').
+            When set, result/stimulus paths are namespaced under it so
+            multiple independent replications of the same paper can
+            coexist in the repo. See CONTRIBUTING.md for naming
+            convention. None means legacy un-namespaced paths.
     """
 
     paper_id: str
@@ -71,6 +77,7 @@ class ClaimConfig:
     depends_on: str | None = None
     notes: str = ""
     paper_section: str = ""
+    replication_id: str | None = None
 
 
 @dataclass
@@ -87,6 +94,8 @@ class ExperimentResult:
             None means not yet evaluated.
         metadata: Additional info -- hyperparameters, timing, seeds,
             layer selection, etc. Stored but not used for evaluation.
+        replication_id: Which replication this result belongs to. None
+            for legacy results predating the per-replication layout.
     """
 
     claim_id: str
@@ -95,6 +104,7 @@ class ExperimentResult:
     metrics: dict[str, Any]
     success: bool | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+    replication_id: str | None = None
 
     def save(self, path: Path) -> None:
         """Atomically save result to JSON.

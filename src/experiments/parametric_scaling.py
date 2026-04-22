@@ -297,7 +297,10 @@ class ParametricScalingExperiment(Experiment):
             List of template dicts with keys: id, template, variable, values.
         """
         from src.utils.datasets import resolve_stimulus_dir
-        data_dir = resolve_stimulus_dir(self.config.paper_id, self.data_root)
+        data_dir = resolve_stimulus_dir(
+            self.config.paper_id, self.data_root,
+            replication_id=self.config.replication_id,
+        )
 
         # Try JSON file in data directory
         templates_file = data_dir / "parametric" / f"{self.stimulus_set}.json"
@@ -318,7 +321,10 @@ class ParametricScalingExperiment(Experiment):
         # Fall back to stimuli_config.yaml
         from src.core.config_loader import load_stimuli_config
         try:
-            stim_config = load_stimuli_config(self.config.paper_id)
+            stim_config = load_stimuli_config(
+                self.config.paper_id,
+                replication_id=self.config.replication_id,
+            )
             stim_sets = stim_config.get("stimulus_sets", {})
             if self.stimulus_set in stim_sets:
                 return stim_sets[self.stimulus_set].get("templates", [])

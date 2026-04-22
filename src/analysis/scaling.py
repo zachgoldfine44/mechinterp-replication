@@ -141,6 +141,7 @@ def analyze_scaling(
     paper_id: str,
     data_root: Path,
     cross_model_report: CrossModelReport | None = None,
+    replication_id: str | None = None,
 ) -> ScalingReport:
     """Analyze how experiment metrics scale with model size.
 
@@ -153,15 +154,19 @@ def analyze_scaling(
         data_root: Root data directory.
         cross_model_report: Pre-computed CrossModelReport. If None, one is
             built from disk.
+        replication_id: Optional replication identifier. Forwarded to
+            ``compare_across_models`` and config loading.
 
     Returns:
         ScalingReport with per-claim, per-family trends.
     """
     if cross_model_report is None:
-        cross_model_report = compare_across_models(paper_id, data_root)
+        cross_model_report = compare_across_models(
+            paper_id, data_root, replication_id=replication_id,
+        )
 
     report = cross_model_report
-    paper_config = load_paper_config(paper_id)
+    paper_config = load_paper_config(paper_id, replication_id=replication_id)
     claim_metrics = {c.claim_id: c.success_metric for c in paper_config.claims}
 
     trends: dict[str, dict[str, ScalingTrend]] = {}
@@ -306,16 +311,26 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description="Scaling analysis")
     parser.add_argument("--paper", required=True, help="Paper ID")
+    parser.add_argument(
+        "--replication", default=None,
+        help="Replication identifier (e.g. emotions-zachgoldfine44-6models).",
+    )
     parser.add_argument("--output", default=None, help="Output directory override")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
     data_root = get_data_root()
-    report = analyze_scaling(args.paper, data_root)
+    report = analyze_scaling(
+        args.paper, data_root, replication_id=args.replication,
+    )
     print(print_scaling_report(report))
 
-    out = Path(args.output) if args.output else data_root / "results" / args.paper
+    from src.core.experiment import results_root_for
+    out = (
+        Path(args.output) if args.output
+        else results_root_for(data_root, args.paper, args.replication)
+    )
     save_scaling_report(report, out)
 
 

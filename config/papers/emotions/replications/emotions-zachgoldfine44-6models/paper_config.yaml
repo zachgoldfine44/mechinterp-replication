@@ -14,6 +14,31 @@ paper:
   original_model: "Claude Sonnet 4.5"
   model_variant: "instruct"
 
+# This file is the configuration for ONE specific replication attempt of
+# the above paper. Other contributors can submit their own replication
+# configs under config/papers/emotions/replications/{their_id}/ without
+# conflicting with this one. See CONTRIBUTING.md for the protocol.
+replication:
+  id: "emotions-zachgoldfine44-6models"
+  replicator: "Zach Goldfine"
+  github_handle: "zachgoldfine44"
+  date: "2026-04-13"
+  models_tested:
+    - "llama_1b"
+    - "llama_8b"
+    - "llama_70b"
+    - "qwen_1_5b"
+    - "qwen_7b"
+    - "gemma_2b"
+    - "gemma_9b"
+  status: "v3.6"
+  summary: >
+    All 4 representational claims replicate universally (probes 73-84%,
+    valence geometry matching original). Causal influence is selective:
+    sentiment shifts universally, pushback capitulation increases on 1-2
+    models (p=0.036), ethical compliance uninformative (0% floor).
+  writeup_path: "writeup/emotions/emotions-zachgoldfine44-6models/draft.md"
+
 # Mechinterp techniques required from src/techniques/
 techniques_required:
   - probes           # Linear probes for emotion classification

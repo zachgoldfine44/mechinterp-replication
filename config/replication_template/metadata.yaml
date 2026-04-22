@@ -1,0 +1,34 @@
+# =============================================================================
+# TEMPLATE metadata.yaml — copy into
+# config/papers/{paper_id}/replications/{replication_id}/ and edit.
+# =============================================================================
+# Read by scripts/generate_replications_table.py to produce the table in
+# README.md. Keep this file small and factual. The CI-safe way to update
+# the table is to edit this file and run the generator.
+# =============================================================================
+
+id: "PAPER_ID-YOUR_HANDLE-MODEL_SCOPE"
+paper_id: "PAPER_ID_HERE"
+replicator: "Your Name"
+github_handle: "your_github_handle"
+date: "2026-MM-DD"
+status: "v0.1"
+
+# List of model keys from config/models.yaml that this replication tested.
+models_tested:
+  - "qwen_1_5b"
+
+# One-line hook for the README table. Prefer concrete numbers over
+# vague language. This is the "abstract" that a reader sees before
+# clicking through to your writeup.
+summary: >
+  REPLACE ME with a 1–2 sentence summary of what you found. Example:
+  "Linear probes replicate at 0.97 on Qwen-1.5B. Cross-dataset generalization
+  fails at the 0.70 threshold (DD 0.50), replicating the paper's 'at
+  sufficient scale' qualifier."
+
+# Paths relative to the repo root. Keep these in sync with where you
+# actually put your files.
+writeup_path: "writeup/PAPER_ID/REPLICATION_ID/draft.md"
+config_path: "config/papers/PAPER_ID/replications/REPLICATION_ID/"
+ai_reviews_path: "writeup/PAPER_ID/REPLICATION_ID/reviews/"

@@ -2,14 +2,23 @@
 
 This module is the single entry point for reading all YAML configs:
   - Paper configs:   config/papers/{paper_id}/paper_config.yaml
+                     (or config/papers/{paper_id}/replications/{replication_id}/paper_config.yaml
+                      for papers that have per-replication layouts)
   - Stimuli configs: config/papers/{paper_id}/stimuli_config.yaml
+                     (or .../replications/{replication_id}/stimuli_config.yaml)
   - Model matrix:    config/models.yaml
   - Active paper:    config/active_paper.txt
+
+Per-replication layout (v4+): a paper may host multiple independent
+replication attempts under ``config/papers/{paper_id}/replications/``.
+Each replication owns its own paper_config.yaml, stimuli, results, and
+writeup. See CONTRIBUTING.md for the naming convention.
 
 Usage:
     from src.core.config_loader import load_paper_config, get_active_paper
 
     paper = load_paper_config("emotions")
+    paper = load_paper_config("emotions", "emotions-zachgoldfine44-6models")
     print(paper.title, len(paper.claims), "claims")
 
     models = get_models_for_tier("small", model_variant="instruct")
@@ -53,6 +62,14 @@ class PaperConfig:
         paper_text: Full text of the paper, loaded from
             ``paper_text_path`` if that file exists. Empty string if no
             paper.md is present (with a logged warning).
+        replication_id: Identifier for this specific replication attempt
+            (e.g., 'geometry_of_truth-tulaneadam-qwen_1_5b'). When set,
+            downstream paths (results, stimuli, writeup) are namespaced
+            under it. None means legacy un-namespaced layout.
+        replication_metadata: Raw ``replication:`` section from the yaml
+            (replicator, github_handle, date, models_tested, status,
+            notes). Used by the README table generator. Empty dict if
+            no ``replication:`` section is present.
     """
 
     id: str
@@ -65,13 +82,67 @@ class PaperConfig:
     claims: list[ClaimConfig]
     paper_text_path: str = "paper.md"
     paper_text: str = ""
+    replication_id: str | None = None
+    replication_metadata: dict[str, Any] = None  # type: ignore[assignment]
+
+    def __post_init__(self) -> None:
+        if self.replication_metadata is None:
+            object.__setattr__(self, "replication_metadata", {})
 
 
-def load_paper_config(paper_id: str) -> PaperConfig:
+def _resolve_paper_config_path(paper_id: str, replication_id: str | None) -> Path:
+    """Return the path to paper_config.yaml for a given paper/replication.
+
+    If ``replication_id`` is given and a per-replication config exists at
+    ``config/papers/{paper_id}/replications/{replication_id}/paper_config.yaml``,
+    that wins. Otherwise fall back to the paper-level
+    ``config/papers/{paper_id}/paper_config.yaml``.
+
+    This fallback is deliberate: it lets the plumbing land before any files
+    move, and it means users can keep running legacy un-namespaced configs
+    while contributors adopt the per-replication layout.
+    """
+    project_root = get_project_root()
+    if replication_id:
+        per_rep = (
+            project_root
+            / "config" / "papers" / paper_id
+            / "replications" / replication_id / "paper_config.yaml"
+        )
+        if per_rep.exists():
+            return per_rep
+    return project_root / "config" / "papers" / paper_id / "paper_config.yaml"
+
+
+def list_replications(paper_id: str) -> list[str]:
+    """List replication_ids present under config/papers/{paper_id}/replications/.
+
+    Returns an empty list if no per-replication layout is in use.
+    """
+    project_root = get_project_root()
+    reps_dir = project_root / "config" / "papers" / paper_id / "replications"
+    if not reps_dir.is_dir():
+        return []
+    return sorted(p.name for p in reps_dir.iterdir() if p.is_dir())
+
+
+def load_paper_config(
+    paper_id: str, replication_id: str | None = None,
+) -> PaperConfig:
     """Load and validate a paper config from YAML.
 
     Args:
         paper_id: Identifier matching a folder under config/papers/.
+        replication_id: Optional replication identifier. When given, the
+            loader reads ``config/papers/{paper_id}/replications/{replication_id}/paper_config.yaml``
+            (falling back to the paper-level config if that file doesn't
+            exist yet). Also used to populate ``PaperConfig.replication_id``,
+            which downstream code uses for namespacing result/writeup paths.
+
+            If ``replication_id`` is None and the paper has exactly one
+            replication under ``replications/``, the loader auto-selects
+            it. If the paper has multiple replications and none was
+            requested, a ValueError is raised listing the choices.
 
     Returns:
         Parsed PaperConfig with all claims.
@@ -79,9 +150,25 @@ def load_paper_config(paper_id: str) -> PaperConfig:
     Raises:
         FileNotFoundError: If the config file doesn't exist.
         KeyError: If required fields are missing from the YAML.
+        ValueError: If ``replication_id`` is None but the paper has
+            multiple replications (caller must pick one).
     """
-    project_root = get_project_root()
-    config_path = project_root / "config" / "papers" / paper_id / "paper_config.yaml"
+    if replication_id is None:
+        reps = list_replications(paper_id)
+        if len(reps) == 1:
+            replication_id = reps[0]
+            logger.info(
+                "Auto-selected sole replication for %s: %s",
+                paper_id, replication_id,
+            )
+        elif len(reps) > 1:
+            raise ValueError(
+                f"Paper {paper_id!r} has multiple replications: {reps}. "
+                f"Pass --replication to pick one (or iterate all of them "
+                f"with a script)."
+            )
+
+    config_path = _resolve_paper_config_path(paper_id, replication_id)
 
     if not config_path.exists():
         raise FileNotFoundError(f"Paper config not found: {config_path}")
@@ -90,8 +177,15 @@ def load_paper_config(paper_id: str) -> PaperConfig:
         raw = yaml.safe_load(f)
 
     paper = raw["paper"]
-    claims: list[ClaimConfig] = []
 
+    # Resolve replication_id: explicit CLI arg wins, then yaml's
+    # replication.id, then None (legacy).
+    replication_meta = raw.get("replication", {}) or {}
+    resolved_replication_id = (
+        replication_id or replication_meta.get("id") or None
+    )
+
+    claims: list[ClaimConfig] = []
     for c in raw["claims"]:
         claims.append(
             ClaimConfig(
@@ -105,11 +199,17 @@ def load_paper_config(paper_id: str) -> PaperConfig:
                 depends_on=c.get("depends_on"),
                 notes=c.get("notes", ""),
                 paper_section=c.get("paper_section", ""),
+                replication_id=resolved_replication_id,
             )
         )
 
+    # Paper text (paper.md) lives at the paper level, not the replication
+    # level, because it is the shared oracle all replications check against.
+    project_root = get_project_root()
     paper_text_path = paper.get("paper_text_path", "paper.md")
-    paper_text_full_path = config_path.parent / paper_text_path
+    paper_text_full_path = (
+        project_root / "config" / "papers" / paper_id / paper_text_path
+    )
     paper_text = ""
     if paper_text_full_path.exists():
         try:
@@ -141,6 +241,8 @@ def load_paper_config(paper_id: str) -> PaperConfig:
         claims=claims,
         paper_text_path=paper_text_path,
         paper_text=paper_text,
+        replication_id=resolved_replication_id,
+        replication_metadata=replication_meta,
     )
 
 
@@ -164,26 +266,57 @@ def load_model_config() -> dict[str, Any]:
         return yaml.safe_load(f)
 
 
-def load_stimuli_config(paper_id: str) -> dict[str, Any]:
-    """Load stimuli config for a paper.
+def load_stimuli_config(
+    paper_id: str, replication_id: str | None = None,
+) -> dict[str, Any]:
+    """Load stimuli config for a paper (optionally per-replication).
 
     Args:
         paper_id: Identifier matching a folder under config/papers/.
+        replication_id: Optional replication identifier. When given, the
+            loader checks for
+            ``config/papers/{paper_id}/replications/{replication_id}/stimuli_config.yaml``
+            first, falling back to the paper-level file if absent. When
+            None, auto-selects the sole replication if the paper has
+            exactly one.
 
     Returns:
         Raw parsed YAML dict defining stimulus sets.
 
     Raises:
-        FileNotFoundError: If the stimuli config doesn't exist.
+        FileNotFoundError: If neither the per-replication nor the
+            paper-level stimuli config exists.
+        ValueError: If replication_id is None but the paper has multiple
+            replications (caller must pick one).
     """
+    if replication_id is None:
+        reps = list_replications(paper_id)
+        if len(reps) == 1:
+            replication_id = reps[0]
+        elif len(reps) > 1:
+            raise ValueError(
+                f"Paper {paper_id!r} has multiple replications: {reps}. "
+                f"Pass replication_id to pick one."
+            )
+
     project_root = get_project_root()
-    config_path = project_root / "config" / "papers" / paper_id / "stimuli_config.yaml"
+    paper_dir = project_root / "config" / "papers" / paper_id
 
-    if not config_path.exists():
-        raise FileNotFoundError(f"Stimuli config not found: {config_path}")
+    candidates: list[Path] = []
+    if replication_id:
+        candidates.append(
+            paper_dir / "replications" / replication_id / "stimuli_config.yaml"
+        )
+    candidates.append(paper_dir / "stimuli_config.yaml")
 
-    with open(config_path) as f:
-        return yaml.safe_load(f)
+    for path in candidates:
+        if path.exists():
+            with open(path) as f:
+                return yaml.safe_load(f)
+
+    raise FileNotFoundError(
+        f"Stimuli config not found. Tried: {', '.join(str(p) for p in candidates)}"
+    )
 
 
 def get_models_for_tier(tier: str, model_variant: str = "instruct") -> list[dict[str, Any]]:
