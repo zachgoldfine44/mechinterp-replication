@@ -8,7 +8,7 @@ It will likely take ~30-60 minutes to complete.
 
 You can substitue the "Geometry of Truth" paper with any mechinterp paper you'd like to replicate. 
 
-From there, you can evaluate the results, make (or ask Claude Code or Codex to make) revisions, extend (or ask Claude Code or Codex to extend) the replication to more models or different configurations, or submit a pull request to contribute your replication attempt. 
+From there, you can evaluate the results, make revisions, extend the replication to more models or different configurations, or submit a pull request to contribute your replication attempt. 
 
 We're excited to see what papers and experiments you replicate!
 
