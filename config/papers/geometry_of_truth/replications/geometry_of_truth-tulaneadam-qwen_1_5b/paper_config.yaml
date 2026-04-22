@@ -6,6 +6,25 @@ paper:
   original_model: "LLaMA-13B"
   model_variant: "base"
 
+# This file is the configuration for ONE specific replication attempt of
+# the above paper. Other contributors can submit their own replication
+# configs under config/papers/geometry_of_truth/replications/{their_id}/
+# without conflicting with this one. See CONTRIBUTING.md.
+replication:
+  id: "geometry_of_truth-tulaneadam-qwen_1_5b"
+  replicator: "Tulane Adam"
+  github_handle: "tulaneadam"
+  date: "2026-04-17"
+  models_tested:
+    - "qwen_1_5b"
+  status: "v1"
+  summary: >
+    Basic truth classification replicates cleanly on Qwen-2.5-1.5B-Instruct
+    (probe accuracy 0.97 vs. 0.70 threshold). Cross-dataset generalization
+    fails to meet the 0.70 threshold (DD 0.50). Causal steering experiment
+    included with preference-correlation metric.
+  writeup_path: "writeup/geometry_of_truth/geometry_of_truth-tulaneadam-qwen_1_5b/draft.md"
+
 techniques_required:
   - probes
   - contrastive
