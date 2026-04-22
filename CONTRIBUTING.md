@@ -1,6 +1,6 @@
-# Contributing to the Mechinterp Replication Harness
+# Contributing to the Mechinterp Replication Harness (for humans)
 
-Thank you for your interest in contributing. The goal of this project is to
+Thank you for your interest in contributing! The goal of this project is to
 make it easy for independent researchers to replicate mechanistic
 interpretability papers across open-source models, and to build a shared
 repository of replications the community can learn from.
@@ -11,10 +11,101 @@ There are two main ways to contribute:
 
 ## 1. Submit a paper replication
 
-This is the primary contribution we're hoping for. You've replicated (or
-attempted to replicate) a mechinterp paper using this harness, and you want
-to add your replication to the repo so others can see the results and build
+This is the primary contribution we're hoping for. Replicate (or
+attempt to replicate) a mechinterp paper using this harness, and add your replication to the repo so others can see the results and build
 on your work.
+
+## 2. Improve the harness
+
+This project is an early-stage harness for LLM-driven replications of mechanistic interpretability papers. It works, but it could use some improvements to reach its potential. If you'd like to help, the items below are the most valuable things to pick up. Open an issue to discuss before a large PR, or just send a small PR if it's self-contained.
+
+### 2.1 Methodological fidelity
+
+The harness sometimes takes shortcuts relative to the original paper's methodology. For example, using Claude Code, it tends to use last-token activations instead of more nuanced methods sometimes implemented by paper authors, e.g., averaged activations across all tokens, or across all tokens after the 50th position. It also occasionally skips paper claims rather than testing them.
+
+Ideas welcome:
+- Harness instructions or a reusable "skill" that forces step-by-step methodology matching. E.g., anchoring on the paper's figures, setting a goal to reproduce each figure faithfully, and methodology checked against the image.
+- An effective post-hoc auditor that diffs paper claims against experiments run and flags untested ones.
+
+### 2.2 Silent failures from missing credentials
+
+Some steps (e.g., the critique-after-experiment step) require an API key but don't announce it upfront, so they fail silently mid-run.
+
+Ideas welcome:
+- Preflight check that validates every required credential before a run starts.
+- Docs listing every key the harness may need and when.
+
+### 2.3 GPU setup friction
+
+Replications on larger models require renting a GPU (Modal, RunPod, Colab, etc.), sometimes managing SSH keys, and picking a GPU type. None of this is well-documented or captured in run configs today, which makes replications hard to reproduce downstream.
+
+Ideas welcome:
+- One-click (or one-prompt) GPU provisioning flow.
+- Auto-log GPU type, driver versions, and runtime into the run config so replications-of-replications are more trivial.
+
+### 2.4 Harness parameter sweeps
+
+We don't yet have a systematic picture of how replication quality varies with prompt or driver model.
+
+Ideas welcome:
+- Comparative runs across prompt variants.
+- Comparative runs across driver models (Claude, ChatGPT, Gemini, open weights).
+- A better scoring rubric so replication quality is more valid and reliable than [the current LLM prompt process](https://github.com/zachgoldfine44/mechinterp-replication/blob/main/CONTRIBUTING.md#ai-review-policy).
+
+### 2.5 Expert review
+
+Replication attempts benefit a lot from senior eyes — especially original paper authors or people with significant hands-on interpretability experience.
+
+Ideas welcome:
+- If you've done interp work or authored a paper in our queue: review an attempt and open an issue with feedback.
+- Intros to potential reviewers are also welcome.
+
+### 2.6 One-click re-replication
+
+Re-running a completed replication should be frictionless. It isn't yet.
+
+Ideas welcome:
+- Update the harness so it can package each replication in a way that anyone with an API key and a GPU budget can reproduce the full output with a single command.
+- Update the harness so outputs pair a draft paper with code, configs, seeds, and exact environment details in a single packaged artifact.
+
+### 2.7 More capabilities
+
+- **New experiment types**: if a paper's methodology doesn't fit the
+  existing generic types, add a new one in `src/experiments/`. It must
+  inherit from the `Experiment` base class and include tests.
+- **New technique modules**: reusable building blocks in
+  `src/techniques/` (e.g., improved circuit discovery methods).
+- **New model families**: add entries to `config/models.yaml` and verify
+  that `src/models/loader.py` and `src/utils/activations.py` handle the
+  architecture correctly.
+- **Better sanity checks**: if you've been bitten by an artifact the
+  existing checks don't catch, add it to `src/core/sanity_checks.py`.
+- **Documentation and tutorials**: especially "How to replicate paper X"
+  walkthroughs that help onboard new contributors.
+
+
+
+---
+
+## Code of conduct
+
+Be kind and constructive. Null results are welcome. Critiques of methods
+should be specific and actionable. The goal is to collectively improve our
+understanding of how models work, not to score points.
+
+---
+
+## Questions?
+
+Open an issue on GitHub. If you're unsure whether a paper is a good
+candidate for replication, or how to handle a tricky methodology, ask —
+we'd rather help you succeed than have you struggle in silence.
+
+---
+
+---
+
+# Contributing to the Mechinterp Replication Harness (for agents)
 
 ### Replication IDs and the per-replication layout
 
@@ -192,36 +283,6 @@ recommendation. The prompts and the raw responses are committed to
 the scores are surfaced in the [Completed
 replications](README.md#completed-replications) table in the README.
 
-To prepare a replication for review, use the helper:
-
-```bash
-# One-shot "give me everything I need to run a review right now":
-# writes a self-contained bundle under
-# local_data/reviews/{paper}/{id}/reviewer_bundle.md and prints
-# step-by-step upload-and-paste instructions plus the two prompts.
-# Works around URL-fetch restrictions in claude.ai / gemini /
-# chatgpt — the reviewer uploads the bundle, no fetching needed.
-# This is the default you want for ad-hoc reviews.
-python scripts/review_prompt.py --paper {paper} --replication {id} \
-    --reviewer-ready
-
-# Prints a ready-to-paste prompt with the standardized protocol + GitHub
-# URLs to the writeup/config/results/figures. Requires the reviewer's
-# AI to fetch URLs, which some web chat UIs now block as a
-# provenance check. Prefer --reviewer-ready if you hit that.
-python scripts/review_prompt.py --paper {paper} --replication {id} \
-    --pr {pr_number}
-
-# Concatenates every text artifact (paper.md, writeup, configs, per-claim
-# result.json + sanity.json, any harness critiques) into a single
-# markdown file. Good for ad-hoc offline use when you don't need the
-# prompt scaffolding --reviewer-ready gives you.
-python scripts/review_prompt.py --paper {paper} --replication {id} \
-    --bundle -o /tmp/review_bundle.md
-```
-
-`--replication` is never auto-selected: if you omit it, the script
-lists the available IDs and exits.
 
 **Why the maintainer runs the reviews, not the submitter:**
 
@@ -264,30 +325,9 @@ protocol version is recorded in each review file's header).
 
 If you disagree with a review and want to respond, feel free to open a
 follow-up PR adding an `author-response.md` to the `reviews/` directory.
-Dialog is welcome.
+Dialog is welcome. If a review has valid critiques, the best thing to do would be to act on them and improve the replication attempt!
 
 ---
-
-## 2. Improve the harness
-
-If you want to contribute to the framework itself rather than (or in
-addition to) a replication, here's what we'd find most useful:
-
-### High-value contributions
-
-- **New experiment types** — if a paper's methodology doesn't fit the
-  existing 6 generic types, add a new one in `src/experiments/`. It must
-  inherit from the `Experiment` base class and include tests.
-- **New technique modules** — reusable building blocks in
-  `src/techniques/` (e.g., representation engineering, probing with
-  concept bottleneck models, improved circuit discovery methods).
-- **New model families** — add entries to `config/models.yaml` and verify
-  that `src/models/loader.py` and `src/utils/activations.py` handle the
-  architecture correctly.
-- **Better sanity checks** — if you've been bitten by an artifact the
-  existing checks don't catch, add it to `src/core/sanity_checks.py`.
-- **Documentation and tutorials** — especially "How to replicate paper X"
-  walkthroughs that help onboard new contributors.
 
 ### Code standards
 
@@ -310,18 +350,4 @@ pytest tests/ -q --fast
 pytest tests/ -v --integration
 ```
 
----
 
-## Code of conduct
-
-Be kind and constructive. Null results are welcome. Critiques of methods
-should be specific and actionable. The goal is to collectively improve our
-understanding of how models work, not to score points.
-
----
-
-## Questions?
-
-Open an issue on GitHub. If you're unsure whether a paper is a good
-candidate for replication, or how to handle a tricky methodology, ask —
-we'd rather help you succeed than have you struggle in silence.
