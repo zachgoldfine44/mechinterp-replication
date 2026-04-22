@@ -1,0 +1,602 @@
+[
+  {
+    "id": "sp_en_trans_true_00308",
+    "concept": "true",
+    "text": "The Spanish word 'abrigo' means 'coat'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00185",
+    "concept": "false",
+    "text": "The Spanish word 'hermano' means 'silver'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00200",
+    "concept": "true",
+    "text": "The Spanish word 'invierno' means 'winter'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00123",
+    "concept": "true",
+    "text": "The Spanish word 'negro' means 'black'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00267",
+    "concept": "false",
+    "text": "The Spanish word 'anillo' means 'to love'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00313",
+    "concept": "false",
+    "text": "The Spanish word 'valle' means 'face'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00216",
+    "concept": "true",
+    "text": "The Spanish word 'mezclar' means 'to mix'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00015",
+    "concept": "false",
+    "text": "The Spanish word 'querer' means 'of'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00246",
+    "concept": "false",
+    "text": "The Spanish word 'piso' means 'set'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00198",
+    "concept": "true",
+    "text": "The Spanish word 'pierna' means 'leg'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00201",
+    "concept": "false",
+    "text": "The Spanish word 'vidrio' means 'to hear'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00342",
+    "concept": "false",
+    "text": "The Spanish word 'pulpo' means 'slow'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00240",
+    "concept": "false",
+    "text": "The Spanish word 'comprar' means 'dry'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00250",
+    "concept": "true",
+    "text": "The Spanish word 'gato' means 'cat'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00076",
+    "concept": "false",
+    "text": "The Spanish word 'nunca' means 'to hear'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00283",
+    "concept": "true",
+    "text": "The Spanish word 'reloj' means 'clock'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00169",
+    "concept": "false",
+    "text": "The Spanish word 'espacio' means 'to measure'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00228",
+    "concept": "true",
+    "text": "The Spanish word 'pagar' means 'to pay'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00266",
+    "concept": "true",
+    "text": "The Spanish word 'esquina' means 'corner'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00070",
+    "concept": "true",
+    "text": "The Spanish word 'crecer' means 'to grow'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00064",
+    "concept": "false",
+    "text": "The Spanish word 'lado' means 'equal'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00149",
+    "concept": "false",
+    "text": "The Spanish word 'oro' means 'story'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00068",
+    "concept": "false",
+    "text": "The Spanish word 'respuesta' means 'bread'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00023",
+    "concept": "true",
+    "text": "The Spanish word 'tierra' means 'land'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00055",
+    "concept": "false",
+    "text": "The Spanish word 'hacer' means 'neck'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00054",
+    "concept": "false",
+    "text": "The Spanish word 'largo' means 'history'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00165",
+    "concept": "true",
+    "text": "The Spanish word 'libre' means 'free'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00175",
+    "concept": "false",
+    "text": "The Spanish word 'seis' means 'to find'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00058",
+    "concept": "false",
+    "text": "The Spanish word 'dos' means 'enemy'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00171",
+    "concept": "true",
+    "text": "The Spanish word 'temprano' means 'early'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00061",
+    "concept": "false",
+    "text": "The Spanish word 'saber' means 'happy'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00298",
+    "concept": "false",
+    "text": "The Spanish word 'dientes' means 'hope'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00265",
+    "concept": "true",
+    "text": "The Spanish word 'estudiante' means 'student'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00245",
+    "concept": "true",
+    "text": "The Spanish word 'cocinero' means 'cook'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00212",
+    "concept": "true",
+    "text": "The Spanish word 'morir' means 'to die'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00271",
+    "concept": "true",
+    "text": "The Spanish word 'imaginar' means 'to imagine'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00012",
+    "concept": "false",
+    "text": "The Spanish word 'decir' means 'order'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00103",
+    "concept": "true",
+    "text": "The Spanish word 'papel' means 'paper'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00044",
+    "concept": "true",
+    "text": "The Spanish word 'ayudar' means 'to help'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00238",
+    "concept": "true",
+    "text": "The Spanish word 'sonrisa' means 'smile'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00046",
+    "concept": "false",
+    "text": "The Spanish word 'derecho' means 'summer'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00278",
+    "concept": "false",
+    "text": "The Spanish word 'campana' means 'to connect'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00249",
+    "concept": "false",
+    "text": "The Spanish word 'seguro' means 'danger'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00117",
+    "concept": "false",
+    "text": "The Spanish word 'pronto' means 'to die'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00053",
+    "concept": "true",
+    "text": "The Spanish word 'escribir' means 'to write'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00154",
+    "concept": "false",
+    "text": "The Spanish word 'calor' means 'dry'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00141",
+    "concept": "false",
+    "text": "The Spanish word 'decidir' means 'to give'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00006",
+    "concept": "false",
+    "text": "The Spanish word 'o' means 'octopus'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00013",
+    "concept": "false",
+    "text": "The Spanish word 'conjunto' means 'son'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00065",
+    "concept": "true",
+    "text": "The Spanish word 'ahora' means 'now'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00281",
+    "concept": "true",
+    "text": "The Spanish word 'miedo' means 'fear'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00225",
+    "concept": "false",
+    "text": "The Spanish word 'primavera' means 'wave'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00109",
+    "concept": "true",
+    "text": "The Spanish word 'suficiente' means 'enough'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00307",
+    "concept": "false",
+    "text": "The Spanish word 'manzana' means 'hand'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00188",
+    "concept": "true",
+    "text": "The Spanish word 'hablar' means 'to speak'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00097",
+    "concept": "false",
+    "text": "The Spanish word 'madera' means 'to have'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00146",
+    "concept": "true",
+    "text": "The Spanish word 'ocupado' means 'busy'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00276",
+    "concept": "true",
+    "text": "The Spanish word 'vecino' means 'neighbor'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00112",
+    "concept": "false",
+    "text": "The Spanish word 'joven' means 'hot'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00111",
+    "concept": "false",
+    "text": "The Spanish word 'chica' means 'to eat'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00101",
+    "concept": "true",
+    "text": "The Spanish word 'caminar' means 'to walk'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00037",
+    "concept": "false",
+    "text": "The Spanish word 'vivir' means 'sheep'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00347",
+    "concept": "false",
+    "text": "The Spanish word 'tortuga' means 'dry'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00224",
+    "concept": "true",
+    "text": "The Spanish word 'momento' means 'moment'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00204",
+    "concept": "true",
+    "text": "The Spanish word 'mes' means 'month'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00349",
+    "concept": "false",
+    "text": "The Spanish word 'elefante' means 'spring'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00116",
+    "concept": "false",
+    "text": "The Spanish word 'sentir' means 'to build'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00162",
+    "concept": "true",
+    "text": "The Spanish word 'belleza' means 'beauty'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00000",
+    "concept": "false",
+    "text": "The Spanish word 'con' means 'to speak'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00009",
+    "concept": "false",
+    "text": "The Spanish word 'otro' means 'hot'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00067",
+    "concept": "true",
+    "text": "The Spanish word 'cabeza' means 'head'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00157",
+    "concept": "true",
+    "text": "The Spanish word 'potencia' means 'power'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00147",
+    "concept": "true",
+    "text": "The Spanish word 'prueba' means 'test'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00077",
+    "concept": "true",
+    "text": "The Spanish word 'ciudad' means 'city'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00129",
+    "concept": "false",
+    "text": "The Spanish word 'orden' means 'old'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00092",
+    "concept": "true",
+    "text": "The Spanish word 'comer' means 'to eat'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00066",
+    "concept": "false",
+    "text": "The Spanish word 'encontrar' means 'person'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00011",
+    "concept": "false",
+    "text": "The Spanish word 'tiempo' means 'market'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00153",
+    "concept": "false",
+    "text": "The Spanish word 'caliente' means 'iron'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00210",
+    "concept": "false",
+    "text": "The Spanish word 'recibir' means 'time'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00126",
+    "concept": "true",
+    "text": "The Spanish word 'viento' means 'wind'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00304",
+    "concept": "true",
+    "text": "The Spanish word 'higo' means 'fig'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00043",
+    "concept": "true",
+    "text": "The Spanish word 'pensar' means 'to think'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00093",
+    "concept": "true",
+    "text": "The Spanish word 'amigo' means 'friend'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00335",
+    "concept": "true",
+    "text": "The Spanish word 'conejo' means 'rabbit'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00083",
+    "concept": "false",
+    "text": "The Spanish word 'izquierda' means 'never'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00305",
+    "concept": "true",
+    "text": "The Spanish word 'hermana' means 'sister'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00005",
+    "concept": "true",
+    "text": "The Spanish word 'pero' means 'but'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00106",
+    "concept": "false",
+    "text": "The Spanish word 'carta' means 'nothing'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00020",
+    "concept": "true",
+    "text": "The Spanish word 'leer' means 'to read'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00089",
+    "concept": "false",
+    "text": "The Spanish word 'libro' means 'industry'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00029",
+    "concept": "true",
+    "text": "The Spanish word 'madre' means 'mother'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00056",
+    "concept": "true",
+    "text": "The Spanish word 'cosa' means 'thing'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00004",
+    "concept": "true",
+    "text": "The Spanish word 'palabra' means 'word'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00206",
+    "concept": "true",
+    "text": "The Spanish word 'esperanza' means 'hope'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00248",
+    "concept": "false",
+    "text": "The Spanish word 'quemar' means 'hot'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00108",
+    "concept": "false",
+    "text": "The Spanish word 'segundo' means 'hello'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00193",
+    "concept": "true",
+    "text": "The Spanish word 'bosque' means 'forest'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_false_00327",
+    "concept": "false",
+    "text": "The Spanish word 'cabra' means 'money'.",
+    "source": "sp_en_trans"
+  },
+  {
+    "id": "sp_en_trans_true_00220",
+    "concept": "true",
+    "text": "The Spanish word 'guardar' means 'to save'.",
+    "source": "sp_en_trans"
+  }
+]
