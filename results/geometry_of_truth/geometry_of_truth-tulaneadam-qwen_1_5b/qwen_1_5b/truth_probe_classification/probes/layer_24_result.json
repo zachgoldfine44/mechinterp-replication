@@ -1,1 +1,0 @@
-{"accuracy": 0.96, "per_concept": {"false": 0.96, "true": 0.96}, "confusion_matrix": [[48, 2], [2, 48]]}

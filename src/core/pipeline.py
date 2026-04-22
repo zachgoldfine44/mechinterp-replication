@@ -811,7 +811,7 @@ Examples:
         default=None,
         help=(
             "Replication attempt identifier, e.g. "
-            "'geometry_of_truth-tulaneadam-qwen_1_5b'. When given, the "
+            "'geometry_of_truth-zachgoldfine44-qwen_1_5b'. When given, the "
             "pipeline loads config from "
             "config/papers/{paper}/replications/{replication}/ and writes "
             "results/writeups/figures under the same namespace, so multiple "

@@ -28,7 +28,7 @@ they own lives under that namespace.
 
 Examples:
 - `emotions-zachgoldfine44-6models` — all 7 models in the matrix
-- `geometry_of_truth-tulaneadam-qwen_1_5b` — one model
+- `geometry_of_truth-zachgoldfine44-qwen_1_5b` — one model
 - `geometry_of_truth-alice-llama-70b` — hypothetical second replication
   by a different person on a larger model
 

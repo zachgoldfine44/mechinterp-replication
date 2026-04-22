@@ -63,7 +63,7 @@ class PaperConfig:
             ``paper_text_path`` if that file exists. Empty string if no
             paper.md is present (with a logged warning).
         replication_id: Identifier for this specific replication attempt
-            (e.g., 'geometry_of_truth-tulaneadam-qwen_1_5b'). When set,
+            (e.g., 'geometry_of_truth-zachgoldfine44-qwen_1_5b'). When set,
             downstream paths (results, stimuli, writeup) are namespaced
             under it. None means legacy un-namespaced layout.
         replication_metadata: Raw ``replication:`` section from the yaml

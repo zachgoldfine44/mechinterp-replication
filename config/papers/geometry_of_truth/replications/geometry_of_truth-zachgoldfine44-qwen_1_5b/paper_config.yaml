@@ -18,9 +18,10 @@ paper:
   paper_text_path: "paper.md"
 
 # This file is the configuration for ONE specific replication attempt of
-# the above paper. A separate replication of the same paper already
-# lives at config/papers/geometry_of_truth/replications/geometry_of_truth-tulaneadam-qwen_1_5b/
-# — the two coexist and are compared row-by-row in the README table.
+# the above paper. The framework supports multiple independent
+# replications of the same paper coexisting under
+# config/papers/{paper}/replications/{replication_id}/ — they get
+# compared row-by-row in the README table.
 replication:
   id: "geometry_of_truth-zachgoldfine44-qwen_1_5b"
   replicator: "Zach Goldfine"

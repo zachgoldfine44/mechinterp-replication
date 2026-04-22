@@ -10,13 +10,6 @@ Structure in Large Language Model Representations of True/False Datasets.*
 **Model in original paper:** LLaMA-2 7B / 13B / 70B (base)
 **Environment:** Apple Silicon MacBook, MPS, local only
 
-> This is the second replication of Marks & Tegmark (2023) in this repo.
-> A separate replication by [@tulaneadam](https://github.com/tulaneadam)
-> is at [`geometry_of_truth-tulaneadam-qwen_1_5b`](../geometry_of_truth-tulaneadam-qwen_1_5b/draft.md).
-> Both cover Qwen-2.5-1.5B-Instruct but make different claim choices
-> and succeed/fail at different thresholds — the two are complementary,
-> not redundant.
-
 ---
 
 ## TL;DR
