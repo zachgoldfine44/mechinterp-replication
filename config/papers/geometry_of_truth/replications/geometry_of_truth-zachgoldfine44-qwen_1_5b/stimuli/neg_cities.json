@@ -1,0 +1,602 @@
+[
+  {
+    "id": "neg_cities_false_00358",
+    "concept": "false",
+    "text": "The city of Luancheng is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00054",
+    "concept": "false",
+    "text": "The city of Niigata is not in Japan.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01089",
+    "concept": "true",
+    "text": "The city of Curitiba is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00765",
+    "concept": "true",
+    "text": "The city of Theni is not in Nigeria.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00013",
+    "concept": "true",
+    "text": "The city of Abidjan is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00002",
+    "concept": "false",
+    "text": "The city of Lodz is not in Poland.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01269",
+    "concept": "true",
+    "text": "The city of Kotli is not in the United States.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01036",
+    "concept": "false",
+    "text": "The city of Tiruppur is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00713",
+    "concept": "true",
+    "text": "The city of Al Ahmadi is not in Japan.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00301",
+    "concept": "true",
+    "text": "The city of Nashik is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00544",
+    "concept": "false",
+    "text": "The city of Orenburg is not in Russia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00038",
+    "concept": "false",
+    "text": "The city of Ulsan is not in South Korea.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00132",
+    "concept": "false",
+    "text": "The city of Changwon is not in South Korea.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01047",
+    "concept": "true",
+    "text": "The city of Huangshi is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00222",
+    "concept": "false",
+    "text": "The city of Santo Domingo Oeste is not in the Dominican Republic.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00037",
+    "concept": "true",
+    "text": "The city of Mombasa is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00025",
+    "concept": "true",
+    "text": "The city of Anqing is not in Brazil.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00820",
+    "concept": "false",
+    "text": "The city of Kunshan is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01211",
+    "concept": "true",
+    "text": "The city of Abu Dhabi is not in Oman.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01025",
+    "concept": "true",
+    "text": "The city of Handan is not in Russia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00128",
+    "concept": "false",
+    "text": "The city of Incheon is not in South Korea.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00046",
+    "concept": "false",
+    "text": "The city of Sambhaji Nagar is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00262",
+    "concept": "false",
+    "text": "The city of Bhayandar is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00919",
+    "concept": "true",
+    "text": "The city of Dombivli is not in Mali.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01215",
+    "concept": "true",
+    "text": "The city of Lianyungang is not in the Philippines.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01247",
+    "concept": "true",
+    "text": "The city of Langfang is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00412",
+    "concept": "false",
+    "text": "The city of Kagoshima is not in Japan.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00805",
+    "concept": "true",
+    "text": "The city of Dandong is not in Niger.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00905",
+    "concept": "true",
+    "text": "The city of Tegucigalpa is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00238",
+    "concept": "false",
+    "text": "The city of Kinshasa is not in the Democratic Republic of the Congo.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01445",
+    "concept": "true",
+    "text": "The city of Haiphong is not in the Dominican Republic.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00564",
+    "concept": "false",
+    "text": "The city of Benin City is not in Nigeria.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00514",
+    "concept": "false",
+    "text": "The city of Sendai is not in Japan.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00399",
+    "concept": "true",
+    "text": "The city of Kemerovo is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01466",
+    "concept": "false",
+    "text": "The city of Copenhagen is not in Denmark.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00076",
+    "concept": "false",
+    "text": "The city of Guilin is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00879",
+    "concept": "true",
+    "text": "The city of Okayama is not in Russia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00541",
+    "concept": "true",
+    "text": "The city of Diyarbakir is not in Colombia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00589",
+    "concept": "true",
+    "text": "The city of Pekanbaru is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00515",
+    "concept": "true",
+    "text": "The city of Sendai is not in Brazil.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00663",
+    "concept": "true",
+    "text": "The city of Guwahati is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01340",
+    "concept": "false",
+    "text": "The city of Arak is not in Iran.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00478",
+    "concept": "false",
+    "text": "The city of Weihai is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01112",
+    "concept": "false",
+    "text": "The city of Yibin is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01388",
+    "concept": "false",
+    "text": "The city of Karbala is not in Iraq.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00225",
+    "concept": "true",
+    "text": "The city of Tangshan is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00870",
+    "concept": "false",
+    "text": "The city of Moradabad is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00918",
+    "concept": "false",
+    "text": "The city of Dombivli is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00322",
+    "concept": "false",
+    "text": "The city of Agadir is not in Morocco.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00048",
+    "concept": "false",
+    "text": "The city of Ajmer is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00525",
+    "concept": "true",
+    "text": "The city of Novosibirsk is not in the Philippines.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00349",
+    "concept": "true",
+    "text": "The city of Shangqiu is not in South Korea.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00266",
+    "concept": "false",
+    "text": "The city of Santo Domingo Este is not in the Dominican Republic.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00193",
+    "concept": "true",
+    "text": "The city of Suez is not in Brazil.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01402",
+    "concept": "false",
+    "text": "The city of Qujing is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01459",
+    "concept": "true",
+    "text": "The city of Las Pinas is not in Yemen.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01396",
+    "concept": "false",
+    "text": "The city of Liupanshui is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00365",
+    "concept": "true",
+    "text": "The city of Bijie is not in Indonesia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01481",
+    "concept": "true",
+    "text": "The city of Changchun is not in Germany.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00237",
+    "concept": "true",
+    "text": "The city of Aparecida de Goiania is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00808",
+    "concept": "false",
+    "text": "The city of Lusaka is not in Zambia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01344",
+    "concept": "false",
+    "text": "The city of Omdurman is not in Sudan.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00457",
+    "concept": "true",
+    "text": "The city of Yunfu is not in Honduras.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00560",
+    "concept": "false",
+    "text": "The city of General Santos is not in the Philippines.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01181",
+    "concept": "true",
+    "text": "The city of Quezon City is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01387",
+    "concept": "true",
+    "text": "The city of Kolkata is not in Japan.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00939",
+    "concept": "true",
+    "text": "The city of Amman is not in Malaysia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00875",
+    "concept": "true",
+    "text": "The city of Shivaji Nagar is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00201",
+    "concept": "true",
+    "text": "The city of Harare is not in Turkey.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00740",
+    "concept": "false",
+    "text": "The city of Kharkiv is not in Ukraine.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00181",
+    "concept": "true",
+    "text": "The city of Anshan is not in Cameroon.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00050",
+    "concept": "false",
+    "text": "The city of Rohini is not in India.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00933",
+    "concept": "true",
+    "text": "The city of Sofia is not in South Korea.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01318",
+    "concept": "false",
+    "text": "The city of Gold Coast is not in Australia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00600",
+    "concept": "false",
+    "text": "The city of Laibin is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00174",
+    "concept": "false",
+    "text": "The city of Shaoxing is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01432",
+    "concept": "false",
+    "text": "The city of Karachi is not in Pakistan.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00008",
+    "concept": "false",
+    "text": "The city of Baoji is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00667",
+    "concept": "true",
+    "text": "The city of Aligarh is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00803",
+    "concept": "true",
+    "text": "The city of Longyan is not in Benin.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00832",
+    "concept": "false",
+    "text": "The city of Fushun is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01311",
+    "concept": "true",
+    "text": "The city of Shenyang is not in Somalia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00296",
+    "concept": "false",
+    "text": "The city of Santiago de los Caballeros is not in the Dominican Republic.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00938",
+    "concept": "false",
+    "text": "The city of Amman is not in Jordan.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00771",
+    "concept": "true",
+    "text": "The city of Chennai is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00552",
+    "concept": "false",
+    "text": "The city of Cheonan is not in South Korea.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01049",
+    "concept": "true",
+    "text": "The city of Huaibei is not in Brazil.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00311",
+    "concept": "true",
+    "text": "The city of Changde is not in Mexico.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00582",
+    "concept": "false",
+    "text": "The city of Hanzhong is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00613",
+    "concept": "true",
+    "text": "The city of Hannover is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00777",
+    "concept": "true",
+    "text": "The city of Bayannur is not in Russia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_01359",
+    "concept": "true",
+    "text": "The city of Tonghua is not in Venezuela.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00364",
+    "concept": "false",
+    "text": "The city of Bijie is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00433",
+    "concept": "true",
+    "text": "The city of Stockholm is not in Russia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_00860",
+    "concept": "false",
+    "text": "The city of Vladivostok is not in Russia.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01044",
+    "concept": "false",
+    "text": "The city of Jingmen is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_true_00437",
+    "concept": "true",
+    "text": "The city of Baghdad is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01258",
+    "concept": "false",
+    "text": "The city of Winnipeg is not in Canada.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01292",
+    "concept": "false",
+    "text": "The city of Xining is not in China.",
+    "source": "neg_cities"
+  },
+  {
+    "id": "neg_cities_false_01042",
+    "concept": "false",
+    "text": "The city of Suizhou is not in China.",
+    "source": "neg_cities"
+  }
+]

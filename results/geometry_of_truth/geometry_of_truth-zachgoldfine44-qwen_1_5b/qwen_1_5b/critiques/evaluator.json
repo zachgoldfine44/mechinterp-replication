@@ -1,0 +1,13 @@
+{
+  "top_concerns": [],
+  "consensus_strengths": [],
+  "consensus_weaknesses": [],
+  "error": "\"Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted\"",
+  "_provenance": {
+    "paper_id": "geometry_of_truth",
+    "model_key": "qwen_1_5b",
+    "n_results": 4,
+    "n_sanity_reports": 4,
+    "chatgpt_available": false
+  }
+}

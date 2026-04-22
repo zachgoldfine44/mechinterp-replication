@@ -1,0 +1,63 @@
+{
+  "claim_id": "truth_probe_generalization_sp_en_trans",
+  "model_key": "qwen_1_5b",
+  "paper_id": "geometry_of_truth",
+  "metrics": {
+    "diagonal_dominance": 0.5,
+    "test_accuracy": 0.58,
+    "per_concept_accuracy": {
+      "false": 0.16,
+      "true": 1.0
+    },
+    "confusion_matrix": [
+      [
+        8,
+        42
+      ],
+      [
+        0,
+        50
+      ]
+    ],
+    "generalization_gap": 0.41000000000000003,
+    "training_accuracy": 0.99,
+    "best_layer": 12,
+    "n_test_stimuli": 100
+  },
+  "success": true,
+  "metadata": {
+    "training_claim_id": "truth_probe_cities",
+    "test_stimulus_set": "sp_en_trans",
+    "n_probe_folds": 5,
+    "run_manifest": {
+      "timestamp_utc": "2026-04-21T19:31:42.189852+00:00",
+      "git": {
+        "short_sha": "d361e01",
+        "full_sha": "d361e011908dd9f6b337e867ee4ac1d6ff7057df",
+        "dirty": false
+      },
+      "python": {
+        "version": "3.11.15",
+        "executable": "/Users/zacharygoldfine/Claude/repos/mechinterp-replication/.venv/bin/python"
+      },
+      "platform": {
+        "system": "Darwin",
+        "machine": "arm64",
+        "processor": "arm"
+      },
+      "torch": {
+        "torch_version": "2.11.0",
+        "cuda_available": false,
+        "mps_available": true
+      },
+      "libs": {
+        "transformer_lens": "3.0.0",
+        "transformers": "4.57.6",
+        "scikit-learn": "1.8.0",
+        "scipy": "1.17.1",
+        "numpy": "2.4.4",
+        "huggingface_hub": "0.36.2"
+      }
+    }
+  }
+}
