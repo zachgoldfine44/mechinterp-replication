@@ -29,28 +29,51 @@ from pathlib import Path
 from typing import Any
 
 from src.core.claim import ClaimConfig, ExperimentResult
+from src.utils.env import get_committed_artifacts_root
 
 logger = logging.getLogger(__name__)
 
 
 def _results_dir_for(
+    data_root: Path,  # kept in signature for API back-compat; unused for this path
+    paper_id: str,
+    replication_id: str | None,
+    model_key: str,
+    claim_id: str,
+) -> Path:
+    """Build the per-claim directory for COMMITTED small artifacts.
+
+    Returns ``<repo>/results/{paper_id}/{replication_id}/{model_key}/{claim_id}``
+    (without the ``replication_id`` segment when it's None). The
+    .gitignore is configured to track ``result.json``, ``sanity.json``,
+    ``concept_vectors.pt``, and per-layer probe JSONs under this tree
+    (see .gitignore whitelist for the exact patterns).
+
+    Heavy per-stimulus activation caches must NOT go here — use
+    :func:`_cache_dir_for` instead. The ``data_root`` arg is accepted
+    for backward compatibility with existing call sites but has no
+    effect on the returned path.
+    """
+    del data_root  # ignored, see docstring
+    base = get_committed_artifacts_root() / paper_id
+    if replication_id:
+        base = base / replication_id
+    return base / model_key / claim_id
+
+
+def _cache_dir_for(
     data_root: Path,
     paper_id: str,
     replication_id: str | None,
     model_key: str,
     claim_id: str,
 ) -> Path:
-    """Build the per-claim results directory.
+    """Build the per-claim directory for LOCAL-ONLY heavy artifacts.
 
-    When ``replication_id`` is set, paths are namespaced as:
-        {data_root}/results/{paper_id}/{replication_id}/{model_key}/{claim_id}
-
-    Otherwise (legacy) paths stay flat:
-        {data_root}/results/{paper_id}/{model_key}/{claim_id}
-
-    Centralizing this here means the whole harness gets namespaced by
-    editing one function — callers in pipeline.py, critique.py, and
-    analysis modules all use helpers that route through here.
+    Returns ``{data_root}/results/{paper_id}/{replication_id}/{model_key}/{claim_id}``.
+    Default ``data_root`` is ``<repo>/local_data/`` and is gitignored in
+    its entirety — this is where per-stimulus activation tensors,
+    probe-weight checkpoints, and other re-derivable caches belong.
     """
     base = data_root / "results" / paper_id
     if replication_id:
@@ -61,10 +84,23 @@ def _results_dir_for(
 def results_root_for(
     data_root: Path, paper_id: str, replication_id: str | None,
 ) -> Path:
-    """Return the root directory for all results of a (paper, replication).
+    """Return the root directory for COMMITTED results of a (paper, replication).
 
     Used by the pipeline summary, critique dirs, and cross-model analysis.
+    The ``data_root`` arg is accepted for signature back-compat but does
+    not affect the returned path.
     """
+    del data_root
+    base = get_committed_artifacts_root() / paper_id
+    if replication_id:
+        base = base / replication_id
+    return base
+
+
+def cache_root_for(
+    data_root: Path, paper_id: str, replication_id: str | None,
+) -> Path:
+    """Return the root directory for LOCAL-ONLY caches of a (paper, replication)."""
     base = data_root / "results" / paper_id
     if replication_id:
         base = base / replication_id
@@ -77,8 +113,17 @@ class Experiment(ABC):
     Attributes:
         config: The ClaimConfig describing what to test and how to evaluate.
         model_key: Identifier for the model being tested (e.g., 'llama_1b').
-        data_root: Root directory for all persistent data (from get_data_root()).
-        results_dir: Where this experiment's outputs are saved.
+        data_root: Root directory for local-only heavy artifacts (from
+            get_data_root()).
+        results_dir: Per-claim directory for **committed small artifacts**
+            (result.json, sanity.json, concept_vectors.pt, probes/ JSONs).
+            Points at ``<repo>/results/{paper}/{replication_id}/{model}/{claim}/``
+            by default so outputs flow into git history during a run.
+        cache_dir: Per-claim directory for **local-only heavy artifacts**
+            (per-stimulus activation tensors, probe-weight checkpoints).
+            Points at ``{data_root}/results/{paper}/{replication_id}/{model}/{claim}/``
+            where ``data_root`` is ``<repo>/local_data/`` unless overridden
+            by ``MECHINTERP_DATA_ROOT``. Gitignored in full.
     """
 
     def __init__(self, config: ClaimConfig, model_key: str, data_root: Path) -> None:
@@ -86,6 +131,13 @@ class Experiment(ABC):
         self.model_key = model_key
         self.data_root = data_root
         self.results_dir = _results_dir_for(
+            data_root=data_root,
+            paper_id=config.paper_id,
+            replication_id=config.replication_id,
+            model_key=model_key,
+            claim_id=config.claim_id,
+        )
+        self.cache_dir = _cache_dir_for(
             data_root=data_root,
             paper_id=config.paper_id,
             replication_id=config.replication_id,

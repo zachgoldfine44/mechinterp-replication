@@ -113,9 +113,13 @@ class CausalSteeringExperiment(Experiment):
         self.results_dir.mkdir(parents=True, exist_ok=True)
 
         # Step 1: Load concept vectors and best layer
-        dep_results_dir = (
-            self.data_root / "results" / self.config.paper_id
-            / self.model_key / self.dependency_claim
+        from src.core.experiment import _results_dir_for
+        dep_results_dir = _results_dir_for(
+            data_root=self.data_root,
+            paper_id=self.config.paper_id,
+            replication_id=self.config.replication_id,
+            model_key=self.model_key,
+            claim_id=self.dependency_claim,
         )
         cv_path = dep_results_dir / "concept_vectors.pt"
         if not cv_path.exists():

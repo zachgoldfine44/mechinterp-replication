@@ -21,7 +21,10 @@ paper:
   url: "https://arxiv.org/abs/XXXX.XXXXX"
   original_model: "What model the paper studied"
   model_variant: "instruct"     # or "base"
-  paper_text_path: "../../paper.md"  # relative to this dir; shared oracle
+  # paper_text_path is resolved relative to config/papers/{paper_id}/
+  # (NOT this replication subdir), so the default "paper.md" picks up
+  # the shared paper.md oracle that lives at the paper level.
+  paper_text_path: "paper.md"
 
 # --- REPLICATION identity ----------------------------------------------------
 # This section identifies ONE specific replication attempt of the above paper.

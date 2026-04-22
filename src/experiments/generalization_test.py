@@ -88,13 +88,18 @@ class GeneralizationTestExperiment(Experiment):
         """
         self.results_dir.mkdir(parents=True, exist_ok=True)
 
-        # Step 1: Load training experiment results to find best layer and probes
-        training_results_dir = (
-            self.data_root
-            / "results"
-            / self.config.paper_id
-            / self.model_key
-            / self.training_claim_id
+        # Step 1: Load training experiment results to find best layer and probes.
+        # Route through the same helper the Experiment base class uses, so
+        # this picks up (a) the per-replication namespace and (b) the
+        # committed-results root (not local_data/). Prior versions
+        # hardcoded both wrong.
+        from src.core.experiment import _results_dir_for
+        training_results_dir = _results_dir_for(
+            data_root=self.data_root,
+            paper_id=self.config.paper_id,
+            replication_id=self.config.replication_id,
+            model_key=self.model_key,
+            claim_id=self.training_claim_id,
         )
         training_result_path = training_results_dir / "result.json"
 
@@ -283,9 +288,13 @@ class GeneralizationTestExperiment(Experiment):
         """
         from src.utils.extraction import extract_for_experiment
 
-        training_results_dir = (
-            self.data_root / "results" / self.config.paper_id
-            / self.model_key / self.training_claim_id
+        from src.core.experiment import _results_dir_for
+        training_results_dir = _results_dir_for(
+            data_root=self.data_root,
+            paper_id=self.config.paper_id,
+            replication_id=self.config.replication_id,
+            model_key=self.model_key,
+            claim_id=self.training_claim_id,
         )
         training_result_path = training_results_dir / "result.json"
         aggregation = "last_token"
@@ -300,7 +309,7 @@ class GeneralizationTestExperiment(Experiment):
             texts=texts,
             layers=[layer],
             aggregation=aggregation,
-            cache_dir=self.results_dir / "activations",
+            cache_dir=self.cache_dir / "activations",
             activations_cache=activations_cache,
         )
         return acts_by_layer[layer]
