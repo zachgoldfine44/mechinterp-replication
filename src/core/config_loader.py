@@ -139,9 +139,10 @@ def load_paper_config(
             exist yet). Also used to populate ``PaperConfig.replication_id``,
             which downstream code uses for namespacing result/writeup paths.
 
-            If ``replication_id`` is None, the loader will read a
-            ``replication:`` section from the yaml itself (if present) and
-            use the ``id`` field there. Explicit argument wins over yaml.
+            If ``replication_id`` is None and the paper has exactly one
+            replication under ``replications/``, the loader auto-selects
+            it. If the paper has multiple replications and none was
+            requested, a ValueError is raised listing the choices.
 
     Returns:
         Parsed PaperConfig with all claims.
@@ -149,7 +150,24 @@ def load_paper_config(
     Raises:
         FileNotFoundError: If the config file doesn't exist.
         KeyError: If required fields are missing from the YAML.
+        ValueError: If ``replication_id`` is None but the paper has
+            multiple replications (caller must pick one).
     """
+    if replication_id is None:
+        reps = list_replications(paper_id)
+        if len(reps) == 1:
+            replication_id = reps[0]
+            logger.info(
+                "Auto-selected sole replication for %s: %s",
+                paper_id, replication_id,
+            )
+        elif len(reps) > 1:
+            raise ValueError(
+                f"Paper {paper_id!r} has multiple replications: {reps}. "
+                f"Pass --replication to pick one (or iterate all of them "
+                f"with a script)."
+            )
+
     config_path = _resolve_paper_config_path(paper_id, replication_id)
 
     if not config_path.exists():
@@ -258,7 +276,9 @@ def load_stimuli_config(
         replication_id: Optional replication identifier. When given, the
             loader checks for
             ``config/papers/{paper_id}/replications/{replication_id}/stimuli_config.yaml``
-            first, falling back to the paper-level file if absent.
+            first, falling back to the paper-level file if absent. When
+            None, auto-selects the sole replication if the paper has
+            exactly one.
 
     Returns:
         Raw parsed YAML dict defining stimulus sets.
@@ -266,7 +286,19 @@ def load_stimuli_config(
     Raises:
         FileNotFoundError: If neither the per-replication nor the
             paper-level stimuli config exists.
+        ValueError: If replication_id is None but the paper has multiple
+            replications (caller must pick one).
     """
+    if replication_id is None:
+        reps = list_replications(paper_id)
+        if len(reps) == 1:
+            replication_id = reps[0]
+        elif len(reps) > 1:
+            raise ValueError(
+                f"Paper {paper_id!r} has multiple replications: {reps}. "
+                f"Pass replication_id to pick one."
+            )
+
     project_root = get_project_root()
     paper_dir = project_root / "config" / "papers" / paper_id
 

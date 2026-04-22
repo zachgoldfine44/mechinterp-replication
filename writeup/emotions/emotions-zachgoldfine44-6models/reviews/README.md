@@ -49,4 +49,4 @@ Followed by:
 
 > Can you turn this into a harsher peer-review-style referee report with major concerns / minor concerns / accept-reject recommendation?
 
-Reviews conducted in April 2026 against the v3.6 draft. This is the review protocol documented in [CONTRIBUTING.md](../../../CONTRIBUTING.md#ai-review-policy).
+Reviews conducted in April 2026 against the v3.6 draft. This is the review protocol documented in [CONTRIBUTING.md](../../../../CONTRIBUTING.md#ai-review-policy).
