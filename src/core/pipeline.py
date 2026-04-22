@@ -624,7 +624,45 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, dict[str, ExperimentResu
     )
     _save_summary(summary_path, paper_config, all_results)
 
+    # Encourage a pre-PR, independent AI review — but only when it would
+    # mean something: we need a replication_id to build a bundle, we skip
+    # --fast runs (smoke tests aren't worth reviewing), and we never let
+    # a review-print failure break the pipeline.
+    if resolved_replication_id and not args.fast and not args.no_self_review:
+        try:
+            _emit_self_review_hint(
+                args.paper, resolved_replication_id,
+                used_ai=getattr(args, "used_ai", None),
+            )
+        except Exception as exc:
+            logger.debug("Could not emit self-review hint: %s", exc)
+
     return all_results
+
+
+def _emit_self_review_hint(
+    paper_id: str, replication_id: str, used_ai: str | None = None,
+) -> None:
+    """Write a self-review bundle and print a prompt to stdout.
+
+    Runs at the end of every non-fast pipeline invocation. The point is
+    to nudge the contributor to get a neutral second-opinion AI review
+    before they open a PR — independent feedback catches blind spots
+    that the AI they co-wrote the replication with is likely to miss.
+    """
+    from src.core.review import build_self_review
+    prompt_text, bundle_path = build_self_review(
+        paper_id, replication_id, used_ai=used_ai,
+    )
+    border = "=" * 78
+    # Go through stdout directly (not logger) so this block is unbroken by
+    # the log-formatting prefix.
+    sys.stdout.write(
+        f"\n{border}\n  NEXT STEP — GET AN INDEPENDENT AI REVIEW\n{border}\n\n"
+        f"{prompt_text}"
+        f"{border}\n"
+    )
+    sys.stdout.flush()
 
 
 # ---------------------------------------------------------------------------
@@ -816,6 +854,28 @@ Examples:
         "--verbose", "-v",
         action="store_true",
         help="Enable verbose (DEBUG) logging.",
+    )
+
+    parser.add_argument(
+        "--no-self-review",
+        action="store_true",
+        help=(
+            "Suppress the end-of-run self-review prompt and bundle. "
+            "By default, non-fast runs write a bundle to "
+            "local_data/reviews/{paper}/{replication}/self_review_bundle.md "
+            "and print a prompt suggesting an independent AI review."
+        ),
+    )
+    parser.add_argument(
+        "--used-ai",
+        default=None,
+        choices=["Claude", "ChatGPT", "Gemini", "Codex", "other"],
+        help=(
+            "Which AI helped you run this replication. Used by the "
+            "end-of-run self-review prompt to suggest the OTHER two "
+            "AIs for an independent review. If omitted, the prompt "
+            "suggests all three generically."
+        ),
     )
 
     return parser
