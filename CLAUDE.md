@@ -25,10 +25,11 @@ whether the findings generalize.
 
 * **Design document**: `DESIGN.md` (framework architecture, replication protocol)
 * **Mech-interp guardrails**: `GOTCHAS.md` (preflight + post-result checklists — read before designing experiments and after every positive result)
-* **Milestone log**: `PROGRESS.md` (read this first every session — big-picture state)
-* **Running changelog**: `CHANGELOG.md` (append-only entry per work unit — your incremental memory)
-* **Active paper**: `config/papers/{paper_id}/` — config + paper text + stimuli
-* **Active paper config**: `config/papers/{paper_id}/paper_config.yaml`
+* **Harness changelog**: `CHANGELOG.md` (framework-level changes only — `src/`, `tests/`, `scripts/`, repo-level docs)
+* **Per-replication milestone log**: `writeup/{paper_id}/{replication_id}/PROGRESS.md` (big-picture state of THIS specific replication — read first every session, after you know which replication you're on)
+* **Per-replication changelog**: `writeup/{paper_id}/{replication_id}/CHANGELOG.md` (append-only work-unit log for this replication — your incremental memory)
+* **Active paper**: `config/papers/{paper_id}/` — paper text + stimuli, with one subfolder per replication under `replications/`
+* **Active paper config**: `config/papers/{paper_id}/replications/{replication_id}/paper_config.yaml` (per-replication; paper-level `paper_config.yaml` exists in legacy layouts)
 * **Paper as ground truth**: `config/papers/{paper_id}/paper.md` (full paper text — see "Paper as oracle" below)
 * **Model matrix**: `config/models.yaml`
 
@@ -59,16 +60,18 @@ pytest tests/ -v --fast
 ## Orientation (read this first every session)
 
 1. `git pull` — get latest code.
-2. Read `PROGRESS.md` — milestone state.
-3. Read the last ~30 entries of `CHANGELOG.md` — fine-grained recent history (what failed yesterday, what I tried last hour).
-4. Check which paper is active: `cat config/active_paper.txt`
-5. Read the active paper config: `cat config/papers/{paper_id}/paper_config.yaml`
-6. **Read the paper itself**: `cat config/papers/{paper_id}/paper.md` (or skim if it's long). This is the oracle. Every claim, every success threshold, every methodology choice should be checkable against the paper.
-7. Skim `GOTCHAS.md` if you're about to design an experiment (preflight checklist) or interpret a result (post-result checklist).
-8. Run `pytest tests/ -v --fast 2>&1 | tail -30` — current test status.
-9. **Make an initial commit at the start of a session** — even if it's just appending to CHANGELOG.md saying "session started, plan: X". This proves the commit pipe works and gives you a stable base to revert to.
-10. Pick the next unchecked item from PROGRESS.md.
-11. When you finish a unit of work: append to CHANGELOG.md, commit, push. **Commits should flow throughout the session, not pile up at the end.**
+2. Read the root `CHANGELOG.md` — recent harness-level changes you may not know about yet.
+3. Check which paper is active: `cat config/active_paper.txt`.
+4. Determine which replication you're working on. If the user hasn't said, list `config/papers/{paper_id}/replications/` and ask. Everything below is namespaced by `{replication_id}`.
+5. Read `writeup/{paper_id}/{replication_id}/PROGRESS.md` — milestone state for this replication.
+6. Read the last ~30 entries of `writeup/{paper_id}/{replication_id}/CHANGELOG.md` — fine-grained recent history (what failed yesterday, what I tried last hour).
+7. Read the replication's paper config: `cat config/papers/{paper_id}/replications/{replication_id}/paper_config.yaml`.
+8. **Read the paper itself**: `cat config/papers/{paper_id}/paper.md` (or skim if it's long). This is the oracle. Every claim, every success threshold, every methodology choice should be checkable against the paper.
+9. Skim `GOTCHAS.md` if you're about to design an experiment (preflight checklist) or interpret a result (post-result checklist).
+10. Run `pytest tests/ -v --fast 2>&1 | tail -30` — current test status.
+11. **Make an initial commit at the start of a session** — even if it's just appending to the replication's CHANGELOG.md saying "session started, plan: X". This proves the commit pipe works and gives you a stable base to revert to.
+12. Pick the next unchecked item from the replication's PROGRESS.md.
+13. When you finish a unit of work: append to the correct CHANGELOG (harness-level change → root `CHANGELOG.md`; work on one specific replication → that replication's `CHANGELOG.md`), commit, push. **Commits should flow throughout the session, not pile up at the end.**
 12. **When you finish a replication for the user:** echo the pipeline's end-of-run self-review prompt back to them in chat and tell them to paste it into an AI other than the one they used (you). See "Step 6: Surface the pre-PR self-review prompt" below for the exact requirement. This is non-negotiable.
 
 ## Commit cadence rules (important)
@@ -82,19 +85,22 @@ The user explicitly wants to see work progressing in git history, not a single e
 - **Each commit must pass `pytest tests/ -q --fast`** — no exceptions, no broken-tests-on-main.
 - **Never `git add .` blindly.** Always `git status` first, then `git add` specific files. This is especially important now that small result files ARE meant to be committed (see "Storage layout" below) — be careful not to accidentally commit large `.pt` cache files.
 
-## CHANGELOG.md vs PROGRESS.md
+## PROGRESS.md, CHANGELOG.md, and where they live
 
-These are different documents serving different purposes:
+Two axes to keep straight: **what kind of log** (milestone vs running) and **what scope** (harness vs replication).
 
-| | PROGRESS.md | CHANGELOG.md |
+- **Per-replication logs** live at `writeup/{paper_id}/{replication_id}/PROGRESS.md` and `.../CHANGELOG.md` — one of each, per replication attempt. Scientific state: what claims pass, what runs are pending, what the last numbers were.
+- **Root `CHANGELOG.md`** — framework-level changes only: `src/`, `tests/`, `scripts/`, root-level docs (`CLAUDE.md`, `CONTRIBUTING.md`, `DESIGN.md`, `GOTCHAS.md`, `README.md`), and `config/models.yaml`. No PROGRESS.md at root, because the framework has no single milestone state — if you want a snapshot, read the README.
+
+| | PROGRESS.md (per-replication only) | CHANGELOG.md (both scopes) |
 |---|---|---|
 | Cadence | Milestones (claim done, paper done, version bump) | Every commit / work unit / failed attempt |
 | Style | Curated, big-picture, replaceable sections | Append-only running log |
 | Editing | OK to rewrite a section when status changes | Never rewrite past entries; always append |
-| Scope | "Where does this paper replication stand?" | "What did I try at 3pm and did it work?" |
+| Scope | "Where does this replication stand?" | Root: "what framework change landed"; per-replication: "what did I try at 3pm on this replication" |
 | Length cap | Keep tight (~200 lines) | Grows forever; that's fine |
 
-When in doubt, append to CHANGELOG.md. PROGRESS.md should not be touched on every commit — only when a milestone changes.
+When routing a CHANGELOG entry: if the change touches `src/`, `tests/`, `scripts/`, `config/models.yaml`, or a root-level doc and applies regardless of which replication you're on, it's harness-level → root CHANGELOG. If it's a run you did for one specific replication, or a tuning/fix/insight that only affects that one replication's numbers, it's scientific → that replication's CHANGELOG.
 
 The user explicitly called out that PROGRESS.md was getting overwritten in a previous session. **Do not overwrite past PROGRESS.md content.** Treat its sections as updates-in-place for current state, never as a place to delete history. Move retired information to CHANGELOG.md or the writeup before deleting from PROGRESS.md.
 

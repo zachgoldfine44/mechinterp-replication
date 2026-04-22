@@ -14,7 +14,7 @@ We're excited to see what papers and experiments you replicate!
 
 # Mechinterp Replication Harness
 
-[![Tests](https://img.shields.io/badge/tests-212%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-211%20passing-brightgreen)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)]()
 
@@ -117,34 +117,50 @@ python -m src.core.pipeline --paper my_paper --tier medium        # all medium m
 
 ### Step 5: Write up
 
-Results land in `results/{paper_id}/{model_key}/`. The framework generates cross-model comparisons. Write your findings in `writeup/{paper_id}/draft.md`.
+Results land in `results/{paper_id}/{replication_id}/{model_key}/`. The framework generates cross-model comparisons. Write your findings in `writeup/{paper_id}/{replication_id}/draft.md`, and track milestones / work units in the sibling `PROGRESS.md` + `CHANGELOG.md`.
 
 ---
 
 ## Repo structure
 
+Everything paper-specific or replication-specific is namespaced under
+`{paper_id}/` and `{paper_id}/{replication_id}/`, so multiple
+independent replications of the same paper can coexist without
+colliding on configs, stimuli, results, writeups, or logs.
+
 ```
 .
 ├── README.md                       # You are here
 ├── CLAUDE.md                       # Operational guide (for Claude Code agents)
+├── CONTRIBUTING.md                 # How to contribute replications or code
 ├── DESIGN.md                       # Framework architecture
 ├── GOTCHAS.md                      # Mechinterp guardrails & checklists
-├── CONTRIBUTING.md                 # How to contribute replications or code
+├── CHANGELOG.md                    # Harness changelog (framework-level changes only)
+├── LICENSE                         # MIT
+├── requirements.txt                # Python dependencies
 ├── config/
-│   ├── models.yaml                 # Model matrix (families x sizes)
-│   └── papers/                     # One folder per paper
-│       └── emotions/               # Completed: Anthropic emotions paper
-│           ├── paper_config.yaml   # Claims, experiments, success criteria
-│           ├── paper.md            # Paper text (ground truth)
-│           ├── stimuli_config.yaml # Stimulus definitions
-│           └── stimuli/            # Generated/curated stimulus JSONs
+│   ├── active_paper.txt            # Default paper_id for the pipeline
+│   ├── models.yaml                 # Model matrix (families × sizes)
+│   └── papers/                     # One folder per paper studied
+│       └── emotions/
+│           ├── paper.md            # Paper text — the ground-truth oracle
+│           ├── paper_config.yaml   # (optional) paper-level legacy config
+│           ├── stimuli_config.yaml # (optional) paper-level legacy stimuli
+│           ├── stimuli/            # Generated/curated stimulus JSONs (shared)
+│           └── replications/       # One subfolder per replication attempt
+│               └── emotions-zachgoldfine44-6models/
+│                   ├── paper_config.yaml   # This attempt's claims + thresholds
+│                   ├── stimuli_config.yaml # This attempt's stimuli config
+│                   └── metadata.yaml       # Row data for the README table
 ├── src/
 │   ├── core/                       # Framework engine
 │   │   ├── pipeline.py             # Orchestrator: config → run → analyze
+│   │   ├── config_loader.py        # Loads paper + replication configs
 │   │   ├── experiment.py           # Abstract experiment base class
 │   │   ├── claim.py                # Claim + ExperimentResult dataclasses
 │   │   ├── sanity_checks.py        # Post-experiment artifact detection
-│   │   └── critique.py             # Claude + ChatGPT critique agents
+│   │   ├── critique.py             # Claude + ChatGPT critique agents
+│   │   └── review.py               # Post-run AI peer-review prompt builder
 │   ├── experiments/                # 6 generic experiment types
 │   │   ├── probe_classification.py
 │   │   ├── generalization_test.py
@@ -164,12 +180,30 @@ Results land in `results/{paper_id}/{model_key}/`. The framework generates cross
 │   ├── models/                     # Model loading (HF, TransformerLens, nnsight)
 │   ├── analysis/                   # Cross-model comparison & visualization
 │   └── utils/                      # Activations, datasets, caching, metrics
+├── scripts/                        # CLI helpers (review prompts, README table regen, …)
 ├── tests/                          # ~211 unit tests + integration suite
-├── writeup/                        # Replication writeups (one per paper)
-│   └── emotions/draft.md
-├── results/                        # Per-paper, per-model result artifacts
-└── figures/                        # Publication-ready plots
+├── writeup/                        # Per-replication writeups
+│   └── emotions/
+│       └── emotions-zachgoldfine44-6models/
+│           ├── draft.md            # The writeup
+│           ├── PROGRESS.md         # Milestone state for this replication
+│           ├── CHANGELOG.md        # Per-work-unit log for this replication
+│           └── reviews/            # AI peer-review responses
+├── results/                        # Per-replication, per-model result artifacts
+│   └── emotions/
+│       └── emotions-zachgoldfine44-6models/
+│           └── {model_key}/        # result.json, sanity.json, critiques/
+├── figures/                        # Per-replication publication-ready plots
+│   └── emotions/
+│       └── emotions-zachgoldfine44-6models/
+└── local_data/                     # Gitignored: activation caches, probe weights
 ```
+
+Two different scopes of log coexist: the **root `CHANGELOG.md`** is the
+harness changelog — framework changes only (`src/`, `tests/`,
+`scripts/`, repo-level docs). Scientific progress on a specific
+replication lives in that replication's own
+`writeup/{paper}/{id}/PROGRESS.md` + `CHANGELOG.md`.
 
 ---
 

@@ -1,6 +1,15 @@
-# Progress Log
+# PROGRESS — `emotions-zachgoldfine44-6models`
 
-## Active paper: emotions (Sofroniew et al. 2026)
+**Paper:** Emotion Concepts and their Function in a Large Language Model
+(Sofroniew+ 2026) — https://transformer-circuits.pub/2026/emotions/index.html
+**Replicator:** @zachgoldfine44
+**Models tested:** 7 (Llama 1B/8B/70B, Qwen 1.5B/7B, Gemma 2B/9B)
+**Current version:** v4.0
+
+Milestone log for this replication. Update in-place when state
+changes; move retired content to `CHANGELOG.md` before deleting.
+Keep this file tight (~200 lines is the guideline; currently over —
+trim next pass).
 
 ## Status: 🟢 Phase A + Phase B + Phase C (Llama-70B) COMPLETE; writeup v4.0 with large-tier + sycophancy results
 
@@ -69,21 +78,6 @@
 - Behavioral scenarios schema: verified correct (no bug).
 - Stimulus count discrepancy fixed (config aligned to actual 25/concept).
 
-
-**Harness v2 (technique modules + tests, in response to "implement the missing files" critique):**
-- 5 previously-vapor technique modules now exist with full implementations and unit tests:
-  - `src/techniques/patching.py` (13 tests) — `causal_trace`, `patch_residual_stream`, denoising/noising sweeps
-  - `src/techniques/attention.py` (14 tests) — pattern extraction, head attribution, induction-head detection, entropy
-  - `src/techniques/sae.py` (17 tests) — `SimpleSAE` train-from-scratch + optional SAELens loader, top-features-per-concept
-  - `src/techniques/logit_lens.py` (9 tests) — projections, per-layer top tokens, target-token trajectory
-  - `src/techniques/circuit_discovery.py` (16 tests) — edge attribution patching, single-edge path patching, ACDC stub
-- New `circuit_identification` experiment type (12 tests) wires patching/attention/circuit_discovery into a paper-agnostic experiment for IOI/induction-head/causal-trace style replications
-- Consolidated `_get_layer_modules` duplication: now `src/utils/activations.get_hf_layer_modules` is the single canonical implementation (was duplicated across 4 files)
-- New integration tests (10) load a real pythia-14m via TransformerLens and exercise the full harness end-to-end (extract → probe → contrastive → steer → patch → attention → logit lens → EAP)
-- New regression tests (10) pin structural properties of activation extraction (norms, monotonicity with depth, dtype preservation, determinism, etc.) to catch silent regressions
-- Updated DESIGN.md: status column on the techniques table; all 8 modules now ✅ except ACDC which is 🟡
-
-**Test counts after harness v2:** 162 unit tests pass in 1.16s; 20 integration tests pass against real pythia-14m in 2.8s when run with `--integration` flag.
 
 **v2 critique-response fixes from previous round (analysis-only, no GPU rerun needed):**
 - Real Fisher's exact test on CUDA steering path; placeholder p-values removed
@@ -302,3 +296,14 @@ Final Phase B values will use 225 expanded scenarios.
 **Scaling confirmed**: Probe accuracy increases with model size.
 - Llama: 0.773 (1B) → 0.819 (8B) ✅
 - Qwen: 0.731 (1.5B) → 0.784 (7B) ✅
+
+## Pointers
+
+- Paper oracle: `config/papers/emotions/paper.md`
+- Config: `config/papers/emotions/replications/emotions-zachgoldfine44-6models/`
+- Results: `results/emotions/emotions-zachgoldfine44-6models/`
+- Reviews: `writeup/emotions/emotions-zachgoldfine44-6models/reviews/`
+- Commit history for this replication:
+  `git log -- writeup/emotions/emotions-zachgoldfine44-6models/
+  config/papers/emotions/replications/emotions-zachgoldfine44-6models/
+  results/emotions/emotions-zachgoldfine44-6models/`
