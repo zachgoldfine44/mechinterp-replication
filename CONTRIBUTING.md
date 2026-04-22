@@ -112,14 +112,31 @@ other people's replications or the shared paper oracle.
    - Cross-model comparison (what generalizes, what's model-specific)
    - Limitations of your replication
    - Anything surprising
-9. **Regenerate the README table** (don't hand-edit it):
+9. **Get a pre-PR self-review from a different AI.** The pipeline
+   prints a "NEXT STEP" block at the end of every non-fast run with a
+   paste-ready prompt and a bundle file at
+   `local_data/reviews/{paper}/{your_id}/self_review_bundle.md`.
+   Upload that bundle into a web AI *other than* the one that helped
+   you run the replication — the goal is independent feedback from a
+   model that isn't already anchored on your choices. You can also
+   invoke it standalone:
    ```bash
-   python scripts/generate_replications_table.py
+   python scripts/review_prompt.py \
+       --paper {paper} --replication {your_id} \
+       --self-review --used-ai Claude   # or ChatGPT / Gemini / Codex
    ```
-   This scans every `metadata.yaml` and rewrites the table between its
-   sentinels. It adds your row automatically from the metadata you
-   wrote in step 4.
-10. **Open a PR** with a clear title like:
+   Save any responses you decide are worth keeping under
+   `writeup/{paper}/{your_id}/reviews/{reviewer}.md` before committing.
+   (This is separate from the post-merge referee reviews the
+   maintainer runs — see [AI review policy](#ai-review-policy) below.)
+10. **Regenerate the README table** (don't hand-edit it):
+    ```bash
+    python scripts/generate_replications_table.py
+    ```
+    This scans every `metadata.yaml` and rewrites the table between its
+    sentinels. It adds your row automatically from the metadata you
+    wrote in step 4.
+11. **Open a PR** with a clear title like:
     `Replication: {replication_id}`
     (e.g., `Replication: geometry_of_truth-alice-llama-70b`). The PR
     shouldn't touch paths under anyone else's `replications/{their_id}/`.

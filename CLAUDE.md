@@ -69,6 +69,7 @@ pytest tests/ -v --fast
 9. **Make an initial commit at the start of a session** — even if it's just appending to CHANGELOG.md saying "session started, plan: X". This proves the commit pipe works and gives you a stable base to revert to.
 10. Pick the next unchecked item from PROGRESS.md.
 11. When you finish a unit of work: append to CHANGELOG.md, commit, push. **Commits should flow throughout the session, not pile up at the end.**
+12. **When you finish a replication for the user:** echo the pipeline's end-of-run self-review prompt back to them in chat and tell them to paste it into an AI other than the one they used (you). See "Step 6: Surface the pre-PR self-review prompt" below for the exact requirement. This is non-negotiable.
 
 ## Commit cadence rules (important)
 
@@ -316,7 +317,50 @@ python -m src.core.pipeline --paper my_paper --all             # everything
 ```bash
 python -m src.analysis.cross_model --paper my_paper
 python -m src.analysis.scaling --paper my_paper
-# Then edit writeup/{paper_id}/draft.md
+# Then edit writeup/{paper_id}/{replication_id}/draft.md
+```
+
+### Step 6: Surface the pre-PR self-review prompt to the user
+
+After you've completed a replication on the user's behalf (pipeline
+run + writeup draft), your final turn MUST include the self-review
+prompt the pipeline generated. The pipeline already prints it at the
+end of every non-fast run; your job is to **echo it back to the user
+in chat** along with a concrete instruction to paste it into an AI
+other than you, so they get a neutral second opinion before opening a PR.
+
+Minimum acceptable closing message:
+
+> I've finished the replication. The pipeline wrote a bundle of every
+> text artifact to `local_data/reviews/{paper_id}/{replication_id}/self_review_bundle.md`
+> and printed a review prompt.
+>
+> Before opening your PR, I strongly recommend pasting that prompt
+> (and uploading the bundle) into **an AI other than the one you just
+> used** — e.g., if you ran this with Claude, try ChatGPT or Gemini.
+> Independent feedback catches methodology and framing blind spots
+> that the AI you co-wrote with is more likely to miss.
+>
+> [inline the Prompt 1 text from the pipeline output, with Paper: and
+>  Replication: lines filled in]
+>
+> Send Prompt 2 (the harsher referee report) after you get the first
+> response. Save any reviews worth keeping under
+> `writeup/{paper_id}/{replication_id}/reviews/{reviewer}.md`.
+
+If the user used `--no-self-review` or ran with `--fast`, skip this
+step — they opted out or are doing a smoke test. Otherwise always
+surface it. This is not optional polish: it's the main guardrail
+against circular "the AI that helped me write it is telling me it's
+great" reviews.
+
+To regenerate the prompt on demand (e.g., the user wants it again
+later), run:
+
+```bash
+python scripts/review_prompt.py \
+    --paper {paper_id} --replication {replication_id} \
+    --self-review --used-ai {Claude|ChatGPT|Gemini|Codex}
 ```
 
 ---
