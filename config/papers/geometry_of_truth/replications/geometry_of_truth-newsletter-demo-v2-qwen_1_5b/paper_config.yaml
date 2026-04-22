@@ -1,0 +1,57 @@
+# Second newsletter-onboarding simulation run, intentionally minimal.
+# Purpose: verify that the three PR-#8 fixes actually work end-to-end
+# on a cold fresh clone.
+
+paper:
+  id: "geometry_of_truth"
+  title: "The Geometry of Truth: Emergent Linear Structure in Large Language Model Representations of True/False Datasets"
+  authors: "Samuel Marks, Max Tegmark"
+  url: "https://arxiv.org/abs/2310.06824"
+  original_model: "LLaMA-2 13B (base)"
+  model_variant: "instruct"
+  paper_text_path: "paper.md"
+
+replication:
+  id: "geometry_of_truth-newsletter-demo-v2-qwen_1_5b"
+  replicator: "Newsletter Demo v2"
+  github_handle: "newsletter-demo-v2"
+  date: "2026-04-21"
+  models_tested:
+    - "qwen_1_5b"
+  status: "v0.2 (post-#8 verification)"
+  summary: >
+    Second newsletter-onboarding simulation, run against main after
+    PR #8 (path-routing + template + Python-version fixes) landed.
+    Verifies that a cold cloner can now open a working PR without
+    manually moving files between local_data/ and results/.
+  writeup_path: "writeup/geometry_of_truth/geometry_of_truth-newsletter-demo-v2-qwen_1_5b/draft.md"
+
+techniques_required:
+  - probes
+
+truth_concepts:
+  - "true"
+  - "false"
+
+claims:
+  - id: "truth_probe_cities"
+    description: >
+      A logistic-regression probe trained on residual-stream activations
+      can classify city-country factual statements as true or false
+      above chance (50%). Paper reports >90% on LLaMA-2-13B; we relax
+      to 0.70 because Qwen-1.5B is ~10x smaller than the smallest
+      model the paper studied.
+    experiment_type: "probe_classification"
+    paper_section: "Section 4, Figure 2"
+    params:
+      concept_set: ["true", "false"]
+      n_stimuli_per_concept: 50
+      probe_type: "logistic_regression"
+      activation_source: "residual_stream"
+      layer_selection: "scan_all_or_subsample"
+      aggregation: "last_token"
+      cross_validation_folds: 5
+      train_test_split: 0.8
+      seed: 42
+    success_metric: "probe_accuracy"
+    success_threshold: 0.70

@@ -1,0 +1,14 @@
+{
+  "paper_id": "geometry_of_truth",
+  "paper_title": "The Geometry of Truth: Emergent Linear Structure in Large Language Model Representations of True/False Datasets",
+  "models": {
+    "qwen_1_5b": {
+      "truth_probe_cities": {
+        "success": true,
+        "metric": "probe_accuracy",
+        "value": 1.0,
+        "threshold": 0.7
+      }
+    }
+  }
+}

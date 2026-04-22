@@ -1,0 +1,18 @@
+id: "geometry_of_truth-newsletter-demo-v2-qwen_1_5b"
+paper_id: "geometry_of_truth"
+replicator: "Newsletter Demo v2"
+github_handle: "newsletter-demo-v2"
+date: "2026-04-21"
+status: "v0.2 (post-#8 verification)"
+
+models_tested:
+  - "qwen_1_5b"
+
+summary: >
+  Second newsletter-onboarding simulation, run against main after PR #8
+  (path-routing + template + Python-version fixes). Verifies a cold
+  cloner can open a working PR without moving files manually.
+
+writeup_path: "writeup/geometry_of_truth/geometry_of_truth-newsletter-demo-v2-qwen_1_5b/draft.md"
+config_path: "config/papers/geometry_of_truth/replications/geometry_of_truth-newsletter-demo-v2-qwen_1_5b/"
+ai_reviews_path: "writeup/geometry_of_truth/geometry_of_truth-newsletter-demo-v2-qwen_1_5b/reviews/"

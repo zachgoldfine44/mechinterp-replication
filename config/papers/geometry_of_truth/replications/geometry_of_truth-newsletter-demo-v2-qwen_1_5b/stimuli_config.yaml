@@ -1,0 +1,10 @@
+# 50 true + 50 false cities statements sampled (seed=42) from the paper's
+# published cities.csv. Regenerate with convert_stimuli.py in this dir.
+
+stimulus_sets:
+  training_stimuli:
+    type: "dataset"
+    source: "geometry-of-truth (Marks & Tegmark 2023)"
+    subset: "cities"
+    per_concept: 50
+    output_dir: "stimuli/training/"

@@ -1,0 +1,111 @@
+{
+  "claim_id": "truth_probe_cities",
+  "model_key": "qwen_1_5b",
+  "paper_id": "geometry_of_truth",
+  "n_warnings": 1,
+  "n_errors": 0,
+  "summary": "[WARN] per_concept_uniformity: per-concept std=0.0000 <0.01; probe may have collapsed",
+  "checks": [
+    {
+      "name": "confusion_matrix_resolution_artifact",
+      "severity": "info",
+      "passed": true,
+      "message": "ok",
+      "details": {
+        "n_concepts": 2,
+        "total_samples": 100,
+        "per_class_samples": 50.0,
+        "metric_value": 1.0,
+        "matched_fraction": "2/2"
+      }
+    },
+    {
+      "name": "chance_level_accuracy",
+      "severity": "info",
+      "passed": true,
+      "message": "probe_accuracy=1.000 above chance",
+      "details": {
+        "accuracy_key": "probe_accuracy",
+        "accuracy_value": 1.0,
+        "n_concepts": 2,
+        "chance_level": 0.5
+      }
+    },
+    {
+      "name": "round_number_suspicion",
+      "severity": "info",
+      "passed": true,
+      "message": "metric is exactly 1.0",
+      "details": {
+        "metric_value": 1.0,
+        "matched": "1.0"
+      }
+    },
+    {
+      "name": "per_concept_uniformity",
+      "severity": "warn",
+      "passed": false,
+      "message": "per-concept std=0.0000 <0.01; probe may have collapsed",
+      "details": {
+        "mean": 1.0,
+        "std": 0.0,
+        "n": 2
+      }
+    },
+    {
+      "name": "metric_in_range",
+      "severity": "info",
+      "passed": true,
+      "message": "probe_accuracy=1.0 in range",
+      "details": {
+        "metric_value": 1.0
+      }
+    },
+    {
+      "name": "success_threshold_consistency",
+      "severity": "info",
+      "passed": true,
+      "message": "threshold consistent with success flag",
+      "details": {
+        "metric_value": 1.0,
+        "threshold": 0.7,
+        "success_flag": true
+      }
+    },
+    {
+      "name": "n_stimuli_matches_config",
+      "severity": "info",
+      "passed": true,
+      "message": "n_stimuli matches config (drift 0.0%)",
+      "details": {
+        "actual": 100,
+        "expected": 100,
+        "drift": 0.0
+      }
+    },
+    {
+      "name": "negative_control_contamination",
+      "severity": "info",
+      "passed": true,
+      "message": "no contamination metric",
+      "details": {}
+    },
+    {
+      "name": "finite_metrics",
+      "severity": "info",
+      "passed": true,
+      "message": "all metrics finite",
+      "details": {}
+    },
+    {
+      "name": "layer_in_valid_range",
+      "severity": "info",
+      "passed": true,
+      "message": "best_layer=15",
+      "details": {
+        "best_layer": 15,
+        "n_layers": null
+      }
+    }
+  ]
+}
