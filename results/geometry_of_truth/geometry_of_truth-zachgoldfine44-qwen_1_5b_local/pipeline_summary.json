@@ -1,0 +1,32 @@
+{
+  "paper_id": "geometry_of_truth",
+  "paper_title": "The Geometry of Truth: Emergent Linear Structure in LLM Representations of True/False Datasets",
+  "models": {
+    "qwen_1_5b": {
+      "truth_probe_cities": {
+        "success": true,
+        "metric": "probe_accuracy",
+        "value": 0.9850000000000001,
+        "threshold": 0.7
+      },
+      "truth_probe_generalization_sp_en_trans": {
+        "success": true,
+        "metric": "diagonal_dominance",
+        "value": 1.0,
+        "threshold": 0.5
+      },
+      "truth_probe_generalization_neg_cities": {
+        "success": false,
+        "metric": "diagonal_dominance",
+        "value": 0.0,
+        "threshold": 0.5
+      },
+      "truth_probe_generalization_larger_than": {
+        "success": true,
+        "metric": "diagonal_dominance",
+        "value": 0.5,
+        "threshold": 0.5
+      }
+    }
+  }
+}
