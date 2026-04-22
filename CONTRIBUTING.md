@@ -27,7 +27,7 @@ they own lives under that namespace.
 **Replication ID convention:** `{paper_id}-{github_handle}-{model_scope}`
 
 Examples:
-- `emotions-zachgoldfine44-6models` — all 7 models in the matrix
+- `emotions-zachgoldfine44-6models` —  7 models across the small, medium, and large tiers
 - `geometry_of_truth-zachgoldfine44-qwen_1_5b` — one model
 - `geometry_of_truth-alice-llama-70b` — hypothetical second replication
   by a different person on a larger model
