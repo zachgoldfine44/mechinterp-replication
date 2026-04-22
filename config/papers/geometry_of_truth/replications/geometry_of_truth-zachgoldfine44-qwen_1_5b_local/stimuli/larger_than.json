@@ -1,0 +1,602 @@
+[
+  {
+    "id": "larger_than_true_01770",
+    "concept": "true",
+    "text": "Ninety-five is larger than sixty-two.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00271",
+    "concept": "false",
+    "text": "Fifty-seven is larger than fifty-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01945",
+    "concept": "true",
+    "text": "Ninety-nine is larger than sixty-one.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00031",
+    "concept": "false",
+    "text": "Fifty-one is larger than eighty-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01929",
+    "concept": "true",
+    "text": "Ninety-eight is larger than ninety-two.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01434",
+    "concept": "true",
+    "text": "Eighty-six is larger than seventy-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01071",
+    "concept": "true",
+    "text": "Seventy-seven is larger than sixty-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00703",
+    "concept": "false",
+    "text": "Sixty-seven is larger than ninety-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00233",
+    "concept": "false",
+    "text": "Fifty-six is larger than sixty-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01249",
+    "concept": "true",
+    "text": "Eighty-two is larger than sixty-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01656",
+    "concept": "true",
+    "text": "Ninety-two is larger than eighty-two.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00923",
+    "concept": "false",
+    "text": "Seventy-three is larger than ninety-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00393",
+    "concept": "false",
+    "text": "Fifty-nine is larger than ninety-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00944",
+    "concept": "true",
+    "text": "Seventy-four is larger than seventy-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00388",
+    "concept": "false",
+    "text": "Fifty-nine is larger than ninety-two.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01657",
+    "concept": "true",
+    "text": "Ninety-two is larger than eighty-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00561",
+    "concept": "false",
+    "text": "Sixty-four is larger than eighty-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00252",
+    "concept": "false",
+    "text": "Fifty-six is larger than eighty-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01572",
+    "concept": "true",
+    "text": "Eighty-nine is larger than eighty-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01555",
+    "concept": "true",
+    "text": "Eighty-nine is larger than sixty-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00503",
+    "concept": "false",
+    "text": "Sixty-three is larger than seventy-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01001",
+    "concept": "false",
+    "text": "Seventy-five is larger than eighty-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01731",
+    "concept": "true",
+    "text": "Ninety-four is larger than sixty-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00665",
+    "concept": "true",
+    "text": "Sixty-seven is larger than fifty-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01827",
+    "concept": "true",
+    "text": "Ninety-six is larger than seventy-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01139",
+    "concept": "false",
+    "text": "Seventy-eight is larger than ninety-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00199",
+    "concept": "false",
+    "text": "Fifty-five is larger than seventy-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00254",
+    "concept": "false",
+    "text": "Fifty-six is larger than eighty-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01398",
+    "concept": "false",
+    "text": "Eighty-five is larger than eighty-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01029",
+    "concept": "true",
+    "text": "Seventy-six is larger than sixty-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01018",
+    "concept": "true",
+    "text": "Seventy-six is larger than fifty-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00230",
+    "concept": "false",
+    "text": "Fifty-six is larger than sixty-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00144",
+    "concept": "false",
+    "text": "Fifty-four is larger than sixty-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01862",
+    "concept": "true",
+    "text": "Ninety-seven is larger than sixty-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00731",
+    "concept": "false",
+    "text": "Sixty-eight is larger than eighty-two.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00017",
+    "concept": "false",
+    "text": "Fifty-one is larger than seventy-one.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01208",
+    "concept": "true",
+    "text": "Eighty-one is larger than seventy-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00416",
+    "concept": "false",
+    "text": "Sixty-one is larger than seventy-four.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00656",
+    "concept": "false",
+    "text": "Sixty-six is larger than ninety-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01582",
+    "concept": "false",
+    "text": "Eighty-nine is larger than ninety-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01724",
+    "concept": "true",
+    "text": "Ninety-four is larger than fifty-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01758",
+    "concept": "false",
+    "text": "Ninety-four is larger than ninety-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00436",
+    "concept": "false",
+    "text": "Sixty-one is larger than ninety-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00007",
+    "concept": "false",
+    "text": "Fifty-one is larger than fifty-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01695",
+    "concept": "true",
+    "text": "Ninety-three is larger than seventy-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00507",
+    "concept": "false",
+    "text": "Sixty-three is larger than seventy-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00876",
+    "concept": "false",
+    "text": "Seventy-two is larger than ninety-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00963",
+    "concept": "false",
+    "text": "Seventy-four is larger than ninety-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01704",
+    "concept": "true",
+    "text": "Ninety-three is larger than eighty-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01418",
+    "concept": "true",
+    "text": "Eighty-six is larger than sixty-two.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00319",
+    "concept": "false",
+    "text": "Fifty-eight is larger than sixty-four.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00609",
+    "concept": "false",
+    "text": "Sixty-five is larger than ninety-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01865",
+    "concept": "true",
+    "text": "Ninety-seven is larger than sixty-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01386",
+    "concept": "true",
+    "text": "Eighty-five is larger than seventy-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01412",
+    "concept": "true",
+    "text": "Eighty-six is larger than fifty-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00182",
+    "concept": "false",
+    "text": "Fifty-five is larger than fifty-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00161",
+    "concept": "false",
+    "text": "Fifty-four is larger than eighty-four.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01631",
+    "concept": "true",
+    "text": "Ninety-two is larger than fifty-four.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00120",
+    "concept": "false",
+    "text": "Fifty-three is larger than eighty-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01506",
+    "concept": "true",
+    "text": "Eighty-eight is larger than sixty-two.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00159",
+    "concept": "false",
+    "text": "Fifty-four is larger than eighty-two.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00986",
+    "concept": "true",
+    "text": "Seventy-five is larger than seventy-one.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01461",
+    "concept": "true",
+    "text": "Eighty-seven is larger than sixty-one.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00267",
+    "concept": "true",
+    "text": "Fifty-seven is larger than fifty-four.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00712",
+    "concept": "true",
+    "text": "Sixty-eight is larger than fifty-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01301",
+    "concept": "true",
+    "text": "Eighty-three is larger than seventy-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01588",
+    "concept": "true",
+    "text": "Ninety-one is larger than fifty-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01377",
+    "concept": "true",
+    "text": "Eighty-five is larger than sixty-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00937",
+    "concept": "true",
+    "text": "Seventy-four is larger than sixty-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00006",
+    "concept": "false",
+    "text": "Fifty-one is larger than fifty-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01094",
+    "concept": "false",
+    "text": "Seventy-seven is larger than ninety-four.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01041",
+    "concept": "false",
+    "text": "Seventy-six is larger than eighty-four.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01960",
+    "concept": "true",
+    "text": "Ninety-nine is larger than seventy-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00799",
+    "concept": "true",
+    "text": "Seventy-one is larger than fifty-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01544",
+    "concept": "true",
+    "text": "Eighty-nine is larger than fifty-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00935",
+    "concept": "true",
+    "text": "Seventy-four is larger than sixty-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00376",
+    "concept": "false",
+    "text": "Fifty-nine is larger than seventy-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00356",
+    "concept": "true",
+    "text": "Fifty-nine is larger than fifty-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01536",
+    "concept": "false",
+    "text": "Eighty-eight is larger than ninety-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00122",
+    "concept": "false",
+    "text": "Fifty-three is larger than eighty-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01475",
+    "concept": "true",
+    "text": "Eighty-seven is larger than seventy-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01051",
+    "concept": "false",
+    "text": "Seventy-six is larger than ninety-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01583",
+    "concept": "false",
+    "text": "Eighty-nine is larger than ninety-nine.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01919",
+    "concept": "true",
+    "text": "Ninety-eight is larger than eighty-one.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00487",
+    "concept": "true",
+    "text": "Sixty-three is larger than fifty-four.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00759",
+    "concept": "true",
+    "text": "Sixty-nine is larger than sixty-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00228",
+    "concept": "false",
+    "text": "Fifty-six is larger than sixty-one.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_00847",
+    "concept": "true",
+    "text": "Seventy-two is larger than sixty-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01570",
+    "concept": "true",
+    "text": "Eighty-nine is larger than eighty-four.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00286",
+    "concept": "false",
+    "text": "Fifty-seven is larger than seventy-six.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01798",
+    "concept": "true",
+    "text": "Ninety-five is larger than ninety-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00633",
+    "concept": "false",
+    "text": "Sixty-six is larger than seventy-one.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01623",
+    "concept": "false",
+    "text": "Ninety-one is larger than ninety-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01676",
+    "concept": "true",
+    "text": "Ninety-three is larger than fifty-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00831",
+    "concept": "false",
+    "text": "Seventy-one is larger than ninety-five.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01287",
+    "concept": "true",
+    "text": "Eighty-three is larger than sixty-three.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_true_01564",
+    "concept": "true",
+    "text": "Eighty-nine is larger than seventy-seven.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00262",
+    "concept": "false",
+    "text": "Fifty-six is larger than ninety-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_00024",
+    "concept": "false",
+    "text": "Fifty-one is larger than seventy-eight.",
+    "source": "larger_than"
+  },
+  {
+    "id": "larger_than_false_01401",
+    "concept": "false",
+    "text": "Eighty-five is larger than ninety-three.",
+    "source": "larger_than"
+  }
+]
