@@ -171,9 +171,28 @@ Each referee gets the exact same two-prompt protocol — first a 1-to-10
 scoring request, then a follow-up asking for a harsher peer-review-style
 referee report with major/minor concerns and an accept/reject
 recommendation. The prompts and the raw responses are committed to
-`writeup/{paper_id}/reviews/` alongside the draft, and the scores are
-surfaced in the [Completed replications](README.md#completed-replications)
-table in the README.
+`writeup/{paper_id}/{replication_id}/reviews/` alongside the draft, and
+the scores are surfaced in the [Completed
+replications](README.md#completed-replications) table in the README.
+
+To prepare a replication for review, use the helper:
+
+```bash
+# Prints a ready-to-paste prompt with the standardized protocol + GitHub
+# URLs to the writeup/config/results/figures. Good for any AI reviewer
+# that can fetch URLs.
+python scripts/review_prompt.py --paper {paper} --replication {id}
+
+# Concatenates every text artifact (paper.md, writeup, configs, per-claim
+# result.json + sanity.json, any harness critiques) into a single
+# markdown file. Good for pasting into a web chat or uploading as one
+# file.
+python scripts/review_prompt.py --paper {paper} --replication {id} \
+    --bundle -o /tmp/review_bundle.md
+```
+
+When the paper has exactly one replication, `--replication` can be
+omitted — the script auto-selects.
 
 **Why the maintainer runs the reviews, not the submitter:**
 
