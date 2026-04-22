@@ -54,7 +54,7 @@ The goal: **lower the barrier so that more papers get replicated more often, by 
 _
 ### Completed Replications
 
-Each row below is **one replication attempt** — a specific (paper, replication author, model-set) triple. Multiple replications of the same paper coexist under `config/papers/{paper}/replications/{replication_id}/` and each owns its own config, stimuli, results, and writeup. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to submit your own.
+Each row below is **one replication attempt** — a specific (paper, replication author, model-set) triple. Multiple replications of the same paper coexist under `config/papers/{paper}/replications/{replication_id}/` and each owns its own config, stimuli, results, and writeup. 
 
 <!-- replications-table:start -->
 | Paper | Replicator | Replication ID | Models | Status | Key findings | Writeup | Config | AI peer reviews |
@@ -68,7 +68,7 @@ We want this table to grow, with multiple independent replications per paper. If
 
 _Note: The table above is regenerated from each replication's `metadata.yaml` by [`scripts/generate_replications_table.py`](scripts/generate_replications_table.py). Please edit the metadata instead of hand-editing the table_.
 
-Every replication submitted to this repo is reviewed by three frontier LLM referees (currently ChatGPT with extended thinking, Claude Opus with extended thinking, and Gemini Pro) using a standardized prompt. The reviews are stored alongside the writeup and linked from this table. The reviews are not a substitute for human peer review — they're a low-cost, high-signal way to stress-test claims, catch methodological issues, and give authors immediate feedback. See [CONTRIBUTING.md](CONTRIBUTING.md#ai-review-policy) for the protocol.
+Every replication submitted to this repo is reviewed by three frontier LLM referees (currently ChatGPT with extended thinking, Claude Opus with extended thinking, and Gemini Pro) using a standardized prompt. The maintainer solicits and submits these reviews, so there's no action needed from you. The reviews are stored alongside the writeup and linked from this table. The reviews are not a substitute for human peer review — they're a low-cost, high-signal way to stress-test claims, catch methodological issues, and give authors feedback. See [CONTRIBUTING.md](CONTRIBUTING.md#ai-review-policy) for the protocol. They typically take 24-48 hours to post.
 
 
 ---
