@@ -6,11 +6,11 @@ To quick-start a replication of a mechinterp paper, copy and paste the following
 
 It will likely take ~30-60 minutes to complete.
 
-You can substitue the "Geometry of Truth" paper with any mechinterp paper you'd like to replicate. 
+_Note: You can substitue the "Geometry of Truth" paper with any mechinterp paper you'd like to replicate._
 
-From there, you can evaluate the results, make revisions, extend the replication to more models or different configurations, or submit a pull request to contribute your replication attempt. 
+Then, evaluate the results. Which parts of the paper were replicated successfully? Which weren't? What parts of the results are useful? What changes might make the replication attempt stronger? The next steps are up to you: make revisions, extend the replication to more models or different configurations, or submit a pull request to contribute your replication attempt as-is. 
 
-We're excited to see what papers and experiments you replicate!
+We're excited to see what you do!
 
 # Mechinterp Replication Harness
 
@@ -28,13 +28,13 @@ Built so independent researchers can validate published findings, contribute rep
 
 Most mechanistic interpretability papers study a single model (often a proprietary one). The findings are fascinating — emotion concepts, truth directions, induction circuits — but we rarely know whether they generalize. Does the same circuit exist in Llama? In Gemma? At 1B scale vs. 70B?
 
-**Independent replication is how science self-corrects**, but it's rare in mechinterp because:
+**Independent replication is an important component of scientific progress**, but it's rare because:
 
 - Setting up the tooling from scratch for each paper is expensive
 - Cross-model comparison requires handling multiple architectures
-- There's no standard framework for "run the same experiment on six models and compare"
+- There's no standardized framework for running experiments and comparing results 
 
-This harness exists to make that tractable. You feed it a link to a mechinterp paper, and it determines what claims to test, what stimuli to use, and what success looks like. And then it runs the experiments across a matrix of open-source models, catches common pitfalls, and produces a writeup.
+This harness exists to make these problems tractable. You feed it a link to a mechinterp paper, and it determines what claims to test, what stimuli to use, and what success looks like. And then it can run the experiments across a matrix of open-source models, catch common pitfalls, and produce a writeup.
 
 The goal: **lower the barrier so that more papers get replicated more often, by more people, across more models.** The field benefits when findings are tested independently, null results are reported, and the community accumulates evidence about what's robust and what isn't.
 
@@ -42,19 +42,17 @@ The goal: **lower the barrier so that more papers get replicated more often, by 
 
 ## What's included
 
-### Framework
+### Standardized Framework
 
 - **6 generic experiment types** that cover many mechinterp papers: probe classification, generalization testing, parametric scaling, causal steering, circuit identification, representation geometry
 - **8 reusable technique modules**: linear probes, contrastive activation addition (CAA), activation steering, activation patching, attention analysis, SAE feature extraction, logit lens, and circuit discovery
-- **3 model families x 3 scales**: Llama 3.1/3.2 (1B, 8B, 70B), Qwen 2.5 (1.5B, 7B, 72B), Gemma 2 (2B, 9B, 27B) — instruct and base variants
-- **Automated sanity checks and guardrails** that catch common issues (resolution traps, chance-level probes, confounded metrics) after every experiment
-- **Critique agents** (Claude + ChatGPT (optional)) that review results against the original paper after each experiment and provides a critique
+- **Configs for 3 model families x 3 scales**: Llama 3.1/3.2 (1B, 8B, 70B), Qwen 2.5 (1.5B, 7B, 72B), Gemma 2 (2B, 9B, 27B) — instruct and base variants
+- **Automated sanity checks and guardrails** that can catch common issues (e.g., resolution traps, chance-level probes, confounded metrics) after every experiment
+- **Critique agents** (Claude + ChatGPT) that review results against the original paper after each experiment and provides a critique. _Note: this requires adding API keys for these models.
+_
+### Completed Replications
 
-### Completed replications
-
-Each row below is **one replication attempt** — a specific (paper, replicator, model-set) triple. Multiple replications of the same paper coexist under `config/papers/{paper}/replications/{replication_id}/` and each owns its own config, stimuli, results, and writeup. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to submit your own.
-
-The table below is regenerated from each replication's `metadata.yaml` by [`scripts/generate_replications_table.py`](scripts/generate_replications_table.py) — don't hand-edit it, edit the metadata.
+Each row below is **one replication attempt** — a specific (paper, replication author, model-set) triple. Multiple replications of the same paper coexist under `config/papers/{paper}/replications/{replication_id}/` and each owns its own config, stimuli, results, and writeup. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to submit your own.
 
 <!-- replications-table:start -->
 | Paper | Replicator | Replication ID | Models | Status | Key findings | Writeup | Config | AI peer reviews |
@@ -66,8 +64,43 @@ The table below is regenerated from each replication's `metadata.yaml` by [`scri
 
 We want this table to grow, with multiple independent replications per paper. If you replicate a paper using this harness, please open a PR to add your replication (see [Contributing](#contributing)).
 
+_Note: The table above is regenerated from each replication's `metadata.yaml` by [`scripts/generate_replications_table.py`](scripts/generate_replications_table.py). Please edit the metadata instead of hand-editing the table_.
+
 Every replication submitted to this repo is reviewed by three frontier LLM referees (currently ChatGPT with extended thinking, Claude Opus with extended thinking, and Gemini Pro) using a standardized prompt. The reviews are stored alongside the writeup and linked from this table. The reviews are not a substitute for human peer review — they're a low-cost, high-signal way to stress-test claims, catch methodological issues, and give authors immediate feedback. See [CONTRIBUTING.md](CONTRIBUTING.md#ai-review-policy) for the protocol.
 
+
+---
+
+## Contributing
+
+We want this to become a hub for independent mechinterp replications. See [CONTRIBUTING.md](CONTRIBUTING.md) for details. The two main ways to contribute:
+
+1. **Replicate a paper**: point an LLM at this repo and include a paper you want to replicate, then open a PR when it's done
+2. **Improve the harness**: please open a PR or create an issue to create or request new experiment types, new model families, better sanity checks, improved documentation, new tests, etc.
+
+Every replication that lands here — whether it confirms, partially confirms, extends, or refutes the original findings — adds to the community's understanding of what's robust or not in mechanistic interpretability.
+
+---
+
+## Acknowledgments
+
+- **Callum McDougall, Neel Nanda, and the [ARENA 3.0](https://www.arena.education/) curriculum team** for producing excellent mechanistic interpretability educational materials that informed the techniques and best practices used throughout this harness
+- **Siddharth Mishra-Sharma** for ["Long-running Claude for scientific computing"](https://www.anthropic.com/research/long-running-Claude), which inspired the idea of building a science replication harness and provided much of the structural scaffolding (incremental checkpointing, changelog discipline, paper-as-oracle pattern)
+- **TransformerLens** and **HuggingFace** teams whose tools made cross-model experimentation easier
+- **Johnny Lin and the Neuronpedia.org team** for encouraging and supporting further development of this harness, and for creating and hosting useful tools for doing open-source mechinterp research
+- The original authors of papers replicated using this harness, starting with **Sofroniew et al.** for the [Emotion Concepts](https://transformer-circuits.pub/2026/emotions/index.html) paper
+
+---
+
+## License
+
+[MIT](LICENSE) — use it, fork it, build on it.
+
+
+
+---
+---
+---
 ---
 
 ## How to replicate a new paper (for agents)
@@ -130,6 +163,7 @@ If `--replication` is omitted, the pipeline reads the ID from the yaml's `replic
 ### Step 5: Write up
 
 Results land in `results/{paper_id}/{replication_id}/{model_key}/`. The framework generates cross-model comparisons. Write your findings in `writeup/{paper_id}/{replication_id}/draft.md`, and track milestones / work units in the sibling `PROGRESS.md` + `CHANGELOG.md`.
+
 
 ---
 
@@ -217,11 +251,12 @@ harness changelog — framework changes only (`src/`, `tests/`,
 replication lives in that replication's own
 `writeup/{paper}/{id}/PROGRESS.md` + `CHANGELOG.md`.
 
+
 ---
 
 ## The model matrix
 
-The harness tests findings across three model families at three scales:
+The initial harness is set up to test findings across three model families at three scales:
 
 | Family | Small (local CPU/MPS) | Medium (single GPU) | Large (multi-GPU) |
 |--------|:---:|:---:|:---:|
@@ -229,7 +264,7 @@ The harness tests findings across three model families at three scales:
 | **Qwen 2.5** | 1.5B | 7B | 72B |
 | **Gemma 2** | 2B | 9B | 27B |
 
-Small-tier models run locally on a laptop for pipeline validation. Medium-tier is the primary replication target. Large-tier is for scaling analysis if compute allows.
+Small-tier models run locally on a laptop for pipeline validation. Medium-tier is the primary replication target. Large-tier is for scaling analysis if compute allows. We hope to see support for many more models added to this harness.
 
 ---
 
@@ -257,29 +292,3 @@ This automates the "paste results into ChatGPT and ask what's wrong" loop that r
 ### Mechinterp guardrails
 
 [GOTCHAS.md](GOTCHAS.md) is a comprehensive checklist of ways to fool yourself in mechinterp research: tokenization traps, metric saturation, cherry-picking, probe confounds, steering illusions, and more. The harness references it during experiment design and the critique agents use it to ground their reviews.
-
----
-
-## Contributing
-
-We want this to become a hub for independent mechinterp replications. See [CONTRIBUTING.md](CONTRIBUTING.md) for details. The two main ways to contribute:
-
-1. **Replicate a paper** — point an LLM at this repo and include a paper you want to replicate, then open a PR when it's done
-2. **Improve the harness** — please open a PR or create an issue to create or request new experiment types, new model families, better sanity checks, improved documentation, new tests, etc.
-
-Every replication that lands here — whether it confirms, partially confirms, or refutes the original findings — adds to the community's understanding of what's robust in mechanistic interpretability.
-
----
-
-## Acknowledgments
-
-- **Callum McDougall, Neel Nanda, and the [ARENA 3.0](https://www.arena.education/) curriculum team** for producing excellent mechanistic interpretability educational materials that informed the techniques and best practices used throughout this harness
-- **Siddharth Mishra-Sharma** for ["Long-running Claude for scientific computing"](https://www.anthropic.com/research/long-running-Claude), which inspired the idea of building a science replication harness and provided much of the structural scaffolding (incremental checkpointing, changelog discipline, paper-as-oracle pattern)
-- **TransformerLens** and **HuggingFace** teams whose tools made cross-model experimentation possible
-- The original authors of papers replicated using this harness, starting with **Sofroniew et al.** for the [Emotion Concepts](https://transformer-circuits.pub/2026/emotions/index.html) paper
-
----
-
-## License
-
-[MIT](LICENSE) — use it, fork it, build on it.
