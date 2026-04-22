@@ -1,10 +1,12 @@
 """Post-replication review prompts — the single source of truth.
 
 This module builds the standardized review prompts documented in
-``CONTRIBUTING.md#ai-review-policy``. Three entry points:
+``CONTRIBUTING.md#ai-review-policy``. Four entry points:
 
   - :func:`build_pr_prompt` — maintainer reviewing an incoming PR.
-    Emits the "Paper: / Replication: {PR URL}" prompt.
+    Emits the "Paper: / Replication: {PR URL}" prompt. Relies on the
+    reviewer's AI being able to fetch URLs; see ``build_reviewer_ready``
+    if fetching is blocked.
 
   - :func:`build_self_review` — contributor checking their own
     replication before opening a PR. Writes an artifact bundle to a
@@ -12,9 +14,16 @@ This module builds the standardized review prompts documented in
     explicitly nudging the user to use an AI *different* from the one
     that helped them run the replication so the feedback is neutral.
 
+  - :func:`build_reviewer_ready` — one-shot "give me everything I
+    need to run a review right now" output. Writes an artifact bundle
+    and returns instructions framed neutrally (no "different AI"
+    nudge). The go-to mode when the user just wants to kick off a
+    review in claude.ai / gemini.google.com / chatgpt.com without
+    dealing with URL-provenance issues.
+
   - :func:`build_bundle` — raw concatenated markdown of every text
     artifact (paper, writeup, configs, result/sanity JSONs, harness
-    critiques). Used by both prompt entry points as well as
+    critiques). Used by the prompt entry points and by
     ``scripts/review_prompt.py --bundle``.
 
 The prompt text is kept in constants at the top of this file so there
@@ -345,6 +354,92 @@ def default_self_review_bundle_path(paper_id: str, replication_id: str) -> Path:
         get_data_root() / "reviews" / paper_id / replication_id
         / "self_review_bundle.md"
     )
+
+
+def default_reviewer_bundle_path(paper_id: str, replication_id: str) -> Path:
+    """Where build_reviewer_ready writes the bundle by default.
+
+    Under ``local_data/`` for the same reasons as the self-review
+    bundle: it's a derived artifact, while the reviews that come back
+    are what get committed under ``writeup/{paper}/{replication}/reviews/``.
+    """
+    return (
+        get_data_root() / "reviews" / paper_id / replication_id
+        / "reviewer_bundle.md"
+    )
+
+
+def build_reviewer_ready(
+    paper_id: str,
+    replication_id: str,
+    bundle_path: Path | None = None,
+) -> tuple[str, Path]:
+    """Write a bundle and return step-by-step reviewer-onboarding text.
+
+    The neutral sibling of :func:`build_self_review`: no "try a
+    different AI" nudge, just "here's the file, here's the prompt,
+    here's the follow-up." This is the right mode when the user asks
+    "generate a review prompt for X" and wants a copy-paste-able
+    response they can drop into claude.ai / gemini.google.com /
+    chatgpt.com without hitting URL-fetch restrictions.
+
+    Returns:
+        (instructions_text, bundle_path). Caller prints
+        ``instructions_text`` (to stdout or relays it in chat) and
+        tells the user to upload ``bundle_path`` into their AI of
+        choice.
+    """
+    if bundle_path is None:
+        bundle_path = default_reviewer_bundle_path(paper_id, replication_id)
+
+    bundle_text = build_bundle(paper_id, replication_id)
+    bundle_path.parent.mkdir(parents=True, exist_ok=True)
+    bundle_path.write_text(bundle_text, encoding="utf-8")
+
+    bundle_display = bundle_path.resolve()
+    try:
+        bundle_display = bundle_display.relative_to(get_project_root())
+    except ValueError:
+        pass  # bundle is outside the repo; use absolute path
+
+    bundle_filename = bundle_path.name
+    bundle_size_kb = max(1, len(bundle_text) // 1024)
+
+    out = StringIO()
+    out.write(f"# Review prompt: `{replication_id}`\n\n")
+    out.write(
+        f"A self-contained review bundle ({bundle_size_kb} KB) has been "
+        f"written to:\n\n"
+        f"    {bundle_display}\n\n"
+        "It contains the paper (oracle), the replicator's writeup + "
+        "config, every per-claim result/sanity JSON, and the harness's "
+        "own critique outputs — i.e. everything a referee needs to score "
+        "the replication, with no external fetches required.\n\n"
+        "## How to use\n\n"
+        "1. Open a fresh chat in claude.ai, gemini.google.com, or "
+        "chatgpt.com.\n"
+        f"2. Upload `{bundle_filename}` as an attachment (all three "
+        "accept markdown files). If upload isn't available in your "
+        "session, paste the file's contents inline instead.\n"
+        "3. Send Prompt 1 (below).\n"
+        "4. After the model replies, send Prompt 2.\n"
+        f"5. Save any reviews worth keeping to "
+        f"`writeup/{paper_id}/{replication_id}/reviews/{{reviewer}}.md` "
+        "and regenerate the README table with "
+        "`python scripts/generate_replications_table.py`.\n\n"
+        "---\n\n"
+        "## Prompt 1\n\n"
+        f"I've uploaded `{bundle_filename}`, which contains everything "
+        "you need to review this replication: the original paper, the "
+        "replicator's writeup, the full config, per-claim result JSONs, "
+        "and the harness's own critique outputs. No external fetches "
+        "required — read the bundle top-to-bottom.\n\n"
+        f"{PROMPT_1}\n\n"
+        "---\n\n"
+        "## Prompt 2 (send after Prompt 1)\n\n"
+        f"{PROMPT_2}\n"
+    )
+    return out.getvalue(), bundle_path
 
 
 def build_self_review(

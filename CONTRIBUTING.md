@@ -195,21 +195,33 @@ replications](README.md#completed-replications) table in the README.
 To prepare a replication for review, use the helper:
 
 ```bash
+# One-shot "give me everything I need to run a review right now":
+# writes a self-contained bundle under
+# local_data/reviews/{paper}/{id}/reviewer_bundle.md and prints
+# step-by-step upload-and-paste instructions plus the two prompts.
+# Works around URL-fetch restrictions in claude.ai / gemini /
+# chatgpt — the reviewer uploads the bundle, no fetching needed.
+# This is the default you want for ad-hoc reviews.
+python scripts/review_prompt.py --paper {paper} --replication {id} \
+    --reviewer-ready
+
 # Prints a ready-to-paste prompt with the standardized protocol + GitHub
-# URLs to the writeup/config/results/figures. Good for any AI reviewer
-# that can fetch URLs.
-python scripts/review_prompt.py --paper {paper} --replication {id}
+# URLs to the writeup/config/results/figures. Requires the reviewer's
+# AI to fetch URLs, which some web chat UIs now block as a
+# provenance check. Prefer --reviewer-ready if you hit that.
+python scripts/review_prompt.py --paper {paper} --replication {id} \
+    --pr {pr_number}
 
 # Concatenates every text artifact (paper.md, writeup, configs, per-claim
 # result.json + sanity.json, any harness critiques) into a single
-# markdown file. Good for pasting into a web chat or uploading as one
-# file.
+# markdown file. Good for ad-hoc offline use when you don't need the
+# prompt scaffolding --reviewer-ready gives you.
 python scripts/review_prompt.py --paper {paper} --replication {id} \
     --bundle -o /tmp/review_bundle.md
 ```
 
-When the paper has exactly one replication, `--replication` can be
-omitted — the script auto-selects.
+`--replication` is never auto-selected: if you omit it, the script
+lists the available IDs and exits.
 
 **Why the maintainer runs the reviews, not the submitter:**
 

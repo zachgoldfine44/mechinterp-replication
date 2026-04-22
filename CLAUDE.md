@@ -363,6 +363,37 @@ python scripts/review_prompt.py \
     --self-review --used-ai {Claude|ChatGPT|Gemini|Codex}
 ```
 
+### When the user asks "generate a review prompt for {replication_id}"
+
+This is a distinct, lower-ceremony ask from Step 6 above — they want to
+paste something into claude.ai / gemini.google.com / chatgpt.com right
+now and kick off a review. Do NOT hand-craft the prompt; you will get
+the wording, URL formatting, or artifact bundling subtly wrong and the
+reviewer's AI will either refuse to fetch the GitHub URLs (provenance
+blocks are a real failure mode) or score based on incomplete context.
+
+Instead, run the helper in `--reviewer-ready` mode and relay its
+output verbatim to the user:
+
+```bash
+python scripts/review_prompt.py \
+    --paper {paper_id} --replication {replication_id} \
+    --reviewer-ready
+```
+
+This writes a self-contained bundle (paper + writeup + config + all
+result/sanity JSONs + harness critiques) to
+`local_data/reviews/{paper}/{replication}/reviewer_bundle.md` and
+prints step-by-step instructions — which file to upload, which prompt
+to paste, which follow-up to send after the first response. The user
+shouldn't need to do any extra assembly.
+
+If the user already ran a replication *in this session* (i.e., you're
+still in the pre-PR flow from Step 6), use `--self-review` instead so
+the "try a different AI" nudge is preserved. `--reviewer-ready` is for
+when the user circles back later and just wants to review an existing
+replication.
+
 ---
 
 ## Generic experiment types
