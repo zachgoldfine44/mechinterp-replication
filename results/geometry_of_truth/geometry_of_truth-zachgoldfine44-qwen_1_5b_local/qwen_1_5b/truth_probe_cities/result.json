@@ -1,0 +1,88 @@
+{
+  "claim_id": "truth_probe_cities",
+  "model_key": "qwen_1_5b",
+  "paper_id": "geometry_of_truth",
+  "metrics": {
+    "probe_accuracy": 0.9850000000000001,
+    "best_layer": 18,
+    "per_layer_accuracy": {
+      "0": 0.5,
+      "3": 0.68,
+      "6": 0.885,
+      "9": 0.9400000000000001,
+      "12": 0.985,
+      "15": 0.9800000000000001,
+      "18": 0.9850000000000001,
+      "21": 0.9850000000000001,
+      "24": 0.9850000000000001,
+      "27": 0.9850000000000001
+    },
+    "per_concept_accuracy": {
+      "false": 0.98,
+      "true": 0.99
+    },
+    "confusion_matrix": [
+      [
+        98,
+        2
+      ],
+      [
+        1,
+        99
+      ]
+    ],
+    "n_concepts": 2,
+    "n_stimuli_total": 200,
+    "chance_level": 0.5
+  },
+  "success": true,
+  "metadata": {
+    "probe_type": "logistic_regression",
+    "aggregation": "last_token",
+    "n_folds": 5,
+    "layers_scanned": [
+      0,
+      3,
+      6,
+      9,
+      12,
+      15,
+      18,
+      21,
+      24,
+      27
+    ],
+    "seed": 42,
+    "run_manifest": {
+      "timestamp_utc": "2026-04-22T02:10:05.406303+00:00",
+      "git": {
+        "short_sha": "b7f216e",
+        "full_sha": "b7f216ec7e6c9e60d1169176f6a3f3345ed17e24",
+        "dirty": true
+      },
+      "python": {
+        "version": "3.9.6",
+        "executable": "/Users/zacharygoldfine/Documents/Codex/2026-04-21-please-replicate-the-geometry-of-truth-2/.venv/bin/python"
+      },
+      "platform": {
+        "system": "Darwin",
+        "machine": "arm64",
+        "processor": "arm"
+      },
+      "torch": {
+        "torch_version": "2.8.0",
+        "cuda_available": false,
+        "mps_available": true
+      },
+      "libs": {
+        "transformer_lens": "2.18.0",
+        "transformers": "4.57.6",
+        "scikit-learn": "1.6.1",
+        "scipy": "1.13.1",
+        "numpy": "1.26.4",
+        "huggingface_hub": "0.36.2"
+      }
+    }
+  },
+  "replication_id": "geometry_of_truth-zachgoldfine44-qwen_1_5b_local"
+}
