@@ -1,0 +1,61 @@
+# Minimal replication of Marks & Tegmark (2023) on Qwen-2.5-1.5B-Instruct.
+# Scope: the paper's headline claim — a linear probe can classify
+# true/false factual statements from residual-stream activations.
+
+paper:
+  id: "geometry_of_truth"
+  title: "The Geometry of Truth: Emergent Linear Structure in Large Language Model Representations of True/False Datasets"
+  authors: "Samuel Marks, Max Tegmark"
+  url: "https://arxiv.org/abs/2310.06824"
+  original_model: "LLaMA-2 13B (base)"
+  model_variant: "instruct"
+  paper_text_path: "../../paper.md"
+
+replication:
+  id: "geometry_of_truth-newsletter-demo-qwen_1_5b"
+  replicator: "Newsletter Demo"
+  github_handle: "newsletter-demo"
+  date: "2026-04-21"
+  models_tested:
+    - "qwen_1_5b"
+  status: "v0.1 (simulation)"
+  summary: >
+    Minimal single-claim replication run as a newsletter-onboarding
+    simulation: does a linear probe classify city-country truth claims
+    above chance on Qwen-2.5-1.5B-Instruct? 50 per class, layer scan.
+  writeup_path: "writeup/geometry_of_truth/geometry_of_truth-newsletter-demo-qwen_1_5b/draft.md"
+
+techniques_required:
+  - probes
+
+truth_concepts:
+  - "true"
+  - "false"
+
+claims:
+  - id: "truth_probe_cities"
+    description: >
+      A logistic-regression probe trained on residual-stream activations
+      can classify city-country factual statements as true or false
+      above chance (50%). Paper reports >90% on LLaMA-2-13B; we relax
+      to 0.70 because Qwen-1.5B is ~10x smaller than the smallest
+      model the paper studied.
+    experiment_type: "probe_classification"
+    paper_section: "Section 4, Figure 2"
+    params:
+      concept_set: ["true", "false"]
+      n_stimuli_per_concept: 50
+      probe_type: "logistic_regression"
+      activation_source: "residual_stream"
+      layer_selection: "scan_all_or_subsample"
+      aggregation: "last_token"
+      cross_validation_folds: 5
+      train_test_split: 0.8
+      seed: 42
+    success_metric: "probe_accuracy"
+    success_threshold: 0.70
+    notes: >
+      Scope: single claim, within-distribution. Cross-dataset generalization
+      (the paper's other headline finding) is deliberately out-of-scope
+      for this minimal replication — see the other Geometry of Truth
+      replications in this repo for that angle.

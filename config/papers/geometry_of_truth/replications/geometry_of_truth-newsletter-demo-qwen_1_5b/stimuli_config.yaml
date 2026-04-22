@@ -1,0 +1,18 @@
+# Stimuli for the newsletter-demo replication.
+#
+# Source: the paper's curated cities.csv from
+# https://github.com/saprmarks/geometry-of-truth/blob/main/datasets/cities.csv
+# Down-sampled here to 50 true + 50 false statements (seed=42). Convert
+# script: convert_stimuli.py in this same directory (run once to (re)generate
+# stimuli/training/{true,false}.json from the source CSV).
+
+stimulus_sets:
+  training_stimuli:
+    type: "dataset"
+    source: "geometry-of-truth (Marks & Tegmark 2023)"
+    subset: "cities"
+    per_concept: 50
+    output_dir: "stimuli/training/"
+    notes: >
+      Files on disk: stimuli/training/{true,false}.json, each 50 items of
+      {"concept": "true"|"false", "text": "The city of X is in Y."}.

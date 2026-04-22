@@ -1,0 +1,19 @@
+id: "geometry_of_truth-newsletter-demo-qwen_1_5b"
+paper_id: "geometry_of_truth"
+replicator: "Newsletter Demo"
+github_handle: "newsletter-demo"
+date: "2026-04-21"
+status: "v0.1 (simulation)"
+
+models_tested:
+  - "qwen_1_5b"
+
+summary: >
+  Minimal single-claim replication run as a newsletter-onboarding simulation.
+  Tests whether a logistic-regression probe classifies city-country truth
+  claims above chance on Qwen-2.5-1.5B-Instruct (50 per class, layer scan).
+  Out of scope: cross-dataset generalization, causal steering.
+
+writeup_path: "writeup/geometry_of_truth/geometry_of_truth-newsletter-demo-qwen_1_5b/draft.md"
+config_path: "config/papers/geometry_of_truth/replications/geometry_of_truth-newsletter-demo-qwen_1_5b/"
+ai_reviews_path: "writeup/geometry_of_truth/geometry_of_truth-newsletter-demo-qwen_1_5b/reviews/"

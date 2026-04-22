@@ -1,0 +1,88 @@
+{
+  "claim_id": "truth_probe_cities",
+  "model_key": "qwen_1_5b",
+  "paper_id": "geometry_of_truth",
+  "metrics": {
+    "probe_accuracy": 1.0,
+    "best_layer": 15,
+    "per_layer_accuracy": {
+      "0": 0.55,
+      "3": 0.6499999999999999,
+      "6": 0.85,
+      "9": 0.9399999999999998,
+      "12": 0.99,
+      "15": 1.0,
+      "18": 1.0,
+      "21": 1.0,
+      "24": 0.99,
+      "27": 0.9800000000000001
+    },
+    "per_concept_accuracy": {
+      "false": 1.0,
+      "true": 1.0
+    },
+    "confusion_matrix": [
+      [
+        50,
+        0
+      ],
+      [
+        0,
+        50
+      ]
+    ],
+    "n_concepts": 2,
+    "n_stimuli_total": 100,
+    "chance_level": 0.5
+  },
+  "success": true,
+  "metadata": {
+    "probe_type": "logistic_regression",
+    "aggregation": "last_token",
+    "n_folds": 5,
+    "layers_scanned": [
+      0,
+      3,
+      6,
+      9,
+      12,
+      15,
+      18,
+      21,
+      24,
+      27
+    ],
+    "seed": 42,
+    "run_manifest": {
+      "timestamp_utc": "2026-04-22T01:27:51.574130+00:00",
+      "git": {
+        "short_sha": "2de068e",
+        "full_sha": "2de068e9ed6b26f53ae236be000d63efe7504348",
+        "dirty": true
+      },
+      "python": {
+        "version": "3.11.15",
+        "executable": "/private/tmp/sim-newsletter/mechinterp-replication/.venv/bin/python"
+      },
+      "platform": {
+        "system": "Darwin",
+        "machine": "arm64",
+        "processor": "arm"
+      },
+      "torch": {
+        "torch_version": "2.11.0",
+        "cuda_available": false,
+        "mps_available": true
+      },
+      "libs": {
+        "transformer_lens": "3.0.0",
+        "transformers": "4.57.6",
+        "scikit-learn": "1.8.0",
+        "scipy": "1.17.1",
+        "numpy": "2.4.4",
+        "huggingface_hub": "0.36.2"
+      }
+    }
+  },
+  "replication_id": null
+}
