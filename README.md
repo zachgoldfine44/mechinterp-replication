@@ -8,9 +8,7 @@ It will likely take ~30-60 minutes to complete.
 
 You can substitue the "Geometry of Truth" paper with any mechinterp paper you'd like to replicate. 
 
-From there, you can evaluate the results, ask Claude Code or Codex to make revisions, ask Claude Code or Codex to extend the replication to more models or different configurations, or submit a pull request to contribute your replication attempt. 
-
-**When the replication finishes, the pipeline will print a review prompt and write an artifact bundle to `local_data/reviews/{paper}/{replication}/self_review_bundle.md`. Paste the prompt and upload the bundle into an AI *other than* the one that just helped you run the replication** — if you used Claude Code, try ChatGPT or Gemini; if you used Codex, try Claude or Gemini. This gives you a neutral second-opinion review on strengths and weaknesses before you open a PR, catching blind spots that the AI you co-wrote with is more likely to miss.
+From there, you can evaluate the results, make (or ask Claude Code or Codex to make) revisions, extend (or ask Claude Code or Codex to extend) the replication to more models or different configurations, or submit a pull request to contribute your replication attempt. 
 
 We're excited to see what papers and experiments you replicate!
 
