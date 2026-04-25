@@ -19,7 +19,7 @@ paper:
 # configs under config/papers/emotions/replications/{their_id}/ without
 # conflicting with this one. See CONTRIBUTING.md for the protocol.
 replication:
-  id: "emotions-zachgoldfine44-6models"
+  id: "emotions-zachgoldfine44-7models"
   replicator: "Zach Goldfine"
   github_handle: "zachgoldfine44"
   date: "2026-04-13"
@@ -37,7 +37,7 @@ replication:
     valence geometry matching original). Causal influence is selective:
     sentiment shifts universally, pushback capitulation increases on 1-2
     models (p=0.036), ethical compliance uninformative (0% floor).
-  writeup_path: "writeup/emotions/emotions-zachgoldfine44-6models/draft.md"
+  writeup_path: "writeup/emotions/emotions-zachgoldfine44-7models/draft.md"
 
 # Mechinterp techniques required from src/techniques/
 techniques_required:

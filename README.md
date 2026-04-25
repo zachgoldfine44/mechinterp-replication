@@ -59,7 +59,7 @@ Each row below is **one replication attempt** — a specific (paper, replication
 <!-- replications-table:start -->
 | Paper | Replicator | Replication ID | Models | Status | Key findings | Writeup | Config | AI peer reviews |
 |-------|:---:|---|:---:|:---:|---|:---:|:---:|:---|
-| [Emotion Concepts and their Function in a Large Language Model](https://transformer-circuits.pub/2026/emotions/index.html) | [@zachgoldfine44](https://github.com/zachgoldfine44) | `emotions-zachgoldfine44-6models` | 7 | v3.6 | All 4 representational claims replicate universally (probes 73-84%, valence geometry matching original). Causal influence is selective: sentiment shifts universally, pushback capitulation increases on 1-2 models (p=0.036), ethical compliance uninformative (0% floor). | [draft.md](writeup/emotions/emotions-zachgoldfine44-6models/draft.md) | [config/](config/papers/emotions/replications/emotions-zachgoldfine44-6models/) | [ChatGPT 7/10](writeup/emotions/emotions-zachgoldfine44-6models/reviews/chatgpt-extended-thinking.md) · [Claude 7/10](writeup/emotions/emotions-zachgoldfine44-6models/reviews/claude-opus-4-6-extended-thinking.md) · [Gemini 8.5/10](writeup/emotions/emotions-zachgoldfine44-6models/reviews/gemini-3-1-pro.md) |
+| [Emotion Concepts and their Function in a Large Language Model](https://transformer-circuits.pub/2026/emotions/index.html) | [@zachgoldfine44](https://github.com/zachgoldfine44) | `emotions-zachgoldfine44-7models` | 7 | v4.0 | All 4 representational claims replicate universally across 7 models (probes 73-85%, valence geometry matching original). Causal influence is selective: sentiment shifts universally, pushback capitulation increases on 1-2 models (p=0.036), ethical compliance uninformative (0% floor). Representation-behavior gap persists at 70B scale. | [draft.md](writeup/emotions/emotions-zachgoldfine44-7models/draft.md) | [config/](config/papers/emotions/replications/emotions-zachgoldfine44-7models/) | [ChatGPT 7/10](writeup/emotions/emotions-zachgoldfine44-7models/reviews/chatgpt-extended-thinking.md) · [Claude 7/10](writeup/emotions/emotions-zachgoldfine44-7models/reviews/claude-opus-4-6-extended-thinking.md) · [Gemini 8.5/10](writeup/emotions/emotions-zachgoldfine44-7models/reviews/gemini-3-1-pro.md) |
 | [The Geometry of Truth: Emergent Linear Structure in LLM Representations of True/False Datasets](https://arxiv.org/abs/2310.06824) | [@zachgoldfine44](https://github.com/zachgoldfine44) | `geometry_of_truth-zachgoldfine44-qwen_1_5b` | 1 | v0.1 partial | Within-distribution probe replicates cleanly (0.99 on cities, layer 12 — matches paper 13B/70B despite being 10x smaller). Cross-dataset generalization does NOT replicate at 1.5B: probe collapses to trivial predictions on sp_en_trans (92/100 "true"), flips sign on neg_cities (replicates paper's Fig 3c orthogonal-directions finding), collapses to all-false on larger_than. Consistent with paper's "at sufficient scale" framing. | [draft.md](writeup/geometry_of_truth/geometry_of_truth-zachgoldfine44-qwen_1_5b/draft.md) | [config/](config/papers/geometry_of_truth/replications/geometry_of_truth-zachgoldfine44-qwen_1_5b/) |  |
 | *Your replication here* | *(you)* | `{paper}-{handle}-{model_scope}` | | | | | | |
 <!-- replications-table:end -->
@@ -196,7 +196,7 @@ colliding on configs, stimuli, results, writeups, or logs.
 │           ├── stimuli_config.yaml # (optional) paper-level legacy stimuli
 │           ├── stimuli/            # Generated/curated stimulus JSONs (shared)
 │           └── replications/       # One subfolder per replication attempt
-│               └── emotions-zachgoldfine44-6models/
+│               └── emotions-zachgoldfine44-7models/
 │                   ├── paper_config.yaml   # This attempt's claims + thresholds
 │                   ├── stimuli_config.yaml # This attempt's stimuli config
 │                   └── metadata.yaml       # Row data for the README table
@@ -232,18 +232,18 @@ colliding on configs, stimuli, results, writeups, or logs.
 ├── tests/                          # ~211 unit tests + integration suite
 ├── writeup/                        # Per-replication writeups
 │   └── emotions/
-│       └── emotions-zachgoldfine44-6models/
+│       └── emotions-zachgoldfine44-7models/
 │           ├── draft.md            # The writeup
 │           ├── PROGRESS.md         # Milestone state for this replication
 │           ├── CHANGELOG.md        # Per-work-unit log for this replication
 │           └── reviews/            # AI peer-review responses
 ├── results/                        # Per-replication, per-model result artifacts
 │   └── emotions/
-│       └── emotions-zachgoldfine44-6models/
+│       └── emotions-zachgoldfine44-7models/
 │           └── {model_key}/        # result.json, sanity.json, critiques/
 ├── figures/                        # Per-replication publication-ready plots
 │   └── emotions/
-│       └── emotions-zachgoldfine44-6models/
+│       └── emotions-zachgoldfine44-7models/
 └── local_data/                     # Gitignored: activation caches, probe weights
 ```
 

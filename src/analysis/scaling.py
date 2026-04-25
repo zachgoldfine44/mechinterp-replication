@@ -313,7 +313,7 @@ def main() -> None:
     parser.add_argument("--paper", required=True, help="Paper ID")
     parser.add_argument(
         "--replication", default=None,
-        help="Replication identifier (e.g. emotions-zachgoldfine44-6models).",
+        help="Replication identifier (e.g. emotions-zachgoldfine44-7models).",
     )
     parser.add_argument("--output", default=None, help="Output directory override")
     args = parser.parse_args()

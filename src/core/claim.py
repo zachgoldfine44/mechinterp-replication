@@ -60,7 +60,7 @@ class ClaimConfig:
             against the paper. STRONGLY ENCOURAGED — every claim should
             cite where in the paper it came from.
         replication_id: Optional identifier for a specific replication
-            attempt of this paper (e.g., 'emotions-zachgoldfine44-6models').
+            attempt of this paper (e.g., 'emotions-zachgoldfine44-7models').
             When set, result/stimulus paths are namespaced under it so
             multiple independent replications of the same paper can
             coexist in the repo. See CONTRIBUTING.md for naming

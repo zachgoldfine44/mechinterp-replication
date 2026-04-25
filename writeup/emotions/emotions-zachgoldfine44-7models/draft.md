@@ -38,7 +38,7 @@ Multi-seed stability is high: standard deviations across five random seeds range
 
 The original study reported 71.3% accuracy on 171 emotions using Claude Sonnet 4.5. Our probes achieve higher absolute accuracy, but on a substantially easier task (15 vs. 171 categories). The comparison is more informative as a consistency check than a direct benchmark: both studies find that emotion identity is linearly decodable from residual-stream activations at levels far exceeding chance and lexical baselines.
 
-![Figure 1](../../../figures/emotions/emotions-zachgoldfine44-6models/fig1_probe_vs_baseline.png)
+![Figure 1](../../../figures/emotions/emotions-zachgoldfine44-7models/fig1_probe_vs_baseline.png)
 
 *Figure 1.* Fifteen-way emotion classification accuracy for residual-stream probes (green) versus best text-only baseline (gray, bag-of-words at 40.0%). Dashed line: chance (6.7%). Dotted line: original study's 171-emotion accuracy on Claude Sonnet 4.5 (71.3%). Error bars: standard deviation across five seeds. Accuracy scales with model size across all three families.
 
@@ -54,7 +54,7 @@ Three complementary analyses confirm that the decoded representations capture ge
 
 **Parametric intensity.** The original study found that probe activation scales with emotional intensity along a continuous parameter. Our initial severity template test revealed heavy contamination by numerical magnitude: a blueberry-count negative control produced comparable or stronger probe-activation correlations than the real severity templates (contamination ratios 0.56--1.45 across medium models). A severity-pairs design that holds numbers constant while varying emotional content (e.g., "500ml water" vs. "500ml bleach") partially rescues this finding: Llama-8B shows 9 of 10 pairs shifting in the expected direction (binomial p = 0.011), with Llama-1B and Qwen-1.5B borderline (8/10, p = 0.055 each). The remaining models---including Llama-70B (4/10)---are not significant. This claim receives partial support at best.
 
-![Figure 2](../../../figures/emotions/emotions-zachgoldfine44-6models/fig2_geometry_and_severity.png)
+![Figure 2](../../../figures/emotions/emotions-zachgoldfine44-7models/fig2_geometry_and_severity.png)
 
 *Figure 2.* **(A)** PC1--valence correlation (|r|) per model. Dotted line: original study's r = 0.81 on Claude. All seven models recover a valence axis, with three matching the original magnitude. **(B)** Severity-pairs test results for the *afraid* vector on Llama-8B: 9 of 10 matched pairs shift in the predicted direction (p = 0.011).
 
@@ -72,15 +72,15 @@ The original study's most striking result was that adding a *desperate* vector t
 
 **Preference steering (no signal).** The original study reported a strong correlation between emotion valence and activity preference shifts (r = 0.85, +212 Elo for *blissful*, -303 Elo for *hostile*). We find no detectable preference effect across any model: all six small and medium models produce correlations indistinguishable from zero. Llama-70B produces a correlation of -0.430 (inverted sign, p = 0.11). This finding does not replicate.
 
-![Figure 3](../../../figures/emotions/emotions-zachgoldfine44-6models/fig3_steering_null.png)
+![Figure 3](../../../figures/emotions/emotions-zachgoldfine44-7models/fig3_steering_null.png)
 
 *Figure 3.* **Left:** Original study result---*desperate* vector steering shifts unethical behavior from 22% to 72% on Claude. **Right:** This study---0% unethical responses across all conditions at 1B--9B (Clopper-Pearson CI: [0%, 30.8%] per condition). The null result is uninformative due to floor effects, not evidence against the original claim.
 
-![Figure 4](../../../figures/emotions/emotions-zachgoldfine44-6models/fig6_sycophancy_pushback.png)
+![Figure 4](../../../figures/emotions/emotions-zachgoldfine44-7models/fig6_sycophancy_pushback.png)
 
 *Figure 4.* Pushback capitulation rates under emotion steering (happy + loving vectors, alpha = 0.50) across six models, judged by GPT-5.4-mini. Qwen-2.5-1.5B shows a significant increase in capitulation (8.3% to 21.7%, p = 0.036). Gemma-2-9B shows a borderline increase (13.3% to 26.7%, p = 0.055). This is the only behavioral domain where emotion steering produces a detectable effect.
 
-![Figure 5](../../../figures/emotions/emotions-zachgoldfine44-6models/fig5_sentiment_positive_control.png)
+![Figure 5](../../../figures/emotions/emotions-zachgoldfine44-7models/fig5_sentiment_positive_control.png)
 
 *Figure 5.* Happy-vector sentiment shift at alpha = 5.0 across all six small and medium models. All models shift positive, confirming the steering pipeline produces real effects on output-level properties.
 
@@ -99,11 +99,11 @@ Table 1 summarizes the replication status of each principal finding. Four of six
 | Valence geometry | r = 0.81 on PC1 | \|r\| = 0.67--0.83 (3 models within 0.02) | **Replicates** |
 | Parametric intensity | Significant across emotions | 1/7 significant by binomial test | **Partial** |
 | Ethical steering | 22% to 72% (*desperate*) | 0/45 significant (floor effect) | **Inconclusive** |
-| Preference steering | r = 0.85, +212/-303 Elo | r ~ 0.0 (6 models), -0.43 (70B, n.s.) | **Does not replicate** |
+| Preference steering | r = 0.85, +212/-303 Elo | r ~ 0.0 (6 of 7 models), -0.43 (70B, n.s.) | **Does not replicate** |
 
 The universality scorecard (Figure 6) provides a per-model, per-claim visualization. Every model passes every representational threshold and fails every behavioral threshold at the original study's criteria. Within the representational claims, probe accuracy scales with model size, but valence geometry does not---it emerges at full strength at 1.5B parameters.
 
-![Figure 6](../../../figures/emotions/emotions-zachgoldfine44-6models/fig4_universality_scorecard.png)
+![Figure 6](../../../figures/emotions/emotions-zachgoldfine44-7models/fig4_universality_scorecard.png)
 
 *Figure 6.* **Top:** Seven-model by six-claim universality scorecard. Green: passes threshold; red: fails. Intensity encodes magnitude. All representational claims pass universally; all behavioral claims fail. **Bottom:** Probe accuracy versus log parameter count (Spearman rho = 0.943, p = 0.005).
 
@@ -319,7 +319,7 @@ The 70B model shifts positive at alpha = 0.5 but the effect vanishes at higher a
 
 ---
 
-## S6. Per-Model Probe Accuracy (15 emotions x 6 models)
+## S6. Per-Model Probe Accuracy (15 emotions x 7 models)
 
 | Emotion | Llama 1B | Llama 8B | Qwen 1.5B | Qwen 7B | Gemma 2B | Gemma 9B | Mean |
 |---------|:--------:|:--------:|:---------:|:-------:|:--------:|:--------:|:----:|

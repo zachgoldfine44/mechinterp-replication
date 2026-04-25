@@ -18,7 +18,7 @@ Usage:
     from src.core.config_loader import load_paper_config, get_active_paper
 
     paper = load_paper_config("emotions")
-    paper = load_paper_config("emotions", "emotions-zachgoldfine44-6models")
+    paper = load_paper_config("emotions", "emotions-zachgoldfine44-7models")
     print(paper.title, len(paper.claims), "claims")
 
     models = get_models_for_tier("small", model_variant="instruct")

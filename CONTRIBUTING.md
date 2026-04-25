@@ -118,13 +118,13 @@ they own lives under that namespace.
 **Replication ID convention:** `{paper_id}-{github_handle}-{model_scope}`
 
 Examples:
-- `emotions-zachgoldfine44-6models` —  6 models across the small, medium, and large tiers
+- `emotions-zachgoldfine44-7models` —  7 models across the small, medium, and large tiers
 - `geometry_of_truth-zachgoldfine44-qwen_1_5b` — one model
 - `geometry_of_truth-alice-llama-70b` — hypothetical second replication
   by a different person on a larger model
 
 `{model_scope}` can be a specific model key (`qwen_1_5b`) or a compact
-label when you run several (`6models`, `small-tier`, `llama-family`).
+label when you run several (`7models`, `small-tier`, `llama-family`).
 Including the paper_id in the ID keeps them globally unique so you can
 replicate many papers on the same model without ambiguity.
 

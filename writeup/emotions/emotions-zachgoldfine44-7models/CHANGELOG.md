@@ -1,4 +1,4 @@
-# CHANGELOG — `emotions-zachgoldfine44-6models`
+# CHANGELOG — `emotions-zachgoldfine44-7models`
 
 Append-only per-work-unit log for this replication. One entry per
 commit (or per meaningful work unit, whichever is larger). For
@@ -211,7 +211,7 @@ This session addresses the highest-priority items.
 Previous emotions work spanned multiple sessions and is captured in
 `PROGRESS.md` and the writeup at `draft.md`. Highlights:
 
-- Replicated the Anthropic emotions paper across 6 models (Llama 1B/8B,
+- Replicated the Anthropic emotions paper across 7 models (Llama 1B/8B/70B,
   Qwen 1.5B/7B, Gemma 2B/9B).
 - Multiple critique-response passes producing draft v3.3.
 - Tier-2 refactors specific to emotions analysis (aggregation, ActivationCache
@@ -220,8 +220,8 @@ Previous emotions work spanned multiple sessions and is captured in
 Full commit history for this replication:
 
 ```
-git log -- writeup/emotions/emotions-zachgoldfine44-6models/ \
-           config/papers/emotions/replications/emotions-zachgoldfine44-6models/ \
-           results/emotions/emotions-zachgoldfine44-6models/ \
-           figures/emotions/emotions-zachgoldfine44-6models/
+git log -- writeup/emotions/emotions-zachgoldfine44-7models/ \
+           config/papers/emotions/replications/emotions-zachgoldfine44-7models/ \
+           results/emotions/emotions-zachgoldfine44-7models/ \
+           figures/emotions/emotions-zachgoldfine44-7models/
 ```

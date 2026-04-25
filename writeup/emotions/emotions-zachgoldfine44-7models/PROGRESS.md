@@ -1,4 +1,4 @@
-# PROGRESS — `emotions-zachgoldfine44-6models`
+# PROGRESS — `emotions-zachgoldfine44-7models`
 
 **Paper:** Emotion Concepts and their Function in a Large Language Model
 (Sofroniew+ 2026) — https://transformer-circuits.pub/2026/emotions/index.html
@@ -93,7 +93,7 @@ trim next pass).
 ## Current test status
 ```
 81 tests passed (pytest tests/ -q --fast)
-6/6 models completed (3 small tier + 3 medium tier)
+7/7 models completed (3 small + 3 medium + 1 large tier)
 4/6 claims REPLICATE universally across all families, both tiers
 2/6 claims NULL (causal + preference steering) — framed as methodology limitation
 Writeup draft complete at writeup/emotions/draft.md, ready for external critique
@@ -300,10 +300,10 @@ Final Phase B values will use 225 expanded scenarios.
 ## Pointers
 
 - Paper oracle: `config/papers/emotions/paper.md`
-- Config: `config/papers/emotions/replications/emotions-zachgoldfine44-6models/`
-- Results: `results/emotions/emotions-zachgoldfine44-6models/`
-- Reviews: `writeup/emotions/emotions-zachgoldfine44-6models/reviews/`
+- Config: `config/papers/emotions/replications/emotions-zachgoldfine44-7models/`
+- Results: `results/emotions/emotions-zachgoldfine44-7models/`
+- Reviews: `writeup/emotions/emotions-zachgoldfine44-7models/reviews/`
 - Commit history for this replication:
-  `git log -- writeup/emotions/emotions-zachgoldfine44-6models/
-  config/papers/emotions/replications/emotions-zachgoldfine44-6models/
-  results/emotions/emotions-zachgoldfine44-6models/`
+  `git log -- writeup/emotions/emotions-zachgoldfine44-7models/
+  config/papers/emotions/replications/emotions-zachgoldfine44-7models/
+  results/emotions/emotions-zachgoldfine44-7models/`
