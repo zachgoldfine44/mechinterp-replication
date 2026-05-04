@@ -8,7 +8,7 @@ It will likely take ~30-60 minutes to complete.
 
 _Note: You can substitue the "Geometry of Truth" paper with any mechinterp paper you'd like to replicate._
 
-Then, evaluate the results. Which parts of the paper were replicated successfully? Which weren't? What parts of the results are useful? What changes might make the replication attempt stronger? 
+Then, evaluate the results. What parts of the paper were replicated successfully? What weren't? What parts of the results are useful? What changes might make the replication attempt stronger? 
 
 The next steps are up to you: make revisions, extend the replication to more models or different configurations, or submit a pull request to contribute your replication attempt as-is. 
 
